@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="editor.css">
+    <link rel="stylesheet" href="theme/3024-day.css">
+    <link rel="stylesheet" href="theme/3024-night.css">
+    <link rel="stylesheet" href="theme/abcdef.css">
+    <link rel="stylesheet" href="theme/ambiance.css">
+    <link rel="stylesheet" href="theme/base16-dark.css">
+    <link rel="stylesheet" href="theme/bespin.css">
+    <link rel="stylesheet" href="theme/base16-light.css">
+    <link rel="stylesheet" href="theme/blackboard.css">
+    <link rel="stylesheet" href="theme/cobalt.css">
+    <link rel="stylesheet" href="theme/colorforth.css">
+    <link rel="stylesheet" href="theme/dracula.css">
+    <link rel="stylesheet" href="theme/duotone-dark.css">
+    <link rel="stylesheet" href="theme/duotone-light.css">
+    <link rel="stylesheet" href="theme/eclipse.css">
+    <link rel="stylesheet" href="theme/elegant.css">
+    <link rel="stylesheet" href="theme/erlang-dark.css">
+    <link rel="stylesheet" href="theme/gruvbox-dark.css">
+    <link rel="stylesheet" href="theme/hopscotch.css">
+    <link rel="stylesheet" href="theme/icecoder.css">
+    <link rel="stylesheet" href="theme/isotope.css">
+    <link rel="stylesheet" href="theme/lesser-dark.css">
+    <link rel="stylesheet" href="theme/liquibyte.css">
+    <link rel="stylesheet" href="theme/lucario.css">
+    <link rel="stylesheet" href="theme/material.css">
+    <link rel="stylesheet" href="theme/mbo.css">
+    <link rel="stylesheet" href="theme/mdn-like.css">
+    <link rel="stylesheet" href="theme/midnight.css">
+    <link rel="stylesheet" href="theme/monokai.css">
+    <link rel="stylesheet" href="theme/neat.css">
+    <link rel="stylesheet" href="theme/neo.css">
+    <link rel="stylesheet" href="theme/night.css">
+    <link rel="stylesheet" href="theme/oceanic-next.css">
+    <link rel="stylesheet" href="theme/panda-syntax.css">
+    <link rel="stylesheet" href="theme/paraiso-dark.css">
+    <link rel="stylesheet" href="theme/paraiso-light.css">
+    <link rel="stylesheet" href="theme/pastel-on-dark.css">
+    <link rel="stylesheet" href="theme/railscasts.css">
+    <link rel="stylesheet" href="theme/rubyblue.css">
+    <link rel="stylesheet" href="theme/seti.css">
+    <link rel="stylesheet" href="theme/shadowfox.css">
+    <link rel="stylesheet" href="theme/solarized.css">
+    <link rel="stylesheet" href="theme/the-matrix.css">
+    <link rel="stylesheet" href="theme/tomorrow-night-bright.css">
+    <link rel="stylesheet" href="theme/tomorrow-night-eighties.css">
+    <link rel="stylesheet" href="theme/ttcn.css">
+    <link rel="stylesheet" href="theme/twilight.css">
+    <link rel="stylesheet" href="theme/vibrant-ink.css">
+    <link rel="stylesheet" href="theme/xq-dark.css">
+    <link rel="stylesheet" href="theme/xq-light.css">
+    <link rel="stylesheet" href="theme/yeti.css">
+    <link rel="stylesheet" href="theme/idea.css">
+    <link rel="stylesheet" href="theme/zenburn.css">
+
+    <style type="text/css">
+        .CodeMirror { height: 520px; font-family: 'consolas'; color: black; direction: ltr; cursor: text; }
+        .cm-s-default .cm-trailing-space-a:before,
+        .cm-s-default .cm-trailing-space-b:before {position: absolute; content: "\00B7"; color: #777;}
+        .cm-s-default .cm-trailing-space-new-line:before {position: absolute; content: "\21B5"; color: #777;}
+    </style>
+    <script src="popup.js"></script>
+    <script src="cryptojs/core.js"></script>
+    <script src="cryptojs/x64-core.js"></script>
+    <script src="cryptojs/lib-typedarrays.js"></script>
+    <script src="cryptojs/md5.js"></script>
+    <script src="cryptojs/sha1.js"></script>
+    <script src="cryptojs/sha256.js"></script>
+    <script src="cryptojs/sha224.js"></script>
+    <script src="cryptojs/sha512.js"></script>
+    <script src="editor.js"></script>
+    <script src="markdown.js"></script>
+    <script src="xml.js"></script>
+</head>
+<body>
+<header>
+    <svg id="svg-logo"><use xlink:href="images/md.svg#md"></use></svg>
+    <div id="txt-logo">Markdown Editor for Easy Blog Posting v1.0</div>
+    <svg id="svg-info"><use xlink:href="images/md.svg#info"></use></svg>
+</header>
+<editor>
+    <textarea spellcheck="false"></textarea>
+</editor>
+<footer>
+    <button id="btn-settings-open" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#settings"></use></svg> <btnlabel>Settings</btnlabel></button>
+    <button id="btn-export" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#download"></use></svg> <btnlabel>Export</btnlabel></button>
+    <button id="btn-reset" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#reset"></use></svg> <btnlabel>Reset</btnlabel></button>
+</footer>
+<overlay>
+    <info class="modal">
+        <section>
+            <sectionlabel>Markdown Editor for Easy Blog Posting v1.0</sectionlabel>
+            <maker>Made by ChangUk (<a href="https://changuk.github.io" target="_blank">changuk.github.io</a>)</maker>
+            <item>Features and Tips</item>
+            <ul>
+                <li>Support drag-and-drop to present resource files attached to markdown document.</li>
+                <li>Support hashing for preventing duplication of resource filenames.</li>
+                <li>Press export button to save editor's content as a file.</li>
+                <li>Enable easy blog-posting through browser setting to ask where to save file before downloading.</li>
+            </ul>
+            <item>Powered by</item>
+            <ul>
+                <li><a href="https://codemirror.net/" target="_blank">CodeMirror</a></li>
+                <li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
+            </ul>
+        </section>
+    </info>
+    <settings class="modal">
+        <section>
+            <sectionlabel>Editor Configuration</sectionlabel>
+            <subsection>
+                <inlinesubsectionlabel>Theme: </inlinesubsectionlabel>
+                <select id="select-theme">
+                    <option>default</option>
+                    <option>3024-day</option>
+                    <option>3024-night</option>
+                    <option>abcdef</option>
+                    <option>ambiance</option>
+                    <option>base16-dark</option>
+                    <option>base16-light</option>
+                    <option>bespin</option>
+                    <option>blackboard</option>
+                    <option>cobalt</option>
+                    <option>colorforth</option>
+                    <option>dracula</option>
+                    <option>duotone-dark</option>
+                    <option>duotone-light</option>
+                    <option>eclipse</option>
+                    <option>elegant</option>
+                    <option>erlang-dark</option>
+                    <option>gruvbox-dark</option>
+                    <option>hopscotch</option>
+                    <option>icecoder</option>
+                    <option>idea</option>
+                    <option>isotope</option>
+                    <option>lesser-dark</option>
+                    <option>liquibyte</option>
+                    <option>lucario</option>
+                    <option>material</option>
+                    <option>mbo</option>
+                    <option>mdn-like</option>
+                    <option>midnight</option>
+                    <option>monokai</option>
+                    <option>neat</option>
+                    <option>neo</option>
+                    <option>night</option>
+                    <option>oceanic-next</option>
+                    <option>panda-syntax</option>
+                    <option>paraiso-dark</option>
+                    <option>paraiso-light</option>
+                    <option>pastel-on-dark</option>
+                    <option>railscasts</option>
+                    <option>rubyblue</option>
+                    <option>seti</option>
+                    <option>shadowfox</option>
+                    <option>solarized dark</option>
+                    <option>solarized light</option>
+                    <option>the-matrix</option>
+                    <option>tomorrow-night-bright</option>
+                    <option>tomorrow-night-eighties</option>
+                    <option>ttcn</option>
+                    <option>twilight</option>
+                    <option>vibrant-ink</option>
+                    <option>xq-dark</option>
+                    <option>xq-light</option>
+                    <option>yeti</option>
+                    <option>zenburn</option>
+                </select>
+            </subsection>
+            <subsection>
+                <inlinesubsectionlabel>Font size: </inlinesubsectionlabel>
+                <select id="select-fontsize">
+                    <option>10</option>
+                    <option>11</option>
+                    <option>12</option>
+                    <option>13</option>
+                    <option>14</option>
+                    <option>16</option>
+                    <option>18</option>
+                    <option>20</option>
+                    <option>24</option>
+                    <option>28</option>
+                    <option>32</option>
+                </select>
+            </subsection>
+        </section>
+        <section>
+            <sectionlabel>Resource Expression</sectionlabel>
+            <subsection>
+                <subsectionlabel>Set resource path: </subsectionlabel>
+                <subsectionvalue>
+                    <input type="text" id="rsrc-storage" spellcheck="false">
+                </subsectionvalue>
+            </subsection>
+            <subsection>
+                <subsectionlabel>Classify resource types (JSON-format): </subsectionlabel>
+                <subsectionvalue>
+                    <input type="text" id="rsrc-type" spellcheck="false">
+                </subsectionvalue>
+            </subsection>
+            <subsection>
+                <subsectionlabel>Select hash function for resource renaming: </subsectionlabel>
+                <subsectionvalue>
+                    <input type="radio" id="rsrc-hash-none" name="hashing" value="none"><label for="rsrc-hash-none">None</label>
+                    <input type="radio" id="rsrc-hash-md5" name="hashing" value="md5"><label for="rsrc-hash-md5">MD5</label>
+                    <input type="radio" id="rsrc-hash-sha1" name="hashing" value="sha1"><label for="rsrc-hash-sha1">SHA-1</label>
+                    <input type="radio" id="rsrc-hash-sha224" name="hashing" value="sha224"><label for="rsrc-hash-sha224">SHA-224</label>
+                    <input type="radio" id="rsrc-hash-sha256" name="hashing" value="sha256"><label for="rsrc-hash-sha256">SHA-256</label>
+                    <input type="radio" id="rsrc-hash-sha512" name="hashing" value="sha512"><label for="rsrc-hash-sha512">SHA-512</label>
+                </subsectionvalue>
+            </subsection>
+        </section>
+        <button id="btn-settings-save" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#check"></use></svg> <btnlabel>Save</btnlabel></button>
+    </settings>
+</overlay>
+</body>
+</html>
