@@ -1,7 +1,12 @@
 * { margin: 0; padding: 0; }
 *:focus { outline: none; }
 
-body { width: 780px; }
+body { width: 780px;
+    transform: rotate(-0.0000000001deg);
+    text-shadow: 0 0 1px rgba(0,0,0,.3);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
 svg { display: inline-flex; align-self: center; fill: currentColor; stroke: currentColor; stroke-width: 0; vertical-align: top; }
 
 a { color: rgba(112, 98, 251, .9); }
@@ -34,6 +39,10 @@ btnlabel { display: inline-block; }
 #btn-reset { float: right; margin-left: .4em; width: 80px; height: 100%; border: none; background: rgba(238, 97, 80, .9); color: #fff; }
 #btn-reset:hover { background: rgba(238, 97, 80, .8); }
 #btn-reset:active { background: rgba(238, 97, 80, 1); }
+
+#btn-open { float: right; margin-left: .4em; width: 80px; height: 100%; border: none; background: rgba(62, 138, 226, .9); color: #fff; }
+#btn-open:hover { background: rgba(62, 138, 226, .8); }
+#btn-open:active { background: rgba(62, 138, 226, 1); }
 
 #btn-export { float: right; margin-left: .4em; width: 80px; height: 100%; border: none; background: rgba(52, 168, 83, .9); color: #fff; }
 #btn-export:hover { background: rgba(52, 168, 83, .8); }

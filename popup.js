@@ -8,8 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var textarea = document.getElementsByTagName('textarea')[0];
     editor = CodeMirror.fromTextArea(textarea, {
         mode: 'markdown',
+        highlightFormatting: true,
         lineNumbers: true,
         lineWrapping: true,
+        indentUnit: 4,
         extraKeys: {"Enter": "newlineAndIndentContinueMarkdownList"}
     });
 
@@ -56,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load previous work
     chrome.storage.local.get('textarea', function(result) {
         if (result.textarea) {
-            editor.setValue(result.textarea);
+            editor.setValue(formatting(result.textarea));
             editor.focus();
             editor.setCursor(editor.lineCount(), 0);
         } else {
@@ -70,6 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('select-fontsize').onchange = selectFontsize;
     document.getElementById('btn-settings-open').onclick = openSettings;
     document.getElementById('btn-reset').onclick = resetEditor;
+    document.getElementById('btn-open').onclick = openfile;
     document.getElementById('btn-export').onclick = exportfile;
     document.getElementById('btn-settings-save').onclick = saveSettings;
 
@@ -184,27 +187,111 @@ function selectFontsize() {
     editor.refresh();
 }
 
+function getCurDatetimeString() {
+    var now = new Date();
+    now.setTime(now.getTime()-(now.getTimezoneOffset() * 60 * 1000));
+    var strDatetime = now.getUTCFullYear() + "-" + ("0" + (now.getUTCMonth() + 1)).slice(-2) + "-" + ("0" + now.getUTCDate()).slice(-2);
+    strDatetime += " " + ("0" + now.getUTCHours()).slice(-2) + ":" + ("0" + now.getUTCMinutes()).slice(-2) + ":" + ("0" + now.getUTCSeconds()).slice(-2);
+    return strDatetime;
+}
+
 function resetEditor() {
     chrome.storage.local.remove(['textarea']);
 
     if (editor) {
-        // Get current datetime
-        var now = new Date();
-        now.setTime(now.getTime());
-    
         // Make document template
         var template = "---\n";
         template += "layout: post\n";
         template += "title: \n";
-        template += "date: "+now.getUTCFullYear()+"-"+("0"+(now.getUTCMonth()+1)).slice(-2)+"-"+("0"+now.getUTCDate()).slice(-2);
-        template += " "+("0"+now.getUTCHours()).slice(-2)+":"+("0"+now.getUTCMinutes()).slice(-2)+":"+("0" + now.getUTCSeconds()).slice(-2)+"\n";
+        template += "date: " + getCurDatetimeString() + "\n";
         template += "category: \n";
-        template += "tags: \n";
+        template += "tags: \n\n";
         template += "---\n\n";
 
         editor.setValue(template);
         editor.focus();
         editor.setCursor(editor.lineCount(), 0);
+    }
+}
+
+function formatting(texts) {
+    var formatted = "";
+    var prevLine = "";
+    var isPostHeader = false;
+    var isPostBody = false;
+    var expectNewline = false;
+
+    texts = texts.replace(/\r/gi, "");
+    var lines = texts.split("\n");
+    for (var i in lines) {
+        if (expectNewline) {
+            formatted += "\n";
+            prevLine = "";
+            expectNewline = false;
+            if (lines[i].length == 0)
+                continue;
+        }
+
+        // At the beginning or end of post header
+        if (lines[i] == "---" && isPostBody == false) {
+            isPostHeader = !isPostHeader;
+
+            // End of post header
+            if (isPostHeader == false) {
+                if (prevLine.length) {
+                    formatted += "\n";
+                    prevLine = "";
+                }
+                expectNewline = true;
+                isPostBody = true;
+            }
+
+            formatted += lines[i] + "\n";
+            prevLine = lines[i];
+            continue;
+        }
+
+        var curLine = lines[i];
+        if (isPostHeader) {
+            var key = curLine.split(":")[0].trim();
+            if (key.length == 0)
+                continue;
+            if (key == "date")
+                curLine = "date: " + getCurDatetimeString();
+        }
+
+        // Append modification
+        formatted += curLine;
+        prevLine = curLine;
+        if (i < lines.length - 1)
+            formatted += "\n";
+    }
+
+    return formatted;
+}
+
+function openfile() {
+    var input = document.createElement("input");
+    input.type = "file";
+    input.name = "file";
+    input.accept = ".md,.markdown";
+    input.addEventListener("change", function(e) {
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+            if (evt.target.readyState == FileReader.DONE) {
+                editor.setValue(formatting(evt.target.result));
+                editor.focus();
+                editor.setCursor(editor.lineCount(), 0);
+            }
+        };
+        reader.readAsText(e.target.files[0]);
+    });
+    if (document.createEvent) {
+        var event = document.createEvent('MouseEvents');
+        event.initEvent('click', true, true);
+        input.dispatchEvent(event);
+    } else {
+        input.click();
     }
 }
 
@@ -238,7 +325,7 @@ function exportfile() {
 
         // Create download link element
         var a = document.createElement("a");
-        var url = URL.createObjectURL(new Blob([data], {type: "text/plain"}));
+        var url = URL.createObjectURL(new Blob([data], {type: "text/x-markdown"}));
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
@@ -254,7 +341,7 @@ function exportfile() {
 
         setTimeout(function() {
             document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
+            window.URL.revokeObjectURL(url);
         }, 0);
     }
 }
