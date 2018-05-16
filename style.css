@@ -14,12 +14,16 @@ a:hover { color: rgba(112, 98, 251, .7); }
 a:active { color: rgba(112, 98, 251, 1); }
 
 /* Header */
-header { padding: .4em; border-bottom: solid 1px #eee; user-select: none; }
+header { display: block; padding: .4em; border-bottom: solid 1px #eee; user-select: none; }
 #svg-logo { display: inline-block; width: 2em; height: 2em; }
 #txt-logo { display: inline-block; margin-left: .4em; font-size: 1.2em; }
-#svg-info { position: fixed; top: .6em; right: 1em; width: 1.4em; height: 1.4em; fill: #777; }
-#svg-info:hover { fill: #888; }
-#svg-info:active { fill: #666; }
+
+/* Toolbox */
+toolbox { display: flex; margin: 0; padding: 0; border-bottom: solid 1px #eee; user-select: none; }
+toolbox > button { margin: 0; padding: .2em .5em; height: 2em; border: none; border-right: solid 1px #eee; background-color: #fff; }
+toolbox > button:hover { background-color: #fafafa; }
+toolbox > button:active { background-color: #f3f3f3; }
+toolbox > button#btn-tool-info { float: right; }
 
 /* Editor */
 editor { display: block; border-bottom: solid 1px #eee; }
@@ -29,16 +33,14 @@ editor>textarea { width: 100%; border: none; resize: vertical; font-family: 'con
 footer { padding: .4em; height: 2.2em; user-select: none; }
 footer:after { content: ''; display: table; clear: both; }
 
+/* Buttons */
 .svg-btn { display: inline-block; width: 1em; height: 1em; }
 btnlabel { display: inline-block; }
 
-#btn-settings-open { float: left; margin-right: .4em; width: 80px; height: 100%; border: none; background: #777; color: #fff; }
-#btn-settings-open:hover { background: #888; }
-#btn-settings-open:active { background: #666; }
-
-#btn-reset { float: right; margin-left: .4em; width: 80px; height: 100%; border: none; background: rgba(238, 97, 80, .9); color: #fff; }
+#btn-reset { float: left; margin-right: .4em; width: 80px; height: 100%; border: none; background: rgba(238, 97, 80, .9); color: #fff; }
 #btn-reset:hover { background: rgba(238, 97, 80, .8); }
 #btn-reset:active { background: rgba(238, 97, 80, 1); }
+#btn-reset .svg-btn { stroke-width: 1px; }
 
 #btn-open { float: right; margin-left: .4em; width: 80px; height: 100%; border: none; background: rgba(62, 138, 226, .9); color: #fff; }
 #btn-open:hover { background: rgba(62, 138, 226, .8); }
@@ -47,12 +49,13 @@ btnlabel { display: inline-block; }
 #btn-export { float: right; margin-left: .4em; width: 80px; height: 100%; border: none; background: rgba(52, 168, 83, .9); color: #fff; }
 #btn-export:hover { background: rgba(52, 168, 83, .8); }
 #btn-export:active { background: rgba(52, 168, 83, 1); }
+#btn-export .svg-btn { stroke-width: 2px; }
 
 /* Overlay */
 overlay { position: fixed; display: none; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255, 255, 255,.7); z-index: 100; }
 .modal { position: absolute; display: none; top: 50%; left: 50%; padding: 20px; background-color: #eee;
     box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px; transform: translate(-50%, -50%); }
-settings { width: 420px; height: 290px; }
+settings { width: 420px; height: 260px; }
 
 section { display: block; margin-bottom: 1.5em; }
 sectionlabel { display: block; margin-bottom: .3em; font-size: 1.2em; font-weight: 700; user-select: none; }
@@ -66,13 +69,8 @@ input[type="text"] { flex: 1; padding: .3em; font-family: 'consolas'; border: so
 input[type="radio"] { display: inline-block; height: 1.4em; line-height: 1.4em; vertical-align: top; }
 label { display: inline-block; padding: 0 1em 0 .3em; height: 1.4em; line-height: 1.4em; vertical-align: top; user-select: none; }
 
-#btn-settings-save { position: absolute; right: 1em; bottom: 1em; width: 80px; height: 2em; border: none; background: rgba(112, 98, 251, .9); color: #fff; user-select: none; }
-#btn-settings-save:hover { background: rgba(112, 98, 251, .8); }
-#btn-settings-save:active { background: rgba(112, 98, 251, 1); }
-#btn-settings-save .svg-btn { stroke-width: 2px; }
-
 /* Info */
-info { width: 380px; height: 230px; user-select: none; }
+info { width: 380px; height: 250px; user-select: none; }
 maker { display: block; margin-bottom: .3em; text-align: right; }
 item { display: block; margin: 1em 0 .3em 0; font-weight: 700; }
 li { margin-left: 2em; }

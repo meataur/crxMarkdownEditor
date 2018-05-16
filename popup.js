@@ -1,9 +1,16 @@
 // Connect to background.js
 var port = chrome.extension.connect({name: "popup"});
+var manifestData = chrome.runtime.getManifest();
 var editor = null;
+var postHeaderKeys = ["layout", "title", "date", "category", "tags"];
 
 // Do something after all contents of document loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Fill extension title into the app title division
+    var appTitleDivs = document.getElementsByClassName("apptitle");
+    for (var i = 0; i < appTitleDivs.length; i++)
+        appTitleDivs[i].innerHTML = manifestData.name + " v" + manifestData.version;
+
     // Create markdown editor
     var textarea = document.getElementsByTagName('textarea')[0];
     editor = CodeMirror.fromTextArea(textarea, {
@@ -12,7 +19,11 @@ document.addEventListener('DOMContentLoaded', function() {
         lineNumbers: true,
         lineWrapping: true,
         indentUnit: 4,
-        extraKeys: {"Enter": "newlineAndIndentContinueMarkdownList"}
+        indentWithTabs: true,
+        tabSize: 4,
+        extraKeys: {
+            "Enter": "newlineAndIndentContinueMarkdownList"
+        }
     });
 
     // // Editting by drag-and-drop
@@ -56,29 +67,46 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Load previous work
-    chrome.storage.local.get('textarea', function(result) {
-        if (result.textarea) {
-            editor.setValue(formatting(result.textarea));
-            editor.focus();
-            editor.setCursor(editor.lineCount(), 0);
+    chrome.storage.local.get('textdata', function(result) {
+        if (result.textdata) {
+            editor.setValue(getFormattedTexts(result.textdata));
         } else {
             resetEditor();
         }
     });
 
+    // Set scrollbar position
+    chrome.storage.local.get('scrollbar', function(result) {
+        if (result.scrollbar)
+            editor.scrollTo(result.scrollbar.left, result.scrollbar.top);
+    });
+
+    // Set cursor position
+    chrome.storage.local.get('cursor', function(result) {
+        if (result.cursor) {
+            editor.focus();
+            editor.setCursor(result.cursor.line, result.cursor.ch);
+        } else {
+            editor.focus();
+            editor.setCursor(0, 0);
+        }
+    });
+
     // Set button handler
-    document.getElementById('svg-info').onclick = openExtensionInfo;
+    document.getElementById('btn-tool-formatting').onclick = formatting;
+    document.getElementById('btn-tool-resettime').onclick = resetPostingTime;
+    document.getElementById('btn-tool-settings').onclick = openSettings;
+    document.getElementById('btn-tool-info').onclick = openExtensionInfo;
     document.getElementById('select-theme').onchange = selectTheme;
     document.getElementById('select-fontsize').onchange = selectFontsize;
-    document.getElementById('btn-settings-open').onclick = openSettings;
     document.getElementById('btn-reset').onclick = resetEditor;
     document.getElementById('btn-open').onclick = openfile;
-    document.getElementById('btn-export').onclick = exportfile;
-    document.getElementById('btn-settings-save').onclick = saveSettings;
+    document.getElementById('btn-export').onclick = savefile;
 
     // Set overlay handler
     window.onclick = function(e) {
         if (e.target == document.getElementsByTagName('overlay')[0]) {
+            saveSettings();
             document.getElementsByTagName('overlay')[0].style.display = "none";
             document.getElementsByTagName("info")[0].style.display = "none";
             document.getElementsByTagName("settings")[0].style.display = "none";
@@ -196,7 +224,7 @@ function getCurDatetimeString() {
 }
 
 function resetEditor() {
-    chrome.storage.local.remove(['textarea']);
+    chrome.storage.local.remove(['textdata', 'scrollbar', 'cursor']);
 
     if (editor) {
         // Make document template
@@ -214,15 +242,15 @@ function resetEditor() {
     }
 }
 
-function formatting(texts) {
+function getFormattedTexts(data) {
     var formatted = "";
     var prevLine = "";
     var isPostHeader = false;
     var isPostBody = false;
     var expectNewline = false;
 
-    texts = texts.replace(/\r/gi, "");
-    var lines = texts.split("\n");
+    data = data.replace(/\r/gi, "");
+    var lines = data.split("\n");
     for (var i in lines) {
         if (expectNewline) {
             formatted += "\n";
@@ -254,10 +282,14 @@ function formatting(texts) {
         var curLine = lines[i];
         if (isPostHeader) {
             var key = curLine.split(":")[0].trim();
-            if (key.length == 0)
+
+            // Remove invalid header items
+            if (postHeaderKeys.indexOf(key) < 0)
                 continue;
-            if (key == "date")
-                curLine = "date: " + getCurDatetimeString();
+        } else if (isPostBody) {
+            // Remove succeeding blank lines
+            if (curLine.length == 0 && prevLine.length == 0)
+                continue;
         }
 
         // Append modification
@@ -270,6 +302,40 @@ function formatting(texts) {
     return formatted;
 }
 
+function formatting() {
+    if (editor) {
+        var data = editor.getValue();
+        editor.setValue(getFormattedTexts(data));
+    }
+}
+
+function resetPostingTime() {
+    var isPostHeader = false;
+    if (editor) {
+        var data = editor.getValue();
+        data = data.replace(/\r/gi, "");
+        var lines = data.split("\n");
+
+        for (var i in lines) {
+            // At the beginning or end of post header
+            if (lines[i] == "---")
+                isPostHeader = !isPostHeader;
+    
+            var curLine = lines[i];
+            if (isPostHeader) {
+                var key = curLine.split(":")[0].trim();
+                if (key == "date") {
+                    curLine = "date: " + getCurDatetimeString();
+                    editor.replaceRange(curLine, { line: i, ch: 0 }, { line: i, ch: Infinity });
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+}
+
 function openfile() {
     var input = document.createElement("input");
     input.type = "file";
@@ -279,9 +345,9 @@ function openfile() {
         var reader = new FileReader();
         reader.onload = function(evt) {
             if (evt.target.readyState == FileReader.DONE) {
-                editor.setValue(formatting(evt.target.result));
+                editor.setValue(getFormattedTexts(evt.target.result));
                 editor.focus();
-                editor.setCursor(editor.lineCount(), 0);
+                editor.setCursor(0, 0);
             }
         };
         reader.readAsText(e.target.files[0]);
@@ -295,7 +361,7 @@ function openfile() {
     }
 }
 
-function exportfile() {
+function savefile() {
     if (editor) {
         // Read editor's content
         var data = editor.getValue();

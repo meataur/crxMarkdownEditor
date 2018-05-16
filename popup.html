@@ -58,7 +58,7 @@
     <link rel="stylesheet" href="theme/zenburn.css">
 
     <style type="text/css">
-        .CodeMirror { height: 520px; font-family: 'consolas'; color: black; direction: ltr; cursor: text; }
+        .CodeMirror { height: 490px; font-family: 'consolas'; color: black; direction: ltr; cursor: text; }
         .cm-s-default .cm-trailing-space-a:before,
         .cm-s-default .cm-trailing-space-b:before {position: absolute; content: "\00B7"; color: #777;}
         .cm-s-default .cm-trailing-space-new-line:before {position: absolute; content: "\21B5"; color: #777;}
@@ -78,23 +78,27 @@
 </head>
 <body>
 <header>
-    <svg id="svg-logo"><use xlink:href="images/md.svg#md"></use></svg>
-    <div id="txt-logo">Markdown Editor for Easy Blog Posting v1.1</div>
-    <svg id="svg-info"><use xlink:href="images/md.svg#info"></use></svg>
+    <svg id="svg-logo"><use xlink:href="images/md.svg#icon-md"></use></svg>
+    <div id="txt-logo" class="apptitle"></div>
 </header>
+<toolbox>
+    <button id="btn-tool-formatting" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg> <btnlabel>Auto Formatting</btnlabel></button>
+    <button id="btn-tool-resettime" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg> <btnlabel>Reset Datetime</btnlabel></button>
+    <button id="btn-tool-settings" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg> <btnlabel>Settings</btnlabel></button>
+    <button id="btn-tool-info" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-info"></use></svg> <btnlabel>Info</btnlabel></button>
+</toolbox>
 <editor>
     <textarea spellcheck="false"></textarea>
 </editor>
 <footer>
-    <button id="btn-settings-open" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#settings"></use></svg> <btnlabel>Settings</btnlabel></button>
-    <button id="btn-export" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#download"></use></svg> <btnlabel>SaveAs</btnlabel></button>
-    <button id="btn-open" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#open"></use></svg> <btnlabel>Open</btnlabel></button>
-    <button id="btn-reset" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#reset"></use></svg> <btnlabel>Reset</btnlabel></button>
+    <button id="btn-export" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-check"></use></svg> <btnlabel>Save</btnlabel></button>
+    <button id="btn-open" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-open"></use></svg> <btnlabel>Open</btnlabel></button>
+    <button id="btn-reset" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-reset"></use></svg> <btnlabel>Reset</btnlabel></button>
 </footer>
 <overlay>
     <info class="modal">
         <section>
-            <sectionlabel>Markdown Editor for Easy Blog Posting v1.1</sectionlabel>
+            <sectionlabel class="apptitle"></sectionlabel>
             <maker>Made by ChangUk (<a href="https://changuk.github.io" target="_blank">changuk.github.io</a>)</maker>
             <item>Features and Tips</item>
             <ul>
@@ -107,6 +111,7 @@
             <ul>
                 <li><a href="https://codemirror.net/" target="_blank">CodeMirror</a></li>
                 <li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
+                <li><a href="https://icomoon.io" target="_blank">IcoMoon</a></li>
             </ul>
         </section>
     </info>
@@ -215,7 +220,6 @@
                 </subsectionvalue>
             </subsection>
         </section>
-        <button id="btn-settings-save" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#check"></use></svg> <btnlabel>Save</btnlabel></button>
     </settings>
 </overlay>
 </body>

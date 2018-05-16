@@ -6460,7 +6460,7 @@ function onDrop(e) {
           var reader = new FileReader
           reader.onload = operation(cm, function () {
             cm.setValue(reader.result);
-            cm.setCursor(cm.lineCount(), 0);
+            cm.setCursor(0, 0);
           });
           reader.readAsText(files[i])
           break;
