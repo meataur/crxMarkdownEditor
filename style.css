@@ -8,6 +8,8 @@ body { width: 780px;
     -moz-osx-font-smoothing: grayscale;
 }
 svg { display: inline-flex; align-self: center; fill: currentColor; stroke: currentColor; stroke-width: 0; vertical-align: top; }
+.svg-btn { display: inline-block; width: 1em; height: 1em; }
+btnlabel { display: inline-block; }
 
 a { color: rgba(112, 98, 251, .9); }
 a:hover { color: rgba(112, 98, 251, .7); }
@@ -19,37 +21,25 @@ header { display: block; padding: .4em; border-bottom: solid 1px #eee; user-sele
 #txt-logo { display: inline-block; margin-left: .4em; font-size: 1.2em; }
 
 /* Toolbox */
-toolbox { display: flex; margin: 0; padding: 0; border-bottom: solid 1px #eee; user-select: none; }
-toolbox > button { margin: 0; padding: .2em .5em; height: 2em; border: none; border-right: solid 1px #eee; background-color: #fff; }
-toolbox > button:hover { background-color: #fafafa; }
+toolbox { display: block; padding: 0; border-bottom: solid 1px #eee; user-select: none; }
+toolbox > button { margin: 0; padding: .2em .5em; height: 2em; border: none; background-color: #fff; }
+toolbox > button:hover { background-color: #f9f9f9; }
 toolbox > button:active { background-color: #f3f3f3; }
-toolbox > button#btn-tool-info { float: right; }
+toolbox > button.left { float: left; border-right: solid 1px #eee; }
+toolbox > button.right { float: right; border-left: solid 1px #eee; }
+toolbox:after { content: ''; display: table; clear: both; visibility: hidden; }
 
 /* Editor */
 editor { display: block; border-bottom: solid 1px #eee; }
 editor>textarea { width: 100%; border: none; resize: vertical; font-family: 'consolas'; }
 
 /* Footer */
-footer { padding: .4em; height: 2.2em; user-select: none; }
+footer { padding: 2px 2px 0px 2px; height: 2.2em; user-select: none; }
 footer:after { content: ''; display: table; clear: both; }
-
-/* Buttons */
-.svg-btn { display: inline-block; width: 1em; height: 1em; }
-btnlabel { display: inline-block; }
-
-#btn-reset { float: left; margin-right: .4em; width: 80px; height: 100%; border: none; background: rgba(238, 97, 80, .9); color: #fff; }
-#btn-reset:hover { background: rgba(238, 97, 80, .8); }
-#btn-reset:active { background: rgba(238, 97, 80, 1); }
-#btn-reset .svg-btn { stroke-width: 1px; }
-
-#btn-open { float: right; margin-left: .4em; width: 80px; height: 100%; border: none; background: rgba(62, 138, 226, .9); color: #fff; }
-#btn-open:hover { background: rgba(62, 138, 226, .8); }
-#btn-open:active { background: rgba(62, 138, 226, 1); }
-
-#btn-export { float: right; margin-left: .4em; width: 80px; height: 100%; border: none; background: rgba(52, 168, 83, .9); color: #fff; }
-#btn-export:hover { background: rgba(52, 168, 83, .8); }
-#btn-export:active { background: rgba(52, 168, 83, 1); }
-#btn-export .svg-btn { stroke-width: 2px; }
+#btn-saveasfile { float: right; margin-left: .4em; padding: .4em .6em; height: 100%; border: none; background: rgba(238, 97, 80, .9); color: #fff; }
+#btn-saveasfile:hover { background: rgba(238, 97, 80, .8); }
+#btn-saveasfile:active { background: rgba(238, 97, 80, 1); }
+#btn-saveasfile .svg-btn { stroke-width: 2px; }
 
 /* Overlay */
 overlay { position: fixed; display: none; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255, 255, 255,.7); z-index: 100; }

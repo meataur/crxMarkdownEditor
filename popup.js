@@ -93,15 +93,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Set button handler
+    document.getElementById('btn-tool-new').onclick = resetEditor;
+    document.getElementById('btn-tool-open').onclick = openfile;
+    document.getElementById('btn-tool-attachment').onclick = attachments;
     document.getElementById('btn-tool-formatting').onclick = formatting;
     document.getElementById('btn-tool-resettime').onclick = resetPostingTime;
+    
     document.getElementById('btn-tool-settings').onclick = openSettings;
     document.getElementById('btn-tool-info').onclick = openExtensionInfo;
+
     document.getElementById('select-theme').onchange = selectTheme;
     document.getElementById('select-fontsize').onchange = selectFontsize;
-    document.getElementById('btn-reset').onclick = resetEditor;
-    document.getElementById('btn-open').onclick = openfile;
-    document.getElementById('btn-export').onclick = savefile;
+    document.getElementById('btn-saveasfile').onclick = savefile;
 
     // Set overlay handler
     window.onclick = function(e) {
@@ -239,6 +242,78 @@ function resetEditor() {
         editor.setValue(template);
         editor.focus();
         editor.setCursor(editor.lineCount(), 0);
+    }
+}
+
+function attachments() {
+    var input = document.createElement("input");
+    input.type = "file";
+    input.name = "files";
+    input.multiple = "multiple";
+    input.addEventListener("change", function(e) {
+        var cursor = editor.getCursor();
+        var files = e.target.files;
+
+        for (var i = 0, f; f = files[i]; i++) {
+            var fext = f.name.toLowerCase().split(".").pop();
+            if (fext == "md" || fext == "markdown") {
+                continue;
+            }
+
+            var reader = new FileReader();
+            reader.onload = (function(file) {
+                return function(evt) {
+                    var fname = file.name;
+                    var fext = fname.toLowerCase().split(".").pop();
+                    var storage = document.getElementById('rsrc-storage').value;
+                    var type = document.getElementById('rsrc-type').value;
+                    var hashing = document.querySelector('input[name="hashing"]:checked').value;
+
+                    // Set sub-directory path
+                    var jsonObj = JSON.parse(type);
+                    var subdir = "";
+                    for (var k in jsonObj) {
+                        if (jsonObj[k].indexOf(fext) >= 0) {
+                        subdir = k + "/";
+                        break;
+                        }
+                    }
+
+                    // Get file hashcode
+                    if (hashing != "none") {
+                        var ui8a = new Uint8Array(evt.target.result);
+                        var tmp = [];
+                        for (var i = 0; i < ui8a.length; i += 4)
+                            tmp.push(ui8a[i] << 24 | ui8a[i + 1] << 16 | ui8a[i + 2] << 8 | ui8a[i + 3]);
+                        var wordArray = CryptoJS.lib.WordArray.create(tmp, ui8a.length);
+                        if (hashing == "md5")
+                            fname = CryptoJS.MD5(wordArray) + "." + fext;
+                        else if (hashing == "sha1")
+                            fname = CryptoJS.SHA1(wordArray) + "." + fext;
+                        else if (hashing == "sha224")
+                            fname = CryptoJS.SHA224(wordArray) + "." + fext;
+                        else if (hashing == "sha256")
+                            fname = CryptoJS.SHA256(wordArray) + "." + fext;
+                        else if (hashing == "sha512")
+                            fname = CryptoJS.SHA512(wordArray) + "." + fext;
+                    }
+
+                    // Insert text
+                    var inputtext = (file.type.startsWith("image")?"!":"")+"["+file.name+"]("+storage+subdir+fname+")\n";
+                    editor.replaceRange(inputtext, { line: cursor.line, ch: cursor.ch }, { line: cursor.line, ch: cursor.ch });
+                    editor.setCursor({ line: cursor.line + 1, ch: 0 });
+                };
+            })(f);
+            reader.readAsArrayBuffer(files[i]);
+        }
+    });
+
+    if (document.createEvent) {
+        var event = document.createEvent('MouseEvents');
+        event.initEvent('click', true, true);
+        input.dispatchEvent(event);
+    } else {
+        input.click();
     }
 }
 
@@ -387,7 +462,14 @@ function savefile() {
         }
 
         // Get save name from document header
-        var filename = docHeader["date"].split(" ")[0]+"-"+docHeader["title"].toLowerCase().split(" ").join("-")+".md";
+        var filename = "";
+        if (docHeader["date"])
+            filename += docHeader["date"].split(" ")[0]+"-";
+        if (docHeader["title"].length == 0) {
+            alert("Unable to save file.\nDocument title is empty.");
+            return;
+        }
+        filename += docHeader["title"].toLowerCase().split(" ").join("-")+".md";
 
         // Create download link element
         var a = document.createElement("a");

@@ -63,7 +63,6 @@
         .cm-s-default .cm-trailing-space-b:before {position: absolute; content: "\00B7"; color: #777;}
         .cm-s-default .cm-trailing-space-new-line:before {position: absolute; content: "\21B5"; color: #777;}
     </style>
-    <script src="popup.js"></script>
     <script src="cryptojs/core.js"></script>
     <script src="cryptojs/x64-core.js"></script>
     <script src="cryptojs/lib-typedarrays.js"></script>
@@ -72,9 +71,11 @@
     <script src="cryptojs/sha256.js"></script>
     <script src="cryptojs/sha224.js"></script>
     <script src="cryptojs/sha512.js"></script>
+    
     <script src="editor.js"></script>
     <script src="markdown.js"></script>
     <script src="xml.js"></script>
+    <script src="popup.js"></script>
 </head>
 <body>
 <header>
@@ -82,18 +83,19 @@
     <div id="txt-logo" class="apptitle"></div>
 </header>
 <toolbox>
-    <button id="btn-tool-formatting" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg> <btnlabel>Auto Formatting</btnlabel></button>
-    <button id="btn-tool-resettime" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg> <btnlabel>Reset Datetime</btnlabel></button>
-    <button id="btn-tool-settings" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg> <btnlabel>Settings</btnlabel></button>
-    <button id="btn-tool-info" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-info"></use></svg> <btnlabel>Info</btnlabel></button>
+    <button id="btn-tool-new" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-empty"></use></svg> <btnlabel>New</btnlabel></button>
+    <button id="btn-tool-open" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-open"></use></svg> <btnlabel>Open</btnlabel></button>
+    <button id="btn-tool-attachment" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-attachment"></use></svg> <btnlabel>Attachment</btnlabel></button>
+    <button id="btn-tool-formatting" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg> <btnlabel>Auto Formatting</btnlabel></button>
+    <button id="btn-tool-resettime" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg> <btnlabel>Reset Datetime</btnlabel></button>
+    <button id="btn-tool-info" class="right" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-info"></use></svg> <btnlabel>Info</btnlabel></button>
+    <button id="btn-tool-settings" class="right" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg> <btnlabel>Settings</btnlabel></button>
 </toolbox>
 <editor>
     <textarea spellcheck="false"></textarea>
 </editor>
 <footer>
-    <button id="btn-export" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-check"></use></svg> <btnlabel>Save</btnlabel></button>
-    <button id="btn-open" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-open"></use></svg> <btnlabel>Open</btnlabel></button>
-    <button id="btn-reset" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-reset"></use></svg> <btnlabel>Reset</btnlabel></button>
+    <button id="btn-saveasfile" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-check"></use></svg> <btnlabel>Save as File</btnlabel></button>
 </footer>
 <overlay>
     <info class="modal">
@@ -104,7 +106,7 @@
             <ul>
                 <li>Support drag-and-drop to present resource files attached to markdown document.</li>
                 <li>Support hashing for preventing duplication of resource filenames.</li>
-                <li>Press export button to save editor's content as a file.</li>
+                <li>Press save button to save editor's content as a file.</li>
                 <li>Enable easy blog-posting through browser setting to ask where to save file before downloading.</li>
             </ul>
             <item>Powered by</item>
