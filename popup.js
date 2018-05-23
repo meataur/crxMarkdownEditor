@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadSettings();
 
     // Check real-time JSON format
-    document.getElementById('rsrc-type').addEventListener('keyup', function() {
+    document.getElementById('attachment-type').addEventListener('keyup', function() {
         try {
             JSON.parse(this.value);
             this.style["background-color"] = "#fff";
@@ -98,26 +98,45 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-tool-attachment').onclick = attachments;
     document.getElementById('btn-tool-formatting').onclick = formatting;
     document.getElementById('btn-tool-resettime').onclick = resetPostingTime;
-    
+
     document.getElementById('btn-tool-settings').onclick = openSettings;
     document.getElementById('btn-tool-info').onclick = openExtensionInfo;
 
+    document.getElementById('localhost-port').onkeypress = numberOnly;
+    document.getElementById('btn-download-installer').onclick = downloadJekyllServeInstaller;
+    document.getElementById('btn-download-uninstaller').onclick = downloadJekyllServeUninstaller;
+
     document.getElementById('select-theme').onchange = selectTheme;
     document.getElementById('select-fontsize').onchange = selectFontsize;
+    
+    document.getElementById('btn-run-jekyllserve').onclick = runJekyll;
     document.getElementById('btn-saveasfile').onclick = savefile;
 
     // Set overlay handler
     window.onclick = function(e) {
         if (e.target == document.getElementsByTagName('overlay')[0]) {
-            saveSettings();
-            document.getElementsByTagName('overlay')[0].style.display = "none";
-            document.getElementsByTagName("info")[0].style.display = "none";
-            document.getElementsByTagName("settings")[0].style.display = "none";
+            if (saveSettings()) {
+                document.getElementsByTagName('overlay')[0].style.display = "none";
+                document.getElementsByTagName("info")[0].style.display = "none";
+                document.getElementsByTagName("settings")[0].style.display = "none";
+            }
         }
     }
 });
 
 function loadSettings() {
+    chrome.storage.local.get('working_dirpath', function(result) {
+        if (result.working_dirpath) {
+            document.getElementById("working-dirpath").value = result.working_dirpath;
+        }
+    });
+    chrome.storage.local.get('localhost_port', function(result) {
+        if (result.localhost_port) {
+            document.getElementById("localhost-port").value = result.localhost_port;
+        } else {
+            document.getElementById("localhost-port").value = 4000;
+        }
+    });
     chrome.storage.local.get('theme', function(result) {
         if (result.theme) {
             document.getElementById("select-theme").value = result.theme;
@@ -133,20 +152,20 @@ function loadSettings() {
             selectFontsize();
         }
     });
-    chrome.storage.local.get('rsrc_storage', function(result) {
-        if (result.rsrc_storage) {
-            document.getElementById('rsrc-storage').value = result.rsrc_storage;
+    chrome.storage.local.get('attachment_location', function(result) {
+        if (result.attachment_location) {
+            document.getElementById('attachment-location').value = result.attachment_location;
         } else {
-            document.getElementById('rsrc-storage').value = "{{ site.baseurl }}/assets/";
+            document.getElementById('attachment-location').value = "{{ site.baseurl }}/assets/";
         }
     });
-    chrome.storage.local.get('rsrc_type', function(result) {
-        if (result.rsrc_type) {
-            document.getElementById('rsrc-type').value = result.rsrc_type;
-            document.getElementById('rsrc-type').style["background-color"] = "#fff";
+    chrome.storage.local.get('attachment_type', function(result) {
+        if (result.attachment_type) {
+            document.getElementById('attachment-type').value = result.attachment_type;
+            document.getElementById('attachment-type').style["background-color"] = "#fff";
         } else {
-            document.getElementById('rsrc-type').value = '{"img":["png","jpg","jpeg","gif","bmp"],"pdf":["pdf"],"doc":["doc","docx","ppt","pptx","xls","xlsx","hwp","txt","html","htm"]}';
-            document.getElementById('rsrc-type').style["background-color"] = "#fff";
+            document.getElementById('attachment-type').value = '{"img":["png","jpg","jpeg","gif","bmp"],"pdf":["pdf"],"doc":["doc","docx","ppt","pptx","xls","xlsx","hwp","txt","html","htm"]}';
+            document.getElementById('attachment-type').style["background-color"] = "#fff";
         }
     });
     chrome.storage.local.get('hashing', function(result) {
@@ -179,29 +198,144 @@ function openSettings() {
 }
 
 function saveSettings() {
+    var themeselector = document.getElementById("select-theme");
+    var fontsizeselector = document.getElementById("select-fontsize");
+    
+    chrome.storage.local.set({
+        'working_dirpath': document.getElementById("working-dirpath").value.replace(/\\+$/, '') + "\\",
+        'localhost_port': document.getElementById("localhost-port").value,
+        'theme': themeselector.options[themeselector.selectedIndex].textContent,
+        'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
+        'attachment_location': document.getElementById('attachment-location').value.replace(/\/+$/, '') + "/",
+        'hashing': document.querySelector('input[name="hashing"]:checked').value
+    });
+
     try {
         // JSON parsing test
-        JSON.parse(document.getElementById('rsrc-type').value);
-
-        var themeselector = document.getElementById("select-theme");
-        var fontsizeselector = document.getElementById("select-fontsize");
-        var storagePath = document.getElementById('rsrc-storage').value;
-        if (!storagePath.endsWith('/'))
-            storagePath += '/';
+        JSON.parse(document.getElementById('attachment-type').value);
 
         chrome.storage.local.set({
-            'theme': themeselector.options[themeselector.selectedIndex].textContent,
-            'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
-            'rsrc_storage': storagePath,
-            'rsrc_type': document.getElementById('rsrc-type').value.split(' ').join(''),
-            'hashing': document.querySelector('input[name="hashing"]:checked').value
+            'attachment_type': document.getElementById('attachment-type').value.split(' ').join('')
         });
 
-        document.getElementsByTagName("overlay")[0].style.display = "none";
-        document.getElementsByTagName("settings")[0].style.display = "none";
+        return true;
     } catch(e) {
         alert("Invalid JSON format!");
+        return false;
     }
+}
+
+function numberOnly(e) {
+    var evt = e || window.event;
+    var key = evt.keyCode || evt.which;
+    key = String.fromCharCode(key);
+    var regex = /[0-9]|\./;
+    if (!regex.test(key)) {
+        evt.returnValue = false;
+        if (evt.preventDefault)
+            evt.preventDefault();
+    }
+}
+
+function downloadJekyllServeInstaller() {
+    var workingDirectory = document.getElementById("working-dirpath").value;
+    if (!workingDirectory) {
+        alert("Invalid working directory path!");
+        return;
+    }
+
+    var localhostPort = document.getElementById("localhost-port").value;
+    if (!localhostPort) {
+        alert("Invalid localhost port!");
+        return;
+    }
+
+    var filedata = `@ECHO OFF
+SETLOCAL ENABLEDELAYEDEXPANSION
+
+SET JEKYLLSERVE_PORT=` + localhostPort + `
+SET JEKYLLSERVE_NAME=jekyllserve%JEKYLLSERVE_PORT%
+SET JEKYLLSERVE_PATH=%APPDATA%\\%JEKYLLSERVE_NAME%
+SET JEKYLL_PATH=` + workingDirectory + `
+SET ALLOWED_ORIGIN=chrome-extension://` + chrome.runtime.id + `/
+
+CALL :ISADMIN
+
+IF %ERRORLEVEL% == 0 (
+    REG ADD "HKLM\\Software\\Google\\Chrome\\NativeMessagingHosts\\%JEKYLLSERVE_NAME%" /ve /t REG_SZ /d "%JEKYLLSERVE_PATH%\\manifest.json" /f
+    IF NOT EXIST %JEKYLLSERVE_PATH% mkdir %JEKYLLSERVE_PATH%
+    (
+        ECHO {
+        ECHO "name": "%JEKYLLSERVE_NAME%",
+        ECHO "description": "Run Jekyll local server with port %JEKYLLSERVE_PORT%",
+        ECHO "path": "jekyllserve.bat",
+        ECHO "type": "stdio",
+        ECHO "allowed_origins": ["%ALLOWED_ORIGIN%"]
+        ECHO }
+    ) > %JEKYLLSERVE_PATH%\\manifest.json
+    (
+        ECHO @ECHO OFF
+        ECHO CD %JEKYLL_PATH%
+        ECHO START jekyll serve -P %JEKYLLSERVE_PORT%
+    ) > %JEKYLLSERVE_PATH%\\jekyllserve.bat
+) ELSE (
+    ECHO Set UAC = CreateObject^("Shell.Application"^) > "%TEMP%\\getadmin.vbs"
+    ECHO UAC.ShellExecute "cmd.exe", "/c %~s0 %~1", "", "runas", 1 >> "%TEMP%\\getadmin.vbs"
+
+    "%TEMP%\\getadmin.vbs"
+    DEL "%TEMP%\\getadmin.vbs"
+)
+EXIT /b
+
+:ISADMIN
+    FSUTIL dirty QUERY %SYSTEMDRIVE% > NUL
+    EXIT /b
+`;
+
+    var a = document.createElement('a');
+    a.href = 'data:application/x-bat,' + encodeURI(filedata);
+    a.download = "install_jekyllserve.bat";
+    a.click();
+}
+
+function downloadJekyllServeUninstaller() {
+    var localhostPort = document.getElementById("localhost-port").value;
+    if (!localhostPort) {
+        alert("Invalid localhost port!");
+        return;
+    }
+
+    var filedata = `@ECHO OFF
+SETLOCAL ENABLEDELAYEDEXPANSION
+
+SET JEKYLLSERVE_PORT=` + localhostPort + `
+SET JEKYLLSERVE_NAME=jekyllserve%JEKYLLSERVE_PORT%
+SET JEKYLLSERVE_PATH=%APPDATA%\\%JEKYLLSERVE_NAME%
+
+CALL :ISADMIN
+
+IF %ERRORLEVEL% == 0 (
+    REG DELETE "HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\%JEKYLLSERVE_NAME%" /f
+    REG DELETE "HKLM\\Software\\Google\\Chrome\\NativeMessagingHosts\\%JEKYLLSERVE_NAME%" /f
+    RD /s /q %JEKYLLSERVE_PATH%
+) ELSE (
+    ECHO Set UAC = CreateObject^("Shell.Application"^) > "%TEMP%\\getadmin.vbs"
+    ECHO UAC.ShellExecute "cmd.exe", "/c %~s0 %~1", "", "runas", 1 >> "%TEMP%\\getadmin.vbs"
+
+    "%TEMP%\\getadmin.vbs"
+    DEL "%TEMP%\\getadmin.vbs"
+)
+EXIT /b
+
+:ISADMIN
+    FSUTIL dirty QUERY %SYSTEMDRIVE% > NUL
+    EXIT /b
+`;
+
+    var a = document.createElement('a');
+    a.href = 'data:application/x-bat,' + encodeURI(filedata);
+    a.download = "uninstall_jekyllserve.bat";
+    a.click();
 }
 
 function selectTheme() {
@@ -265,8 +399,8 @@ function attachments() {
                 return function(evt) {
                     var fname = file.name;
                     var fext = fname.toLowerCase().split(".").pop();
-                    var storage = document.getElementById('rsrc-storage').value;
-                    var type = document.getElementById('rsrc-type').value;
+                    var storage = document.getElementById('attachment-location').value;
+                    var type = document.getElementById('attachment-type').value;
                     var hashing = document.querySelector('input[name="hashing"]:checked').value;
 
                     // Set sub-directory path
@@ -434,6 +568,37 @@ function openfile() {
     } else {
         input.click();
     }
+}
+
+function runJekyll() {
+    var localhost_port = document.getElementById("localhost-port").value;
+    if (!localhost_port) {
+        alert("Invalid localhost port!");
+        return;
+    }
+
+    chrome.runtime.sendNativeMessage("jekyllserve" + localhost_port, { text: "" }, function(response) {
+        if (!response) {
+            var lastError = chrome.runtime.lastError;
+            if (lastError) {
+                console.log(lastError);
+                if (lastError.message == "Access to the specified native messaging host is forbidden.") {
+                    // Do nothing
+                    alert("Invalid \"allowed_origins\" value in manifest JSON file!\nRe-install JekyllServe.");
+                    openSettings();
+                } else if (lastError.message == "Specified native messaging host not found.") {
+                    // Not found host application
+                    alert("Not found host application!\nInstall JekyllServe with port " + localhost_port + ".");
+                    openSettings();
+                } else if (lastError.message == "Error when communicating with the native messaging host.") {
+                    // Disconnected
+                } else {
+                    // Do nothing
+                    alert("Unknown error occurred!");
+                }
+            }
+        }
+    });
 }
 
 function savefile() {

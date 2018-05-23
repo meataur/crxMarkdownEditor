@@ -6471,8 +6471,8 @@ function onDrop(e) {
           return function(evt) {
             var fname = file.name;
             var fext = fname.toLowerCase().split(".").pop();
-            var storage = document.getElementById('rsrc-storage').value;
-            var type = document.getElementById('rsrc-type').value;
+            var storage = document.getElementById('attachment-location').value;
+            var type = document.getElementById('attachment-type').value;
             var hashing = document.querySelector('input[name="hashing"]:checked').value;
 
             // Set sub-directory path

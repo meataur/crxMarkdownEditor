@@ -15,6 +15,8 @@ a { color: rgba(112, 98, 251, .9); }
 a:hover { color: rgba(112, 98, 251, .7); }
 a:active { color: rgba(112, 98, 251, 1); }
 
+overlay { user-select: none; }
+
 /* Header */
 header { display: block; padding: .4em; border-bottom: solid 1px #eee; user-select: none; }
 #svg-logo { display: inline-block; width: 2em; height: 2em; }
@@ -36,31 +38,41 @@ editor>textarea { width: 100%; border: none; resize: vertical; font-family: 'con
 /* Footer */
 footer { padding: 2px 2px 0px 2px; height: 2.2em; user-select: none; }
 footer:after { content: ''; display: table; clear: both; }
-#btn-saveasfile { float: right; margin-left: .4em; padding: .4em .6em; height: 100%; border: none; background: rgba(238, 97, 80, .9); color: #fff; }
-#btn-saveasfile:hover { background: rgba(238, 97, 80, .8); }
-#btn-saveasfile:active { background: rgba(238, 97, 80, 1); }
+
+#btn-run-jekyllserve { visibility: visible; float: left; margin-right: 2px; padding: .4em .6em; height: 100%; border: none; background: rgba(238, 97, 80, .9); color: #fff; }
+#btn-run-jekyllserve:hover { background: rgba(238, 97, 80, .8); }
+#btn-run-jekyllserve:active { background: rgba(238, 97, 80, 1); }
+
+#btn-setup-jekyllserve { visibility: visible; float: left; margin-right: 2px; padding: .4em .6em; height: 100%; border: none; background: rgba(62, 138, 226, .9); color: #fff; }
+#btn-setup-jekyllserve:hover { background: rgba(62, 138, 226, .8); }
+#btn-setup-jekyllserve:active { background: rgba(62, 138, 226, 1); }
+
+#btn-saveasfile { float: right; margin-left: 2px; padding: .4em .6em; height: 100%; border: none; background: rgba(52, 168, 83, .9); color: #fff; }
+#btn-saveasfile:hover { background: rgba(52, 168, 83, .8); }
+#btn-saveasfile:active { background: rgba(52, 168, 83, 1); }
 #btn-saveasfile .svg-btn { stroke-width: 2px; }
 
 /* Overlay */
 overlay { position: fixed; display: none; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255, 255, 255,.7); z-index: 100; }
 .modal { position: absolute; display: none; top: 50%; left: 50%; padding: 20px; background-color: #eee;
     box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px; transform: translate(-50%, -50%); }
-settings { width: 420px; height: 260px; }
+settings { width: 410px; height: 425px; }
 
-section { display: block; margin-bottom: 1.5em; }
-sectionlabel { display: block; margin-bottom: .3em; font-size: 1.2em; font-weight: 700; user-select: none; }
+section { display: block; margin-bottom: 1.6em; }
+sectionlabel { display: block; margin-bottom: .3em; font-size: 1.2em; font-weight: 700; }
 
-subsection { display: block; margin-bottom: .5em; }
-subsectionlabel { display: block; margin-bottom: .3em; font-size: 1.1em; font-weight: 400; user-select: none; }
-inlinesubsectionlabel { display: inline-block; margin-bottom: .3em; font-size: 1.1em; font-weight: 400; user-select: none; }
+subsection { display: block; margin: .6em 0; }
+subsection > button { padding: .2em .4em; }
+subsectionlabel { display: block; margin: .3em 0; font-size: 1.1em; font-weight: 500; }
+inlinesubsectionlabel { display: inline-block; font-size: 1.1em; font-weight: 500; }
 subsectionvalue { display: flex; overflow: hidden; }
 
 input[type="text"] { flex: 1; padding: .3em; font-family: 'consolas'; border: solid 1px #ccc; border-radius: 2px; }
 input[type="radio"] { display: inline-block; height: 1.4em; line-height: 1.4em; vertical-align: top; }
-label { display: inline-block; padding: 0 1em 0 .3em; height: 1.4em; line-height: 1.4em; vertical-align: top; user-select: none; }
+label { display: inline-block; padding: 0 1em 0 .3em; height: 1.4em; line-height: 1.4em; vertical-align: top; }
 
 /* Info */
-info { width: 380px; height: 250px; user-select: none; }
+info { width: 380px; height: 250px; }
 maker { display: block; margin-bottom: .3em; text-align: right; }
 item { display: block; margin: 1em 0 .3em 0; font-weight: 700; }
 li { margin-left: 2em; }

@@ -83,19 +83,20 @@
     <div id="txt-logo" class="apptitle"></div>
 </header>
 <toolbox>
-    <button id="btn-tool-new" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-empty"></use></svg> <btnlabel>New</btnlabel></button>
-    <button id="btn-tool-open" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-open"></use></svg> <btnlabel>Open</btnlabel></button>
-    <button id="btn-tool-attachment" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-attachment"></use></svg> <btnlabel>Attachment</btnlabel></button>
-    <button id="btn-tool-formatting" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg> <btnlabel>Auto Formatting</btnlabel></button>
-    <button id="btn-tool-resettime" class="left" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg> <btnlabel>Reset Datetime</btnlabel></button>
-    <button id="btn-tool-info" class="right" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-info"></use></svg> <btnlabel>Info</btnlabel></button>
-    <button id="btn-tool-settings" class="right" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg> <btnlabel>Settings</btnlabel></button>
+    <button type="button" id="btn-tool-new" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-empty"></use></svg> <btnlabel>New</btnlabel></button>
+    <button type="button" id="btn-tool-open" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-open"></use></svg> <btnlabel>Open</btnlabel></button>
+    <button type="button" id="btn-tool-attachment" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-attachment"></use></svg> <btnlabel>Attachment</btnlabel></button>
+    <button type="button" id="btn-tool-formatting" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg> <btnlabel>Auto Formatting</btnlabel></button>
+    <button type="button" id="btn-tool-resettime" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg> <btnlabel>Reset Datetime</btnlabel></button>
+    <button type="button" id="btn-tool-info" class="right"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-info"></use></svg> <btnlabel>Info</btnlabel></button>
+    <button type="button" id="btn-tool-settings" class="right"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg> <btnlabel>Settings</btnlabel></button>
 </toolbox>
 <editor>
     <textarea spellcheck="false"></textarea>
 </editor>
 <footer>
-    <button id="btn-saveasfile" type="button"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-check"></use></svg> <btnlabel>Save as File</btnlabel></button>
+    <button type="button" id="btn-run-jekyllserve"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-power"></use></svg> <btnlabel>Run Jekyll</btnlabel></button>
+    <button type="button" id="btn-saveasfile"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-check"></use></svg> <btnlabel>Save as File</btnlabel></button>
 </footer>
 <overlay>
     <info class="modal">
@@ -119,7 +120,24 @@
     </info>
     <settings class="modal">
         <section>
-            <sectionlabel>Editor Configuration</sectionlabel>
+            <sectionlabel>JEKYLL EXECUTION :: LOCALHOST SETUP</sectionlabel>
+            <subsection>
+                <subsectionlabel>Working Directory Path:</subsectionlabel>
+                <subsectionvalue>
+                    <input type="text" id="working-dirpath" spellcheck="false">
+                </subsectionvalue>
+            </subsection>
+            <subsection>
+                <inlinesubsectionlabel>Localhost Port:</inlinesubsectionlabel>
+                <input type="text" id="localhost-port" spellcheck="false" maxlength="5" size="5">
+            </subsection>
+            <subsection>
+                <button type="button" id="btn-download-installer"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Installer</button>
+                <button type="button" id="btn-download-uninstaller"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Uninstaller</button>
+            </subsection>
+        </section>
+        <section>
+            <sectionlabel>EDITOR :: APPEARANCE</sectionlabel>
             <subsection>
                 <inlinesubsectionlabel>Theme: </inlinesubsectionlabel>
                 <select id="select-theme">
@@ -180,7 +198,7 @@
                 </select>
             </subsection>
             <subsection>
-                <inlinesubsectionlabel>Font size: </inlinesubsectionlabel>
+                <inlinesubsectionlabel>Font Size: </inlinesubsectionlabel>
                 <select id="select-fontsize">
                     <option>10</option>
                     <option>11</option>
@@ -197,28 +215,28 @@
             </subsection>
         </section>
         <section>
-            <sectionlabel>Resource Expression</sectionlabel>
+            <sectionlabel>EDITOR :: ATTACHMENT SYNTAX</sectionlabel>
             <subsection>
-                <subsectionlabel>Set resource path: </subsectionlabel>
+                <subsectionlabel>Location:</subsectionlabel>
                 <subsectionvalue>
-                    <input type="text" id="rsrc-storage" spellcheck="false">
+                    <input type="text" id="attachment-location" spellcheck="false">
                 </subsectionvalue>
             </subsection>
             <subsection>
-                <subsectionlabel>Classify resource types (JSON-format): </subsectionlabel>
+                <subsectionlabel>Attachment Classification (JSON-Format):</subsectionlabel>
                 <subsectionvalue>
-                    <input type="text" id="rsrc-type" spellcheck="false">
+                    <input type="text" id="attachment-type" spellcheck="false">
                 </subsectionvalue>
             </subsection>
             <subsection>
-                <subsectionlabel>Select hash function for resource renaming: </subsectionlabel>
+                <subsectionlabel>Hash Function to Avoid Filename Duplication:</subsectionlabel>
                 <subsectionvalue>
-                    <input type="radio" id="rsrc-hash-none" name="hashing" value="none"><label for="rsrc-hash-none">None</label>
-                    <input type="radio" id="rsrc-hash-md5" name="hashing" value="md5"><label for="rsrc-hash-md5">MD5</label>
-                    <input type="radio" id="rsrc-hash-sha1" name="hashing" value="sha1"><label for="rsrc-hash-sha1">SHA-1</label>
-                    <input type="radio" id="rsrc-hash-sha224" name="hashing" value="sha224"><label for="rsrc-hash-sha224">SHA-224</label>
-                    <input type="radio" id="rsrc-hash-sha256" name="hashing" value="sha256"><label for="rsrc-hash-sha256">SHA-256</label>
-                    <input type="radio" id="rsrc-hash-sha512" name="hashing" value="sha512"><label for="rsrc-hash-sha512">SHA-512</label>
+                    <input type="radio" id="hash-none" name="hashing" value="none"><label for="hash-none">None</label>
+                    <input type="radio" id="hash-md5" name="hashing" value="md5"><label for="hash-md5">MD5</label>
+                    <input type="radio" id="hash-sha1" name="hashing" value="sha1"><label for="hash-sha1">SHA-1</label>
+                    <input type="radio" id="hash-sha224" name="hashing" value="sha224"><label for="hash-sha224">SHA-224</label>
+                    <input type="radio" id="hash-sha256" name="hashing" value="sha256"><label for="hash-sha256">SHA-256</label>
+                    <input type="radio" id="hash-sha512" name="hashing" value="sha512"><label for="hash-sha512">SHA-512</label>
                 </subsectionvalue>
             </subsection>
         </section>
