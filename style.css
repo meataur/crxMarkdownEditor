@@ -11,9 +11,8 @@ svg { display: inline-flex; align-self: center; fill: currentColor; stroke: curr
 .svg-btn { display: inline-block; width: 1em; height: 1em; }
 btnlabel { display: inline-block; }
 
-a { color: rgba(112, 98, 251, .9); }
-a:hover { color: rgba(112, 98, 251, .7); }
-a:active { color: rgba(112, 98, 251, 1); }
+a { color: rgba(33, 117, 212, 0.9); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
 overlay { user-select: none; }
 
@@ -56,6 +55,7 @@ footer:after { content: ''; display: table; clear: both; }
 overlay { position: fixed; display: none; top: 0; right: 0; bottom: 0; left: 0; background: rgba(255, 255, 255,.7); z-index: 100; }
 .modal { position: absolute; display: none; top: 50%; left: 50%; padding: 20px; background-color: #eee;
     box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px; transform: translate(-50%, -50%); }
+messagebox { z-index: 2147483647; font-size: 1.1em; }
 settings { width: 410px; height: 425px; }
 
 section { display: block; margin-bottom: 1.6em; }
@@ -72,7 +72,7 @@ input[type="radio"] { display: inline-block; height: 1.4em; line-height: 1.4em; 
 label { display: inline-block; padding: 0 1em 0 .3em; height: 1.4em; line-height: 1.4em; vertical-align: top; }
 
 /* Info */
-info { width: 380px; height: 250px; }
-maker { display: block; margin-bottom: .3em; text-align: right; }
-item { display: block; margin: 1em 0 .3em 0; font-weight: 700; }
-li { margin-left: 2em; }
+info { width: 510px; height: 270px; }
+maker { display: block; margin-bottom: .3em; font-size: 1.1em; text-align: right; }
+item { display: block; margin: 1em 0 .3em 0; font-size: 1.1em; font-weight: 700; }
+li { margin-left: 2em; font-size: 1.1em; }

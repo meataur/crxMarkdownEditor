@@ -10,11 +10,11 @@ chrome.runtime.onConnect.addListener(function(port) {
                 'scrollbar': editor.getScrollInfo(),
                 'cursor': editor.getCursor(),
 
-                'working_dirpath': view.document.getElementById("working-dirpath").value.replace(/\\+$/, '') + "\\",
+                'working_dirpath': view.document.getElementById("working-dirpath").value.replace(/\\+$/, ''),
                 'localhost_port': view.document.getElementById("localhost-port").value,
                 'theme': themeselector.options[themeselector.selectedIndex].textContent,
                 'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
-                'attachment_location': view.document.getElementById('attachment-location').value.replace(/\/+$/, '') + "/",
+                'attachment_location': view.document.getElementById('attachment-location').value.replace(/\/+$/, ''),
                 'hashing': view.document.querySelector('input[name="hashing"]:checked').value
             });
 

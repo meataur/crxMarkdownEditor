@@ -6471,7 +6471,7 @@ function onDrop(e) {
           return function(evt) {
             var fname = file.name;
             var fext = fname.toLowerCase().split(".").pop();
-            var storage = document.getElementById('attachment-location').value;
+            var storage = document.getElementById('attachment-location').value.replace(/\/+$/, '');
             var type = document.getElementById('attachment-type').value;
             var hashing = document.querySelector('input[name="hashing"]:checked').value;
 
@@ -6505,7 +6505,7 @@ function onDrop(e) {
             }
 
             // Set text to insert
-            text[idx] = (file.type.startsWith("image")?"!":"")+"["+file.name+"]("+storage+subdir+fname+")";
+            text[idx] = (file.type.startsWith("image")?"!":"")+"["+file.name+"]("+storage+"/"+subdir+fname+")";
             if (idx == (n - 1)) {
               pos = clipPos(cm.doc, pos)
               var change = {from: pos, to: pos,
