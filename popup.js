@@ -103,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-tool-info').onclick = openExtensionInfo;
 
     document.getElementById('localhost-port').onkeypress = numberOnly;
+    document.getElementById('btn-download-jekyll').onclick = downloadJekyllStandalone;
     document.getElementById('btn-download-installer').onclick = downloadJekyllServeInstaller;
     document.getElementById('btn-download-uninstaller').onclick = downloadJekyllServeUninstaller;
 
@@ -247,6 +248,14 @@ function numberOnly(e) {
         if (evt.preventDefault)
             evt.preventDefault();
     }
+}
+
+function downloadJekyllStandalone() {
+    chrome.downloads.download({
+        url: "https://github.com/ChangUk/jekyll-standalone/archive/master.zip",
+        filename: "jekyll-standalone.zip",
+        conflictAction: "overwrite"
+    });
 }
 
 function downloadJekyllServeInstaller() {
@@ -666,24 +675,30 @@ function savefile() {
         filename += docHeader["title"].toLowerCase().split(" ").join("-")+".md";
 
         // Create download link element
-        var a = document.createElement("a");
-        var url = URL.createObjectURL(new Blob([data], {type: "text/x-markdown"}));
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
+        chrome.downloads.download({
+            url: URL.createObjectURL(new Blob([data], {type: "text/x-markdown"})),
+            filename: filename,
+            conflictAction: "overwrite",
+            saveAs: true
+        });
 
-        // Download document
-        if (document.createEvent) {
-            var event = document.createEvent('MouseEvents');
-            event.initEvent('click', true, true);
-            a.dispatchEvent(event);
-        } else {
-            a.click();
-        }
+        // var a = document.createElement("a");
+        // var url = URL.createObjectURL(new Blob([data], {type: "text/x-markdown"}));
+        // a.href = url;
+        // a.download = filename;
 
-        setTimeout(function() {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 0);
+        // // Download document
+        // if (document.createEvent) {
+        //     var event = document.createEvent('MouseEvents');
+        //     event.initEvent('click', true, true);
+        //     a.dispatchEvent(event);
+        // } else {
+        //     a.click();
+        // }
+
+        // setTimeout(function() {
+        //     document.body.removeChild(a);
+        //     window.URL.revokeObjectURL(url);
+        // }, 0);
     }
 }

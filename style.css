@@ -56,7 +56,7 @@ overlay { position: fixed; display: none; top: 0; right: 0; bottom: 0; left: 0; 
 .modal { position: absolute; display: none; top: 50%; left: 50%; padding: 20px; background-color: #eee;
     box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px; transform: translate(-50%, -50%); }
 messagebox { z-index: 2147483647; font-size: 1.1em; }
-settings { width: 410px; height: 425px; }
+settings { width: 410px; height: 455px; }
 
 section { display: block; margin-bottom: 1.6em; }
 sectionlabel { display: block; margin-bottom: .3em; font-size: 1.2em; font-weight: 700; }
@@ -64,7 +64,7 @@ sectionlabel { display: block; margin-bottom: .3em; font-size: 1.2em; font-weigh
 subsection { display: block; margin: .6em 0; }
 subsection > button { padding: .2em .4em; }
 subsectionlabel { display: block; margin: .3em 0; font-size: 1.1em; font-weight: 500; }
-inlinesubsectionlabel { display: inline-block; font-size: 1.1em; font-weight: 500; }
+inlinesubsectionlabel { display: inline-block; font-size: 1.1em; font-weight: 500; margin-right: .2em; }
 subsectionvalue { display: flex; overflow: hidden; }
 
 input[type="text"] { flex: 1; padding: .3em; font-family: 'consolas'; border: solid 1px #ccc; border-radius: 2px; }
