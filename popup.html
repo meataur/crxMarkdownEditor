@@ -2,8 +2,9 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <link rel="stylesheet" href="editor.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="codemirror/editor.css">
+    <link rel="stylesheet" href="codemirror/dialog/dialog.css">
     <link rel="stylesheet" href="theme/3024-day.css">
     <link rel="stylesheet" href="theme/3024-night.css">
     <link rel="stylesheet" href="theme/abcdef.css">
@@ -63,6 +64,8 @@
         .cm-s-default .cm-trailing-space-b:before {position: absolute; content: "\00B7"; color: #777;}
         .cm-s-default .cm-trailing-space-new-line:before {position: absolute; content: "\21B5"; color: #777;}
     </style>
+
+    <!-- CryptoJS -->
     <script src="cryptojs/core.js"></script>
     <script src="cryptojs/x64-core.js"></script>
     <script src="cryptojs/lib-typedarrays.js"></script>
@@ -72,9 +75,16 @@
     <script src="cryptojs/sha224.js"></script>
     <script src="cryptojs/sha512.js"></script>
     
-    <script src="editor.js"></script>
-    <script src="markdown.js"></script>
-    <script src="xml.js"></script>
+    <!-- CodeMirror -->
+    <script src="codemirror/editor.js"></script>
+    <script src="codemirror/markdown.js"></script>
+    <script src="codemirror/xml.js"></script>
+    <script src="codemirror/search/search.js"></script>
+    <script src="codemirror/search/searchcursor.js"></script>
+    <script src="codemirror/search/line-to-jump.js"></script>
+    <script src="codemirror/dialog/dialog.js"></script>
+
+    <!-- Common Script -->
     <script src="popup.js"></script>
 </head>
 <body>

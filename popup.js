@@ -394,7 +394,7 @@ function resetEditor() {
 
     if (editor) {
         // Make document template
-        var template = "---\n";
+        var template = "---\n\n";
         template += "layout: post\n";
         template += "title: \n";
         template += "date: " + getCurDatetimeString() + "\n";
@@ -480,62 +480,74 @@ function attachments() {
     }
 }
 
+var Working = Object.freeze({ "READY": {}, "HEADER": {}, "BODY": {} });
+
 function getFormattedTexts(data) {
     var formatted = "";
     var prevLine = "";
-    var isPostHeader = false;
-    var isPostBody = false;
-    var expectNewline = false;
+    var curState = Working.READY;
+    var checkHeaderItems = 0;
 
     data = data.replace(/\r/gi, "");
     var lines = data.split("\n");
     for (var i in lines) {
-        if (expectNewline) {
-            formatted += "\n";
-            prevLine = "";
-            expectNewline = false;
-            if (lines[i].length == 0)
-                continue;
-        }
-
-        // At the beginning or end of post header
-        if (lines[i] == "---" && isPostBody == false) {
-            isPostHeader = !isPostHeader;
-
-            // End of post header
-            if (isPostHeader == false) {
-                if (prevLine.length) {
-                    formatted += "\n";
-                    prevLine = "";
-                }
-                expectNewline = true;
-                isPostBody = true;
-            }
-
-            formatted += lines[i] + "\n";
-            prevLine = lines[i];
-            continue;
-        }
-
+        // Current line texts
         var curLine = lines[i];
-        if (isPostHeader) {
-            var key = curLine.split(":")[0].trim();
 
-            // Remove invalid header items
-            if (postHeaderKeys.indexOf(key) < 0)
+        // Work with current line
+        if (curState == Working.READY) {
+            if (!curLine.length)
                 continue;
-        } else if (isPostBody) {
+
+            if (curLine.startsWith("---")) {        // At the beginning of post header
+                formatted += "---\n\n";
+                prevLine = "";
+                curState = Working.HEADER;
+            }
+        } else if (curState == Working.HEADER) {
+            if (curLine.startsWith("---")) {         // At the end of post header
+                if (checkHeaderItems < postHeaderKeys.length)
+                    continue
+                if (prevLine.length)
+                    formatted += "\n";
+
+                formatted += "---\n\n";
+                prevLine = "";
+                curState = Working.BODY;
+            } else {
+                // Remove succeeding blank lines
+                if (!curLine.length && !prevLine.length)
+                    continue;
+                
+                // Remove invalid header items
+                var key = curLine.split(":")[0].trim();
+                if (postHeaderKeys.indexOf(key) < 0) {
+                    continue;
+                } else {
+                    checkHeaderItems += 1;
+                    formatted += curLine + "\n";
+                    prevLine = curLine;
+                }
+            }
+        } else if (curState == Working.BODY) {
             // Remove succeeding blank lines
-            if (curLine.length == 0 && prevLine.length == 0)
+            if (!curLine.length && !prevLine.length)
                 continue;
-        }
 
-        // Append modification
-        formatted += curLine;
-        prevLine = curLine;
-        if (i < lines.length - 1)
-            formatted += "\n";
+            if (curLine.startsWith("#") || curLine.startsWith("---") || curLine.startsWith("===") || curLine.startsWith("___")) {
+                if (prevLine.length)
+                    formatted += "\n";
+                formatted += curLine + "\n\n";
+                prevLine = "";
+            } else {
+                formatted += curLine + "\n";
+                prevLine = curLine;
+            }
+        }
     }
+
+    if (curLine.length)
+        formatted += "\n";
 
     return formatted;
 }
