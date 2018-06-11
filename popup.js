@@ -2,7 +2,6 @@
 var port = chrome.extension.connect({name: "popup"});
 var manifestData = chrome.runtime.getManifest();
 var editor = null;
-var postHeaderKeys = ["layout", "title", "date", "category", "tags"];
 
 // Do something after all contents of document loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -22,7 +21,14 @@ document.addEventListener('DOMContentLoaded', function() {
         indentWithTabs: true,
         tabSize: 4,
         extraKeys: {
-            "Enter": "newlineAndIndentContinueMarkdownList"
+            "Enter": "newlineAndIndentContinueMarkdownList",
+            "Ctrl-F": "findPersistent",
+            "Ctrl-H": "replaceAll",
+            "Ctrl-G": "jumpToLine",
+            "Shift-Ctrl-F": function() { return false; },
+            "Shift-Ctrl-G": function() { return false; },
+            "Shift-Ctrl-R": function() { return false; },
+            "Alt-G": function() { return false; }
         }
     });
 
@@ -69,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load previous work
     chrome.storage.local.get('textdata', function(result) {
         if (result.textdata) {
-            editor.setValue(getFormattedTexts(result.textdata));
+            editor.setValue(result.textdata);
         } else {
             resetEditor();
         }
@@ -483,10 +489,10 @@ function attachments() {
 var Working = Object.freeze({ "READY": {}, "HEADER": {}, "BODY": {} });
 
 function getFormattedTexts(data) {
+    var postHeader = {};
     var formatted = "";
     var prevLine = "";
     var curState = Working.READY;
-    var checkHeaderItems = 0;
 
     data = data.replace(/\r/gi, "");
     var lines = data.split("\n");
@@ -506,11 +512,8 @@ function getFormattedTexts(data) {
             }
         } else if (curState == Working.HEADER) {
             if (curLine.startsWith("---")) {         // At the end of post header
-                if (checkHeaderItems < postHeaderKeys.length)
-                    continue
                 if (prevLine.length)
                     formatted += "\n";
-
                 formatted += "---\n\n";
                 prevLine = "";
                 curState = Working.BODY;
@@ -519,12 +522,10 @@ function getFormattedTexts(data) {
                 if (!curLine.length && !prevLine.length)
                     continue;
                 
-                // Remove invalid header items
                 var key = curLine.split(":")[0].trim();
-                if (postHeaderKeys.indexOf(key) < 0) {
-                    continue;
-                } else {
-                    checkHeaderItems += 1;
+                var value = curLine.split(":")[1];
+                if (key.length) {
+                    postHeader[key] = value ? value.trim() : "";
                     formatted += curLine + "\n";
                     prevLine = curLine;
                 }
@@ -534,7 +535,7 @@ function getFormattedTexts(data) {
             if (!curLine.length && !prevLine.length)
                 continue;
 
-            if (curLine.startsWith("#") || curLine.startsWith("---") || curLine.startsWith("===") || curLine.startsWith("___")) {
+            if (curLine.startsWith("#")) {
                 if (prevLine.length)
                     formatted += "\n";
                 formatted += curLine + "\n\n";

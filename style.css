@@ -72,7 +72,16 @@ input[type="radio"] { display: inline-block; height: 1.4em; line-height: 1.4em; 
 label { display: inline-block; padding: 0 1em 0 .3em; height: 1.4em; line-height: 1.4em; vertical-align: top; }
 
 /* Info */
-info { width: 510px; height: 270px; }
+info { width: 510px; height: 385px; }
 maker { display: block; margin-bottom: .3em; font-size: 1.1em; text-align: right; }
 item { display: block; margin: 1em 0 .3em 0; font-size: 1.1em; font-weight: 700; }
 li { margin-left: 2em; font-size: 1.1em; }
+
+kbd {
+    display: inline-block;
+    margin: 0; padding: 0 .4em;
+    border: 1px solid rgba(63,63,63,.25); border-radius: 3px; box-shadow: 0 1px 0 rgba(63,63,63,.25);
+    background-color: #fff; color: #333; font-size: .9em; white-space: nowrap;
+    user-select: none;
+}
+kbd:hover { background-color: #f7f7f7; }

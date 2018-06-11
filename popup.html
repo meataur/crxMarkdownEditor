@@ -3,8 +3,11 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" href="style.css">
+
     <link rel="stylesheet" href="codemirror/editor.css">
     <link rel="stylesheet" href="codemirror/dialog/dialog.css">
+    <link rel="stylesheet" href="codemirror/search/matchesonscrollbar.css">
+
     <link rel="stylesheet" href="theme/3024-day.css">
     <link rel="stylesheet" href="theme/3024-night.css">
     <link rel="stylesheet" href="theme/abcdef.css">
@@ -81,7 +84,9 @@
     <script src="codemirror/xml.js"></script>
     <script src="codemirror/search/search.js"></script>
     <script src="codemirror/search/searchcursor.js"></script>
-    <script src="codemirror/search/line-to-jump.js"></script>
+    <script src="codemirror/search/jump-to-line.js"></script>
+    <script src="codemirror/scroll/annotatescrollbar.js"></script>
+    <script src="codemirror/search/matchesonscrollbar.js"></script>
     <script src="codemirror/dialog/dialog.js"></script>
 
     <!-- Common Script -->
@@ -122,6 +127,14 @@
                 <li>Enable easy blog-posting through browser setting to ask where to save file before downloading.</li>
                 <li>Jekyll standalone installer is available at <a href="https://github.com/ChangUk/jekyll-standalone" target="_blank">github.com/ChangUk/jekyll-standalone</a>.</li>
             </ul>
+            <item>Keyboard Shortcuts</item>
+            <ul>
+                <li>Find text matches: <kbd>Ctrl</kbd> + <kbd>F</kbd></li>
+                <li>Find next: <kbd>Enter</kbd></li>
+                <li>Find previous: <kbd>Shift</kbd> + <kbd>Enter</kbd></li>
+                <li>Replace all: <kbd>Ctrl</kbd> + <kbd>H</kbd></li>
+                <li>Jump to line: <kbd>Alt</kbd> + <kbd>G</kbd></li>
+            </ul>
             <item>Powered by</item>
             <ul>
                 <li><a href="https://codemirror.net/" target="_blank">CodeMirror</a></li>
@@ -145,7 +158,7 @@
             </subsection>
             <subsection>
                 <inlinesubsectionlabel>Install Jekyll:</inlinesubsectionlabel>
-                <button type="button" id="btn-download-jekyll"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll-Standalone</button>
+                <button type="button" id="btn-download-jekyll"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll-Standalone</button> (v3.7.3)
             </subsection>
             <subsection>
                 <inlinesubsectionlabel>Install JekyllServe:</inlinesubsectionlabel>
