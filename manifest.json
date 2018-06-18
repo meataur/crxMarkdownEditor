@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Markdown Editor for Easy Blog Posting",
     "description": "This extension makes it easy for you to post markdown document for static blog generator such as Jekyll",
-    "version": "1.4.4",
+    "version": "1.5",
     "background": {
         "scripts": ["background.js"],
         "persistent": false

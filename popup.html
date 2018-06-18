@@ -89,6 +89,9 @@
     <script src="codemirror/search/matchesonscrollbar.js"></script>
     <script src="codemirror/dialog/dialog.js"></script>
 
+    <!-- Marked -->
+    <script src="marked/marked.min.js"></script>
+
     <!-- Common Script -->
     <script src="popup.js"></script>
 </head>
@@ -97,21 +100,26 @@
     <svg id="svg-logo"><use xlink:href="images/md.svg#icon-md"></use></svg>
     <div id="txt-logo" class="apptitle"></div>
 </header>
-<toolbox>
-    <button type="button" id="btn-tool-new" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-empty"></use></svg> <btnlabel>New</btnlabel></button>
-    <button type="button" id="btn-tool-open" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-open"></use></svg> <btnlabel>Open</btnlabel></button>
-    <button type="button" id="btn-tool-attachment" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-attachment"></use></svg> <btnlabel>Attachment</btnlabel></button>
-    <button type="button" id="btn-tool-formatting" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg> <btnlabel>Auto Formatting</btnlabel></button>
-    <button type="button" id="btn-tool-resettime" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg> <btnlabel>Reset Datetime</btnlabel></button>
-    <button type="button" id="btn-tool-info" class="right"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-info"></use></svg> <btnlabel>Info</btnlabel></button>
-    <button type="button" id="btn-tool-settings" class="right"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg> <btnlabel>Settings</btnlabel></button>
-</toolbox>
-<editor>
-    <textarea spellcheck="false"></textarea>
-</editor>
+<content>
+    <toolbox>
+        <button type="button" id="btn-tool-new" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-empty"></use></svg> <btnlabel>New</btnlabel></button>
+        <button type="button" id="btn-tool-open" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-open"></use></svg> <btnlabel>Open</btnlabel></button>
+        <button type="button" id="btn-tool-attachment" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-attachment"></use></svg> <btnlabel>Attachment</btnlabel></button>
+        <button type="button" id="btn-tool-prettify" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg> <btnlabel>Prettify</btnlabel></button>
+        <button type="button" id="btn-tool-resettime" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg> <btnlabel>Reset Datetime</btnlabel></button>
+        <button type="button" id="btn-tool-info" class="right"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-info"></use></svg> <btnlabel>Info</btnlabel></button>
+        <button type="button" id="btn-tool-settings" class="right"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg> <btnlabel>Settings</btnlabel></button>
+    </toolbox>
+    <editor>
+        <textarea spellcheck="false"></textarea>
+    </editor>
+    <iframe id="preview"></iframe>
+</content>
 <footer>
     <button type="button" id="btn-run-jekyllserve"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-power"></use></svg> <btnlabel>Run Jekyll</btnlabel></button>
-    <button type="button" id="btn-saveasfile"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-check"></use></svg> <btnlabel>Save as File</btnlabel></button>
+    <button type="button" id="btn-saveasfile"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-check"></use></svg> <btnlabel>Save As</btnlabel></button>
+    <button type="button" id="btn-preview"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-preview"></use></svg> <btnlabel>Preview</btnlabel></button>
+    <button type="button" id="btn-edit"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-edit"></use></svg> <btnlabel>Editor</btnlabel></button>
 </footer>
 <overlay>
     <messagebox class="modal"></messagebox>
@@ -135,10 +143,11 @@
                 <li>Replace all: <kbd>Ctrl</kbd> + <kbd>H</kbd></li>
                 <li>Jump to line: <kbd>Alt</kbd> + <kbd>G</kbd></li>
             </ul>
-            <item>Powered by</item>
+            <item>Dependents</item>
             <ul>
                 <li><a href="https://codemirror.net/" target="_blank">CodeMirror</a></li>
                 <li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
+                <li><a href="https://marked.js.org" target="_blank">Marked.js</a></li>
                 <li><a href="https://icomoon.io" target="_blank">IcoMoon</a></li>
             </ul>
         </section>
@@ -157,11 +166,12 @@
                 <input type="text" id="localhost-port" spellcheck="false" maxlength="5" size="5">
             </subsection>
             <subsection>
-                <inlinesubsectionlabel>Install Jekyll:</inlinesubsectionlabel>
-                <button type="button" id="btn-download-jekyll"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll-Standalone</button> (v3.7.3)
+                <inlinesubsectionlabel>Jekyll Setup:</inlinesubsectionlabel>
+                <button type="button" id="btn-download-ruby"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> RubyInstaller</button>
+                <button type="button" id="btn-download-jekyll"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll-Standalone v3.7.3</button>
             </subsection>
             <subsection>
-                <inlinesubsectionlabel>Install JekyllServe:</inlinesubsectionlabel>
+                <inlinesubsectionlabel>JekyllServe Installation:</inlinesubsectionlabel>
                 <button type="button" id="btn-download-installer"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Installer</button>
                 <button type="button" id="btn-download-uninstaller"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Uninstaller</button>
             </subsection>

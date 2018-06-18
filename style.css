@@ -21,6 +21,9 @@ header { display: block; padding: .4em; border-bottom: solid 1px #eee; user-sele
 #svg-logo { display: inline-block; width: 2em; height: 2em; }
 #txt-logo { display: inline-block; margin-left: .4em; font-size: 1.2em; }
 
+/* Content */
+content { display: block; position: relative; border-bottom: solid 1px #eee; }
+
 /* Toolbox */
 toolbox { display: block; padding: 0; border-bottom: solid 1px #eee; user-select: none; }
 toolbox > button { margin: 0; padding: .2em .5em; height: 2em; border: none; background-color: #fff; }
@@ -31,22 +34,34 @@ toolbox > button.right { float: right; border-left: solid 1px #eee; }
 toolbox:after { content: ''; display: table; clear: both; visibility: hidden; }
 
 /* Editor */
-editor { display: block; border-bottom: solid 1px #eee; }
-editor>textarea { width: 100%; border: none; resize: vertical; font-family: 'consolas'; }
+editor { display: block; }
+editor > textarea { width: 100%; border: none; resize: vertical; font-family: 'consolas'; }
+
+/* Preview */
+#preview {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+    visibility: hidden; border: none;
+    background-color: #fff; z-index: 10; overflow-x: hidden; overflow-y: auto;
+}
 
 /* Footer */
 footer { padding: 2px 2px 0px 2px; height: 2.2em; user-select: none; }
 footer:after { content: ''; display: table; clear: both; }
 
-#btn-run-jekyllserve { visibility: visible; float: left; margin-right: 2px; padding: .4em .6em; height: 100%; border: none; background: rgba(238, 97, 80, .9); color: #fff; }
+#btn-run-jekyllserve { float: left; margin-right: 2px; padding: .4em .6em; width: 95px; height: 100%; border: none; background: rgba(238, 97, 80, .9); color: #fff; }
 #btn-run-jekyllserve:hover { background: rgba(238, 97, 80, .8); }
 #btn-run-jekyllserve:active { background: rgba(238, 97, 80, 1); }
 
-#btn-setup-jekyllserve { visibility: visible; float: left; margin-right: 2px; padding: .4em .6em; height: 100%; border: none; background: rgba(62, 138, 226, .9); color: #fff; }
-#btn-setup-jekyllserve:hover { background: rgba(62, 138, 226, .8); }
-#btn-setup-jekyllserve:active { background: rgba(62, 138, 226, 1); }
+#btn-preview { float: right; margin-left: 2px; padding: .4em .6em; width: 95px; height: 100%; border: none; background: rgba(62, 138, 226, .9); color: #fff; }
+#btn-preview:hover { background: rgba(62, 138, 226, .8); }
+#btn-preview:active { background: rgba(62, 138, 226, 1); }
+#btn-preview .svg-btn { stroke-width: 1px; }
 
-#btn-saveasfile { float: right; margin-left: 2px; padding: .4em .6em; height: 100%; border: none; background: rgba(52, 168, 83, .9); color: #fff; }
+#btn-edit { display: none; float: right; margin-left: 2px; padding: .4em .6em; width: 95px; height: 100%; border: none; background: rgba(62, 138, 226, .9); color: #fff; }
+#btn-edit:hover { background: rgba(62, 138, 226, .8); }
+#btn-edit:active { background: rgba(62, 138, 226, 1); }
+
+#btn-saveasfile { float: right; margin-left: 2px; padding: .4em .6em; width: 95px; height: 100%; border: none; background: rgba(52, 168, 83, .9); color: #fff; }
 #btn-saveasfile:hover { background: rgba(52, 168, 83, .8); }
 #btn-saveasfile:active { background: rgba(52, 168, 83, 1); }
 #btn-saveasfile .svg-btn { stroke-width: 2px; }
@@ -72,7 +87,7 @@ input[type="radio"] { display: inline-block; height: 1.4em; line-height: 1.4em; 
 label { display: inline-block; padding: 0 1em 0 .3em; height: 1.4em; line-height: 1.4em; vertical-align: top; }
 
 /* Info */
-info { width: 510px; height: 385px; }
+info { width: 510px; height: 400px; }
 maker { display: block; margin-bottom: .3em; font-size: 1.1em; text-align: right; }
 item { display: block; margin: 1em 0 .3em 0; font-size: 1.1em; font-weight: 700; }
 li { margin-left: 2em; font-size: 1.1em; }
@@ -85,3 +100,4 @@ kbd {
     user-select: none;
 }
 kbd:hover { background-color: #f7f7f7; }
+kbd:active { box-shadow: none; transform: translateY(1px); }

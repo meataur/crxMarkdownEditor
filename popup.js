@@ -102,13 +102,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-tool-new').onclick = resetEditor;
     document.getElementById('btn-tool-open').onclick = openfile;
     document.getElementById('btn-tool-attachment').onclick = attachments;
-    document.getElementById('btn-tool-formatting').onclick = formatting;
+    document.getElementById('btn-tool-prettify').onclick = prettify;
     document.getElementById('btn-tool-resettime').onclick = resetPostingTime;
 
     document.getElementById('btn-tool-settings').onclick = openSettings;
     document.getElementById('btn-tool-info').onclick = openExtensionInfo;
 
     document.getElementById('localhost-port').onkeypress = numberOnly;
+    document.getElementById('btn-download-ruby').onclick = downloadRuby;
     document.getElementById('btn-download-jekyll').onclick = downloadJekyllStandalone;
     document.getElementById('btn-download-installer').onclick = downloadJekyllServeInstaller;
     document.getElementById('btn-download-uninstaller').onclick = downloadJekyllServeUninstaller;
@@ -117,6 +118,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('select-fontsize').onchange = selectFontsize;
     
     document.getElementById('btn-run-jekyllserve').onclick = runJekyll;
+    document.getElementById('btn-preview').onclick = preview;
+    document.getElementById('btn-edit').onclick = hidePreview;
     document.getElementById('btn-saveasfile').onclick = savefile;
 
     // Set overlay handler
@@ -254,6 +257,10 @@ function numberOnly(e) {
         if (evt.preventDefault)
             evt.preventDefault();
     }
+}
+
+function downloadRuby() {
+    chrome.tabs.create({ url: "https://rubyinstaller.org/downloads/" });
 }
 
 function downloadJekyllStandalone() {
@@ -488,9 +495,13 @@ function attachments() {
 
 var Working = Object.freeze({ "READY": {}, "HEADER": {}, "BODY": {} });
 
-function getFormattedTexts(data) {
-    var postHeader = {};
-    var formatted = "";
+function parse(data) {
+    var parsed = {}
+    parsed["header"] = {};
+    parsed["body"] = {};
+    parsed.body["hierarchy"] = "";
+    parsed.body["texts"] = "";
+
     var prevLine = "";
     var curState = Working.READY;
 
@@ -502,61 +513,73 @@ function getFormattedTexts(data) {
 
         // Work with current line
         if (curState == Working.READY) {
+            curLine = curLine.trim();
             if (!curLine.length)
                 continue;
 
             if (curLine.startsWith("---")) {        // At the beginning of post header
-                formatted += "---\n\n";
-                prevLine = "";
                 curState = Working.HEADER;
             }
         } else if (curState == Working.HEADER) {
-            if (curLine.startsWith("---")) {         // At the end of post header
-                if (prevLine.length)
-                    formatted += "\n";
-                formatted += "---\n\n";
-                prevLine = "";
+            curLine = curLine.trim();
+            if (!curLine.length)
+                continue;
+
+            if (curLine.startsWith("---")) {        // At the end of post header
                 curState = Working.BODY;
             } else {
-                // Remove succeeding blank lines
-                if (!curLine.length && !prevLine.length)
-                    continue;
-                
+                // Save key-value pair of post header
                 var key = curLine.split(":")[0].trim();
-                var value = curLine.split(":")[1];
-                if (key.length) {
-                    postHeader[key] = value ? value.trim() : "";
-                    formatted += curLine + "\n";
-                    prevLine = curLine;
-                }
+                var value = curLine.split(":").slice(1).join(":").trim().replace(/ +/g, ' ');
+                if (key.length)
+                    parsed.header[key] = value;
             }
         } else if (curState == Working.BODY) {
             // Remove succeeding blank lines
+            curLine = curLine.trimEnd();
             if (!curLine.length && !prevLine.length)
                 continue;
 
             if (curLine.startsWith("#")) {
-                if (prevLine.length)
-                    formatted += "\n";
-                formatted += curLine + "\n\n";
+                var heading = curLine.replace(/^#+/g, '').trim();
+                if (heading.length) {
+                    var level = (curLine.match(/#/g) || []).length;
+                    // TODO: make headings hierarchy
+                }
+                parsed.body["texts"] += curLine + "\n\n";
                 prevLine = "";
             } else {
-                formatted += curLine + "\n";
+                parsed.body["texts"] += curLine + "\n";
                 prevLine = curLine;
             }
         }
     }
 
-    if (curLine.length)
-        formatted += "\n";
+    // Remove succeeding newlines
+    parsed.body["texts"] = parsed.body["texts"].replace(/\n+$/g, '\n');
 
-    return formatted;
+    return parsed;
 }
 
-function formatting() {
+function getPrettified(data) {
+    // Parse data
+    var parsed = parse(data);
+    var prettified = "---\n\n";
+
+    // Write header
+    for (var key in parsed.header)
+        prettified += key + ": " + parsed.header[key] + "\n";
+
+    // Write body
+    prettified += "\n---\n\n" + parsed.body.texts;
+
+    return prettified;
+}
+
+function prettify() {
     if (editor) {
         var data = editor.getValue();
-        editor.setValue(getFormattedTexts(data));
+        editor.setValue(getPrettified(data));
     }
 }
 
@@ -596,7 +619,7 @@ function openfile() {
         var reader = new FileReader();
         reader.onload = function(evt) {
             if (evt.target.readyState == FileReader.DONE) {
-                editor.setValue(getFormattedTexts(evt.target.result));
+                editor.setValue(evt.target.result);
                 editor.focus();
                 editor.setCursor(0, 0);
             }
@@ -652,6 +675,42 @@ function runJekyll() {
     xhr.send();
 }
 
+function hidePreview() {
+    document.getElementById("btn-preview").style.display = "block";
+    document.getElementById("btn-edit").style.display = "none";
+
+    // Hide preview panel
+    var ifrm = document.getElementById("preview");
+    ifrm.style.visibility = "hidden";
+}
+
+function preview() {
+    document.getElementById("btn-preview").style.display = "none";
+    document.getElementById("btn-edit").style.display = "block";
+
+    if (editor) {
+        var parsed = parse(editor.getValue());
+        var data = "";
+        if (parsed.header.title.length)
+            data += "# " + parsed.header.title + "\n\n";
+        if (parsed.body.texts.length)
+            data += parsed.body.texts;
+        
+        // Show preview panel
+        var ifrm = document.getElementById("preview");
+        ifrm.contentDocument.head.innerHTML += "<meta charset='utf-8'>";
+        ifrm.contentDocument.head.innerHTML += "<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
+        ifrm.contentDocument.head.innerHTML += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+        ifrm.contentDocument.head.innerHTML += "<link rel='stylesheet' href='preview/preview.css'>";
+        ifrm.contentDocument.head.innerHTML += "<script type='text/javascript' src='preview/jquery/3.3.1/jquery.min.js'></script>";
+        ifrm.contentDocument.head.innerHTML += "<link rel='stylesheet' href='preview/font-awesome/4.7.0/css/font-awesome.min.css'>";
+        ifrm.contentDocument.head.innerHTML += "<script type='text/x-mathjax-config' src='preview/preview.js'></script>";
+        ifrm.contentDocument.head.innerHTML += "<script type='text/javascript' async src='preview/mathjax/2.7.4/MathJax.js'></script>";
+        ifrm.contentDocument.body.innerHTML = marked(data);
+        ifrm.style.visibility = "visible";
+    }
+}
+
 function savefile() {
     if (editor) {
         // Read editor's content
@@ -682,7 +741,7 @@ function savefile() {
         if (docHeader["date"])
             filename += docHeader["date"].split(" ")[0]+"-";
         if (docHeader["title"].length == 0) {
-            messageBox("Unable to save file.\nDocument title is empty.");
+            messageBox("Unable to save as file.\nDocument title is empty.");
             return;
         }
         filename += docHeader["title"].toLowerCase().split(" ").join("-")+".md";
