@@ -1,32 +1,64 @@
-chrome.runtime.onConnect.addListener(function(port) {
-    port.onDisconnect.addListener(function() {
-        var view = chrome.extension.getViews({ type: "popup" })[0];
-        var themeselector = view.document.getElementById("select-theme");
-        var fontsizeselector = view.document.getElementById("select-fontsize");
-        var editor = view.document.getElementsByClassName("CodeMirror")[0].CodeMirror;
-        if (editor.getValue().length > 0) {
-            chrome.storage.local.set({
-                'textdata': editor.getValue(),
-                'scrollbar': editor.getScrollInfo(),
-                'cursor': editor.getCursor(),
+chrome.browserAction.onClicked.addListener(function(tab) {
+    chrome.tabs.query({ url: chrome.extension.getURL("index.html") }, function(tabs) {
+        if (tabs.length > 0) {
+            // The extension was already opened in browser, make it active
+            chrome.tabs.update(tabs[0].id, { active: true });
+        } else {
+            // Create a new tab for the extension
+            chrome.tabs.create({ url: "index.html", index: tab.index + 1 }, function(newtab) {
+                chrome.tabs.onRemoved.addListener(function(tabId, info) {
+                    if (tabId === newtab.id) {
+                        var view = chrome.extension.getViews({ type: "tab" })[0];
+                        var editor = view.document.getElementsByClassName("CodeMirror")[0].CodeMirror;
 
-                'working_dirpath': view.document.getElementById("working-dirpath").value.replace(/\\+$/, ''),
-                'localhost_port': view.document.getElementById("localhost-port").value,
-                'theme': themeselector.options[themeselector.selectedIndex].textContent,
-                'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
-                'attachment_location': view.document.getElementById('attachment-location').value.replace(/\/+$/, ''),
-                'hashing': view.document.querySelector('input[name="hashing"]:checked').value
-            });
+                        // Find current active tab index and set its data
+                        chrome.storage.local.get("documents", function(result) {
+                            if (result.documents) {
+                                var docs = result.documents;
+                                var tabs = view.document.getElementsByClassName("tab");
+                                for (var i = 0; i < tabs.length - 1; i++) {
+                                    if (tabs[i].hasAttribute("active")) {
+                                        // Update active document data
+                                        docs[i] = {
+                                            last_modified: docs[i].last_modified,
+                                            texts: editor.getValue(),
+                                            scrollbar: editor.getScrollInfo(),
+                                            cursor: editor.getCursor(),
+                                            active: true
+                                        };
 
-            try {
-                // JSON parsing test
-                JSON.parse(document.getElementById('attachment-type').value);
+                                        // Save previous works
+                                        chrome.storage.local.set({ documents: docs });
+                                        break;
+                                    }
+                                }
+                            }
+                        });
 
-                chrome.storage.local.set({
-                    'attachment_type': view.document.getElementById('attachment-type').value.split(' ').join('')
+                        // Save setting values
+                        var themeselector = view.document.getElementById("select-theme");
+                        var fontsizeselector = view.document.getElementById("select-fontsize");
+                        chrome.storage.local.set({
+                            'working_dirpath': view.document.getElementById("working-dirpath").value.replace(/\\+$/, ''),
+                            'localhost_port': view.document.getElementById("localhost-port").value,
+                            'theme': themeselector.options[themeselector.selectedIndex].textContent,
+                            'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
+                            'attachment_location': view.document.getElementById('attachment-location').value.replace(/\/+$/, ''),
+                            'hashing': view.document.querySelector('input[name="hashing"]:checked').value
+                        });
+
+                        try {
+                            // JSON parsing test
+                            JSON.parse(view.document.getElementById('attachment-type').value);
+                            chrome.storage.local.set({
+                                'attachment_type': view.document.getElementById('attachment-type').value.split(' ').join('')
+                            });
+                        } catch (err) {
+                            console.log(err);
+                        }
+                    }
                 });
-            } catch(e) {
-            }
+            });
         }
     });
 });

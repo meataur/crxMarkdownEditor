@@ -1,14 +1,14 @@
 {
     "manifest_version": 2,
-    "name": "Markdown Editor for Easy Blog Posting",
+    "name": "mdEditor",
     "description": "This extension makes it easy for you to post markdown document for static blog generator such as Jekyll",
-    "version": "1.5",
+    "version": "2.0",
+    "offline_enabled": true,
     "background": {
         "scripts": ["background.js"],
         "persistent": false
     },
     "browser_action": {
-        "default_popup": "popup.html",
         "default_icon": {
             "16": "images/md16.png",
             "32": "images/md32.png",
@@ -16,7 +16,12 @@
             "128": "images/md128.png"
         }
     },
+    "icons": {
+        "16": "images/md16.png",
+        "128": "images/md128.png"
+    },
     "permissions": [
+        "tabs",
         "storage",
         "downloads",
         "nativeMessaging",

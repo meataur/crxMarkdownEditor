@@ -1,14 +1,17 @@
-// Connect to background.js
-var port = chrome.extension.connect({name: "popup"});
 var manifestData = chrome.runtime.getManifest();
 var editor = null;
 
-// Do something after all contents of document loaded
+var docs = [];
+var justTabCreated = false;
+var prevTabIdx = -1;
+
+var isPanelResizing = false;
+
 document.addEventListener('DOMContentLoaded', function() {
     // Fill extension title into the app title division
-    var appTitleDivs = document.getElementsByClassName("apptitle");
+    var appTitleDivs = document.getElementsByClassName("appname");
     for (var i = 0; i < appTitleDivs.length; i++)
-        appTitleDivs[i].innerHTML = manifestData.name + " v" + manifestData.version;
+        appTitleDivs[i].innerHTML = manifestData.name; // + " v" + manifestData.version;
 
     // Create markdown editor
     var textarea = document.getElementsByTagName('textarea')[0];
@@ -17,6 +20,8 @@ document.addEventListener('DOMContentLoaded', function() {
         highlightFormatting: true,
         lineNumbers: true,
         lineWrapping: true,
+        styleActiveLine: true,
+        styleActiveSelected: true,
         indentUnit: 4,
         indentWithTabs: true,
         tabSize: 4,
@@ -25,88 +30,80 @@ document.addEventListener('DOMContentLoaded', function() {
             "Ctrl-F": "findPersistent",
             "Ctrl-H": "replaceAll",
             "Ctrl-G": "jumpToLine",
-            "Shift-Ctrl-F": function() { return false; },
+            "Shift-Ctrl-H": "replace",
             "Shift-Ctrl-G": function() { return false; },
             "Shift-Ctrl-R": function() { return false; },
             "Alt-G": function() { return false; }
         }
     });
+    editor.on("change", function(evt) {
+        var parsed = parse(editor.getValue());
+        var tabs = document.getElementsByClassName("tab");
+        for (var i = 0; i < tabs.length - 1; i++) {
+            if (tabs[i].hasAttribute("active")) {
+                // Update document title of tab
+                var docTitle = tabs[i].getElementsByClassName("doc-title")[0];
+                docTitle.innerHTML = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
 
-    // // Editting by drag-and-drop
-    // textarea.addEventListener("dragover", function(evt) {
-    //     evt.stopPropagation();
-    //     evt.preventDefault();
-    //     evt.dataTransfer.dropEffect = 'copy';
-    // }, false);
-    // textarea.addEventListener("drop", function(evt) {
-    //     evt.stopPropagation();
-    //     evt.preventDefault();
-
-    //     messageBox("drop!");
-
-    //     for (var i = 0; i < evt.dataTransfer.files.length; i++) {
-    //         var f = evt.dataTransfer.files[i];
-    //         console.log(f.name, f.type, f.size);
-    //     }
-
-    //     var file = evt.dataTransfer.files[0];
-    //     var reader = new FileReader();
-    //     reader.onload = function(e) {
-    //         editor.setValue(e.target.result);
-    //         editor.focus();
-    //         editor.setCursor(editor.lineCount(), 0);
-    //     };
-    //     reader.readAsText(file, "UTF-8");
-    // }, false);
+                // Update last modified datetime of tab
+                docs[i].last_modified = getCurDatetimeString();
+                
+                break;
+            }
+        }
+        preview(parsed);
+    });
 
     // Load settings value
     loadSettings();
+
+    // Load previous works
+    loadPrevWorks();
 
     // Check real-time JSON format
     document.getElementById('attachment-type').addEventListener('keyup', function() {
         try {
             JSON.parse(this.value);
-            this.style["background-color"] = "#fff";
+            this.style["background"] = "#fff";
         } catch(e) {
-            this.style["background-color"] = "rgb(238,97,80)";
+            this.style["background"] = "rgb(238,97,80)";
         }
     });
 
-    // Load previous work
-    chrome.storage.local.get('textdata', function(result) {
-        if (result.textdata) {
-            editor.setValue(result.textdata);
-        } else {
-            resetEditor();
-        }
-    });
+    // Enable panel splitter dragging
+    document.getElementById('gutter').onmousedown = function(evt) {
+        isPanelResizing = true;
+    };
+    document.onmouseup = function(evt) {
+        isPanelResizing = false;
+    };
+    document.onmousemove = function(evt) {
+        if (!isPanelResizing) return;
+        var container = document.getElementsByTagName("content")[0];
+        var panelEditor = document.getElementsByTagName("editor")[0];
+        var panelPreview = document.getElementsByTagName("preview")[0];
 
-    // Set scrollbar position
-    chrome.storage.local.get('scrollbar', function(result) {
-        if (result.scrollbar)
-            editor.scrollTo(result.scrollbar.left, result.scrollbar.top);
-    });
+        var offset = evt.clientX - container.offsetLeft;
+        if (offset < 350 || (container.clientWidth - offset) < 350) return;
 
-    // Set cursor position
-    chrome.storage.local.get('cursor', function(result) {
-        if (result.cursor) {
-            editor.focus();
-            editor.setCursor(result.cursor.line, result.cursor.ch);
-        } else {
-            editor.focus();
-            editor.setCursor(0, 0);
-        }
-    });
+        var ratio = offset / container.clientWidth * 100;
+        panelEditor.style.width = "calc(" + ratio + "% - 0.5px)";
+        panelPreview.style.width = "calc(" + (100 - ratio) + "% - 0.5px)";
+    }
 
-    // Set button handler
+    // Set buttons event handler
+    document.getElementById('newtab').onclick = newTab;
+    document.getElementById('btn-info').onclick = openExtensionInfo;
+
     document.getElementById('btn-tool-new').onclick = resetEditor;
     document.getElementById('btn-tool-open').onclick = openfile;
+    document.getElementById('btn-tool-save').onclick = savefile;
+    document.getElementById('btn-tool-delete').onclick = closeTab;
     document.getElementById('btn-tool-attachment').onclick = attachments;
     document.getElementById('btn-tool-prettify').onclick = prettify;
     document.getElementById('btn-tool-resettime').onclick = resetPostingTime;
-
+    document.getElementById('btn-tool-run-jekyllserve').onclick = runJekyll;
     document.getElementById('btn-tool-settings').onclick = openSettings;
-    document.getElementById('btn-tool-info').onclick = openExtensionInfo;
 
     document.getElementById('localhost-port').onkeypress = numberOnly;
     document.getElementById('btn-download-ruby').onclick = downloadRuby;
@@ -116,11 +113,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('select-theme').onchange = selectTheme;
     document.getElementById('select-fontsize').onchange = selectFontsize;
-    
-    document.getElementById('btn-run-jekyllserve').onclick = runJekyll;
-    document.getElementById('btn-preview').onclick = preview;
-    document.getElementById('btn-edit').onclick = hidePreview;
-    document.getElementById('btn-saveasfile').onclick = savefile;
 
     // Set overlay handler
     window.onclick = function(e) {
@@ -130,6 +122,40 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementsByTagName("messagebox")[0].style.display = "none";
             document.getElementsByTagName("settings")[0].style.display = "none";
             document.getElementsByTagName("info")[0].style.display = "none";
+        }
+    }
+
+    window.onbeforeunload = function(e) {
+        saveSettings();
+
+        // Save active workspace
+        var tabs = document.getElementsByClassName("tab");
+        for (var i = 0; i < tabs.length - 1; i++) {
+            if (tabs[i].hasAttribute("active")) {
+                // Update active document data
+                docs[i] = {
+                    last_modified: docs[i].last_modified,
+                    texts: editor.getValue(),
+                    scrollbar: editor.getScrollInfo(),
+                    cursor: editor.getCursor(),
+                    active: true
+                };
+                chrome.storage.local.set({ documents: docs });
+                break;
+            }
+        }
+    }
+
+    window.onresize = function(e) {
+        var bodyWidth = parseInt(window.getComputedStyle(document.body).width);
+        var tabs = document.getElementsByClassName("tab");
+        var nTabs = tabs.length - 1;
+        var tabWidth = parseInt(window.getComputedStyle(tabs[0]).width);
+
+        console.log(bodyWidth, tabWidth);
+        if (nTabs * tabWidth )
+        for (var i = 0; i < nTabs; i++) {
+
         }
     }
 });
@@ -216,6 +242,52 @@ function saveSettings() {
     }
 }
 
+function loadPrevWorks() {
+    // Load previous workspace
+    chrome.storage.local.get("documents", function(result) {
+        if (result.documents) {
+            result.documents.forEach(function(doc) { docs.push(doc) });
+
+            if (docs.length) {
+                var ul = document.getElementById("tabs");
+                docs.forEach(function(doc) {
+                    // Parse document text data
+                    var parsed = parse(doc.texts);
+
+                    // Create new tab
+                    var divDatetime = document.createElement("div");
+                    divDatetime.className = "doc-datetime";
+                    divDatetime.innerHTML = doc.last_modified;
+                    var divTitle = document.createElement("div");
+                    divTitle.className = "doc-title";
+                    divTitle.innerHTML = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
+                    var a = document.createElement("a");
+                    a.appendChild(divDatetime);
+                    a.appendChild(divTitle);
+                    var li = document.createElement("li");
+                    li.className = "tab";
+                    if (doc.active) {
+                        li.setAttribute("active", "");
+                        editor.setValue(doc.texts);
+                        editor.scrollTo(doc.scrollbar.left, doc.scrollbar.top);
+                        editor.focus();
+                        editor.setCursor(doc.cursor.line, doc.cursor.ch);
+                    }
+                    li.appendChild(a);
+                    li.addEventListener("click", onTabClick);
+                    
+                    // Add tab
+                    ul.insertBefore(li, ul.children[ul.children.length - 1]);
+                });
+            } else {
+                newTab();
+            }
+        } else {
+            newTab();
+        }
+    });
+}
+
 function messageBox(text) {
     var info = document.getElementsByTagName("info")[0];
     info.style.display = "none";
@@ -227,6 +299,127 @@ function messageBox(text) {
     var messageBox = document.getElementsByTagName("messagebox")[0];
     messageBox.innerHTML = text.replace(/\n/g, '<br />');;
     messageBox.style.display = "block";
+}
+
+function newTab() {
+    // Save current work
+    var tabs = document.getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length - 1; i++) {
+        if (tabs[i].hasAttribute("active")) {
+            docs[i].texts = editor.getValue();
+            docs[i].scrollbar = editor.getScrollInfo(),
+            docs[i].cursor = editor.getCursor(),
+            docs[i].active = false;
+            prevTabIdx = i;
+        }
+        tabs[i].removeAttribute("active");
+    }
+
+    // Create new tab
+    var divDatetime = document.createElement("div");
+    divDatetime.className = "doc-datetime";
+    divDatetime.innerHTML = getCurDatetimeString().split(' ')[0];
+    var divTitle = document.createElement("div");
+    divTitle.className = "doc-title";
+    divTitle.innerHTML = "Untitled Document";
+    var a = document.createElement("a");
+    a.appendChild(divDatetime);
+    a.appendChild(divTitle);
+    var li = document.createElement("li");
+    li.className = "tab";
+    li.setAttribute("active", "");
+    li.appendChild(a);
+    li.addEventListener("click", onTabClick);
+    li.click();
+
+    // Add tab
+    var ul = document.getElementById("tabs");
+    ul.insertBefore(li, ul.children[ul.children.length - 1]);
+    justTabCreated = true;
+
+    // Add to document list
+    docs.push({
+        last_modified: getCurDatetimeString(),
+        texts: "",
+        cursor: "",
+        scrollbar: "",
+        active: true
+    });
+
+    // Set default format
+    resetEditor();
+}
+
+function closeTab() {
+    var tabs = document.getElementsByClassName("tab");
+    if (tabs.length === 2) {
+        resetEditor();
+        return;
+    }
+
+    // Find currently active tab
+    for (var i = 0; i < tabs.length - 1; i++) {
+        if (tabs[i].hasAttribute("active")) {
+            if (i === tabs.length - 2) {
+                if (justTabCreated) {
+                    tabs[prevTabIdx].click();
+                    justTabCreated = false;
+                } else {
+                    tabs[i - 1].click();
+                }
+            } else {
+                tabs[i + 1].click();
+            }
+
+            // Remove from document list
+            docs.splice(i, 1);
+
+            // Remove from tabs
+            var ul = document.getElementById("tabs");
+            ul.removeChild(tabs[i]);
+
+            // Save current workspace
+            chrome.storage.local.set({ "documents": docs });
+            break;
+        }
+    }
+}
+
+function onTabClick() {
+    if (this.hasAttribute("active"))
+        return;
+
+    // Save current work
+    var tabs = document.getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length - 1; i++) {
+        if (tabs[i].hasAttribute("active")) {
+            docs[i].texts = editor.getValue();
+            docs[i].scrollbar = editor.getScrollInfo();
+            docs[i].cursor = editor.getCursor();
+            docs[i].active = false;
+            prevTabIdx = i;
+        }
+        tabs[i].removeAttribute("active");
+    }
+
+    // Load selected document texts
+    this.setAttribute("active", "");
+    for (var i = 0; i < tabs.length - 1; i++) {
+        if (tabs[i].hasAttribute("active")) {
+            editor.setValue(docs[i].texts);
+            editor.scrollTo(docs[i].scrollbar.left, docs[i].scrollbar.top);
+            editor.focus();
+            editor.setCursor(docs[i].cursor.line, docs[i].cursor.ch);
+            docs[i].active = true;
+            break;
+        }
+    }
+
+    // Save current workspace
+    chrome.storage.local.set({ documents: docs });
+
+    // Release tab creation flag
+    justTabCreated = false;
 }
 
 function openExtensionInfo() {
@@ -403,8 +596,6 @@ function getCurDatetimeString() {
 }
 
 function resetEditor() {
-    chrome.storage.local.remove(['textdata', 'scrollbar', 'cursor']);
-
     if (editor) {
         // Make document template
         var template = "---\n\n";
@@ -418,6 +609,8 @@ function resetEditor() {
         editor.setValue(template);
         editor.focus();
         editor.setCursor(editor.lineCount(), 0);
+
+        preview(parse(editor.getValue()));
     }
 }
 
@@ -636,18 +829,18 @@ function openfile() {
 }
 
 function runJekyll() {
-    document.getElementById('btn-run-jekyllserve').disabled = true;
+    document.getElementById('btn-tool-run-jekyllserve').disabled = true;
     var localhost_port = document.getElementById("localhost-port").value;
     if (!localhost_port) {
         messageBox("Invalid localhost port!");
-        document.getElementById('btn-run-jekyllserve').disabled = false;
+        document.getElementById('btn-tool-run-jekyllserve').disabled = false;
         return;
     }
 
     var xhr = new XMLHttpRequest();
     xhr.addEventListener("load", function() {
         messageBox("Jekyll is now running on port " + localhost_port + ".");
-        document.getElementById('btn-run-jekyllserve').disabled = false;
+        document.getElementById('btn-tool-run-jekyllserve').disabled = false;
     });
     xhr.addEventListener("error", function() {
         chrome.runtime.sendNativeMessage("jekyllserve" + localhost_port, { text: "" }, function(response) {
@@ -668,46 +861,32 @@ function runJekyll() {
                     }
                 }
             }
-            document.getElementById('btn-run-jekyllserve').disabled = false;
+            document.getElementById('btn-tool-run-jekyllserve').disabled = false;
         });
     });
     xhr.open("GET", "http://localhost:" + localhost_port + "/", true);
     xhr.send();
 }
 
-function hidePreview() {
-    document.getElementById("btn-preview").style.display = "block";
-    document.getElementById("btn-edit").style.display = "none";
-
-    // Hide preview panel
-    var ifrm = document.getElementById("preview");
-    ifrm.style.visibility = "hidden";
-}
-
-function preview() {
-    document.getElementById("btn-preview").style.display = "none";
-    document.getElementById("btn-edit").style.display = "block";
-
+function preview(parsed) {
     if (editor) {
-        var parsed = parse(editor.getValue());
         var data = "";
-        if (parsed.header.title.length)
+        if (parsed.header.title && parsed.header.title.length)
             data += "# " + parsed.header.title + "\n\n";
         if (parsed.body.texts.length)
             data += parsed.body.texts;
         
         // Show preview panel
-        var ifrm = document.getElementById("preview");
-        ifrm.contentDocument.head.innerHTML += "<meta charset='utf-8'>";
-        ifrm.contentDocument.head.innerHTML += "<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
-        ifrm.contentDocument.head.innerHTML += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
-        ifrm.contentDocument.head.innerHTML += "<link rel='stylesheet' href='preview/preview.css'>";
-        ifrm.contentDocument.head.innerHTML += "<script type='text/javascript' src='preview/jquery/3.3.1/jquery.min.js'></script>";
-        ifrm.contentDocument.head.innerHTML += "<link rel='stylesheet' href='preview/font-awesome/4.7.0/css/font-awesome.min.css'>";
-        ifrm.contentDocument.head.innerHTML += "<script type='text/x-mathjax-config' src='preview/preview.js'></script>";
-        ifrm.contentDocument.head.innerHTML += "<script type='text/javascript' async src='preview/mathjax/2.7.4/MathJax.js'></script>";
-        ifrm.contentDocument.body.innerHTML = marked(data);
-        ifrm.style.visibility = "visible";
+        var preview = document.getElementById("preview");
+        // ifrm.innerHTML += "<meta charset='utf-8'>";
+        // ifrm.innerHTML += "<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
+        // ifrm.innerHTML += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+        // ifrm.innerHTML += "<link rel='stylesheet' href='preview/preview.css'>";
+        // ifrm.innerHTML += "<script type='text/javascript' src='preview/jquery/3.3.1/jquery.min.js'></script>";
+        // ifrm.innerHTML += "<link rel='stylesheet' href='preview/font-awesome/4.7.0/css/font-awesome.min.css'>";
+        // ifrm.innerHTML += "<script type='text/x-mathjax-config' src='preview/preview.js'></script>";
+        // ifrm.innerHTML += "<script type='text/javascript' async src='preview/mathjax/2.7.4/MathJax.js'></script>";
+        preview.innerHTML = marked(data);
     }
 }
 
@@ -753,24 +932,5 @@ function savefile() {
             conflictAction: "overwrite",
             saveAs: true
         });
-
-        // var a = document.createElement("a");
-        // var url = URL.createObjectURL(new Blob([data], {type: "text/x-markdown"}));
-        // a.href = url;
-        // a.download = filename;
-
-        // // Download document
-        // if (document.createEvent) {
-        //     var event = document.createEvent('MouseEvents');
-        //     event.initEvent('click', true, true);
-        //     a.dispatchEvent(event);
-        // } else {
-        //     a.click();
-        // }
-
-        // setTimeout(function() {
-        //     document.body.removeChild(a);
-        //     window.URL.revokeObjectURL(url);
-        // }, 0);
     }
 }

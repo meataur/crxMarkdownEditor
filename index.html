@@ -1,131 +1,159 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="stylesheet" href="style.css">
+  <title>mdEditor</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" href="font.css?family=Source+Sans+Pro:400,600,700">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="preview.css">
 
-    <link rel="stylesheet" href="codemirror/editor.css">
-    <link rel="stylesheet" href="codemirror/dialog/dialog.css">
-    <link rel="stylesheet" href="codemirror/search/matchesonscrollbar.css">
+  <link rel="stylesheet" href="codemirror/editor.css">
+  <link rel="stylesheet" href="codemirror/dialog/dialog.css">
+  <link rel="stylesheet" href="codemirror/search/matchesonscrollbar.css">
 
-    <link rel="stylesheet" href="theme/3024-day.css">
-    <link rel="stylesheet" href="theme/3024-night.css">
-    <link rel="stylesheet" href="theme/abcdef.css">
-    <link rel="stylesheet" href="theme/ambiance.css">
-    <link rel="stylesheet" href="theme/base16-dark.css">
-    <link rel="stylesheet" href="theme/bespin.css">
-    <link rel="stylesheet" href="theme/base16-light.css">
-    <link rel="stylesheet" href="theme/blackboard.css">
-    <link rel="stylesheet" href="theme/cobalt.css">
-    <link rel="stylesheet" href="theme/colorforth.css">
-    <link rel="stylesheet" href="theme/dracula.css">
-    <link rel="stylesheet" href="theme/duotone-dark.css">
-    <link rel="stylesheet" href="theme/duotone-light.css">
-    <link rel="stylesheet" href="theme/eclipse.css">
-    <link rel="stylesheet" href="theme/elegant.css">
-    <link rel="stylesheet" href="theme/erlang-dark.css">
-    <link rel="stylesheet" href="theme/gruvbox-dark.css">
-    <link rel="stylesheet" href="theme/hopscotch.css">
-    <link rel="stylesheet" href="theme/icecoder.css">
-    <link rel="stylesheet" href="theme/isotope.css">
-    <link rel="stylesheet" href="theme/lesser-dark.css">
-    <link rel="stylesheet" href="theme/liquibyte.css">
-    <link rel="stylesheet" href="theme/lucario.css">
-    <link rel="stylesheet" href="theme/material.css">
-    <link rel="stylesheet" href="theme/mbo.css">
-    <link rel="stylesheet" href="theme/mdn-like.css">
-    <link rel="stylesheet" href="theme/midnight.css">
-    <link rel="stylesheet" href="theme/monokai.css">
-    <link rel="stylesheet" href="theme/neat.css">
-    <link rel="stylesheet" href="theme/neo.css">
-    <link rel="stylesheet" href="theme/night.css">
-    <link rel="stylesheet" href="theme/oceanic-next.css">
-    <link rel="stylesheet" href="theme/panda-syntax.css">
-    <link rel="stylesheet" href="theme/paraiso-dark.css">
-    <link rel="stylesheet" href="theme/paraiso-light.css">
-    <link rel="stylesheet" href="theme/pastel-on-dark.css">
-    <link rel="stylesheet" href="theme/railscasts.css">
-    <link rel="stylesheet" href="theme/rubyblue.css">
-    <link rel="stylesheet" href="theme/seti.css">
-    <link rel="stylesheet" href="theme/shadowfox.css">
-    <link rel="stylesheet" href="theme/solarized.css">
-    <link rel="stylesheet" href="theme/the-matrix.css">
-    <link rel="stylesheet" href="theme/tomorrow-night-bright.css">
-    <link rel="stylesheet" href="theme/tomorrow-night-eighties.css">
-    <link rel="stylesheet" href="theme/ttcn.css">
-    <link rel="stylesheet" href="theme/twilight.css">
-    <link rel="stylesheet" href="theme/vibrant-ink.css">
-    <link rel="stylesheet" href="theme/xq-dark.css">
-    <link rel="stylesheet" href="theme/xq-light.css">
-    <link rel="stylesheet" href="theme/yeti.css">
-    <link rel="stylesheet" href="theme/idea.css">
-    <link rel="stylesheet" href="theme/zenburn.css">
+  <link rel="stylesheet" href="theme/3024-night.css">
+  <link rel="stylesheet" href="theme/abcdef.css">
+  <link rel="stylesheet" href="theme/ambiance.css">
+  <link rel="stylesheet" href="theme/bespin.css">
+  <link rel="stylesheet" href="theme/blackboard.css">
+  <link rel="stylesheet" href="theme/cobalt.css">
+  <link rel="stylesheet" href="theme/colorforth.css">
+  <link rel="stylesheet" href="theme/dracula.css">
+  <link rel="stylesheet" href="theme/duotone-dark.css">
+  <link rel="stylesheet" href="theme/duotone-light.css">
+  <link rel="stylesheet" href="theme/eclipse.css">
+  <link rel="stylesheet" href="theme/elegant.css">
+  <link rel="stylesheet" href="theme/erlang-dark.css">
+  <link rel="stylesheet" href="theme/gruvbox-dark.css">
+  <link rel="stylesheet" href="theme/hopscotch.css">
+  <link rel="stylesheet" href="theme/icecoder.css">
+  <link rel="stylesheet" href="theme/isotope.css">
+  <link rel="stylesheet" href="theme/lesser-dark.css">
+  <link rel="stylesheet" href="theme/liquibyte.css">
+  <link rel="stylesheet" href="theme/lucario.css">
+  <link rel="stylesheet" href="theme/material.css">
+  <link rel="stylesheet" href="theme/mbo.css">
+  <link rel="stylesheet" href="theme/mdn-like.css">
+  <link rel="stylesheet" href="theme/midnight.css">
+  <link rel="stylesheet" href="theme/monokai.css">
+  <link rel="stylesheet" href="theme/neat.css">
+  <link rel="stylesheet" href="theme/neo.css">
+  <link rel="stylesheet" href="theme/night.css">
+  <link rel="stylesheet" href="theme/oceanic-next.css">
+  <link rel="stylesheet" href="theme/panda-syntax.css">
+  <link rel="stylesheet" href="theme/paraiso-dark.css">
+  <link rel="stylesheet" href="theme/paraiso-light.css">
+  <link rel="stylesheet" href="theme/pastel-on-dark.css">
+  <link rel="stylesheet" href="theme/railscasts.css">
+  <link rel="stylesheet" href="theme/rubyblue.css">
+  <link rel="stylesheet" href="theme/seti.css">
+  <link rel="stylesheet" href="theme/shadowfox.css">
+  <link rel="stylesheet" href="theme/solarized.css">
+  <link rel="stylesheet" href="theme/the-matrix.css">
+  <link rel="stylesheet" href="theme/tomorrow-night-bright.css">
+  <link rel="stylesheet" href="theme/tomorrow-night-eighties.css">
+  <link rel="stylesheet" href="theme/ttcn.css">
+  <link rel="stylesheet" href="theme/twilight.css">
+  <link rel="stylesheet" href="theme/vibrant-ink.css">
+  <link rel="stylesheet" href="theme/xq-dark.css">
+  <link rel="stylesheet" href="theme/xq-light.css">
+  <link rel="stylesheet" href="theme/yeti.css">
+  <link rel="stylesheet" href="theme/idea.css">
+  <link rel="stylesheet" href="theme/zenburn.css">
 
-    <style type="text/css">
-        .CodeMirror { height: 490px; font-family: 'consolas'; color: black; direction: ltr; cursor: text; }
-        .cm-s-default .cm-trailing-space-a:before,
-        .cm-s-default .cm-trailing-space-b:before {position: absolute; content: "\00B7"; color: #777;}
-        .cm-s-default .cm-trailing-space-new-line:before {position: absolute; content: "\21B5"; color: #777;}
-    </style>
+  <style type="text/css">
+    .CodeMirror { width: 100%; height: calc(100vh - 105px); font-family: 'consolas'; color: black; direction: ltr; cursor: text; font-weight: 300; }
+    .cm-s-default .cm-trailing-space-a:before,
+    .cm-s-default .cm-trailing-space-b:before { position: absolute; content: "\00B7"; color: #777; }
+    .cm-s-default .cm-trailing-space-new-line:before { position: absolute; content: "\21B5"; color: #777; }
+  </style>
 
-    <!-- CryptoJS -->
-    <script src="cryptojs/core.js"></script>
-    <script src="cryptojs/x64-core.js"></script>
-    <script src="cryptojs/lib-typedarrays.js"></script>
-    <script src="cryptojs/md5.js"></script>
-    <script src="cryptojs/sha1.js"></script>
-    <script src="cryptojs/sha256.js"></script>
-    <script src="cryptojs/sha224.js"></script>
-    <script src="cryptojs/sha512.js"></script>
-    
-    <!-- CodeMirror -->
-    <script src="codemirror/editor.js"></script>
-    <script src="codemirror/markdown.js"></script>
-    <script src="codemirror/xml.js"></script>
-    <script src="codemirror/search/search.js"></script>
-    <script src="codemirror/search/searchcursor.js"></script>
-    <script src="codemirror/search/jump-to-line.js"></script>
-    <script src="codemirror/scroll/annotatescrollbar.js"></script>
-    <script src="codemirror/search/matchesonscrollbar.js"></script>
-    <script src="codemirror/dialog/dialog.js"></script>
+  <!-- CryptoJS -->
+  <script src="cryptojs/core.js"></script>
+  <script src="cryptojs/x64-core.js"></script>
+  <script src="cryptojs/lib-typedarrays.js"></script>
+  <script src="cryptojs/md5.js"></script>
+  <script src="cryptojs/sha1.js"></script>
+  <script src="cryptojs/sha256.js"></script>
+  <script src="cryptojs/sha224.js"></script>
+  <script src="cryptojs/sha512.js"></script>
+  
+  <!-- CodeMirror -->
+  <script src="codemirror/editor.js"></script>
+  <script src="codemirror/markdown.js"></script>
+  <script src="codemirror/xml.js"></script>
+  <script src="codemirror/search/search.js"></script>
+  <script src="codemirror/search/searchcursor.js"></script>
+  <script src="codemirror/search/jump-to-line.js"></script>
+  <script src="codemirror/scroll/annotatescrollbar.js"></script>
+  <script src="codemirror/search/matchesonscrollbar.js"></script>
+  <script src="codemirror/dialog/dialog.js"></script>
+  <script src="codemirror/activeline/active-line.js"></script>
 
-    <!-- Marked -->
-    <script src="marked/marked.min.js"></script>
+  <!-- Marked -->
+	<script src="marked/marked.min.js"></script>
 
-    <!-- Common Script -->
-    <script src="popup.js"></script>
+  <!-- Common Script -->
+  <script src="common.js"></script>
 </head>
 <body>
 <header>
-    <svg id="svg-logo"><use xlink:href="images/md.svg#icon-md"></use></svg>
-    <div id="txt-logo" class="apptitle"></div>
+  <nav>
+    <ul id="tabs">
+      <li id="newtab" class="tab">
+        <a><svg style="width: 1em; height: 60px; stroke-width: 1px;"><use xlink:href="images/md.svg#icon-plus"></use></svg></a>
+      </li>
+    </ul>
+  </nav>
+  <menu>
+    <ul id="menu">
+      <li id="btn-info" class="menuitem">
+        <a class="appname"></a>
+      </li>
+    </ul>
+  </menu>
 </header>
+
 <content>
-    <toolbox>
-        <button type="button" id="btn-tool-new" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-empty"></use></svg> <btnlabel>New</btnlabel></button>
-        <button type="button" id="btn-tool-open" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-open"></use></svg> <btnlabel>Open</btnlabel></button>
-        <button type="button" id="btn-tool-attachment" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-attachment"></use></svg> <btnlabel>Attachment</btnlabel></button>
-        <button type="button" id="btn-tool-prettify" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg> <btnlabel>Prettify</btnlabel></button>
-        <button type="button" id="btn-tool-resettime" class="left"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg> <btnlabel>Reset Datetime</btnlabel></button>
-        <button type="button" id="btn-tool-info" class="right"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-info"></use></svg> <btnlabel>Info</btnlabel></button>
-        <button type="button" id="btn-tool-settings" class="right"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg> <btnlabel>Settings</btnlabel></button>
-    </toolbox>
-    <editor>
-        <textarea spellcheck="false"></textarea>
-    </editor>
-    <iframe id="preview"></iframe>
+  <editor style="width: calc(50% - 0.5px);">
+    <div class="vpanel-header">
+      <label>Editor</label>
+      <toolbox>
+        <button type="button" id="btn-tool-new" title="Make New Document"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-empty"></use></svg></button>
+        <button type="button" id="btn-tool-open" title="Open"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-open"></use></svg></button>
+				<button type="button" id="btn-tool-save" title="Save"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-save"></use></svg></button>
+				<button type="button" id="btn-tool-delete" title="Delete"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-delete"></use></svg></button>
+        <button type="button" id="btn-tool-attachment" title="Attachments"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-attachment"></use></svg></button>
+        <button type="button" id="btn-tool-prettify" title="Prettify Code"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg></button>
+        <button type="button" id="btn-tool-resettime" title="Reset Datetime"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg></button>
+        <button type="button" id="btn-tool-run-jekyllserve" title="Run Local Server"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-power"></use></svg></button>
+        <button type="button" id="btn-tool-settings" title="Settings"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg></button>
+      </toolbox>
+    </div>
+    <div class="vpanel-content">
+      <textarea spellcheck="false"></textarea>
+    </div>
+  </editor>
+  <div id="gutter"></div>
+  <preview style="width: calc(50% - 0.5px);">
+    <div class="vpanel-header">
+      <label>Preview</label>
+      <toolbox>
+        <button type="button" id="btn-tool-html" title="Export as HTML">HTML</button>
+        <button type="button" id="btn-tool-pdf" title="Export as PDF">PDF</button>
+      </toolbox>
+    </div>
+    <div class="vpanel-content">
+      <div id="preview"></div>
+    </div>
+  </preview>
 </content>
-<footer>
-    <button type="button" id="btn-run-jekyllserve"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-power"></use></svg> <btnlabel>Run Jekyll</btnlabel></button>
-    <button type="button" id="btn-saveasfile"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-check"></use></svg> <btnlabel>Save As</btnlabel></button>
-    <button type="button" id="btn-preview"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-preview"></use></svg> <btnlabel>Preview</btnlabel></button>
-    <button type="button" id="btn-edit"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-edit"></use></svg> <btnlabel>Editor</btnlabel></button>
-</footer>
+
 <overlay>
     <messagebox class="modal"></messagebox>
     <info class="modal">
         <section>
-            <sectionlabel class="apptitle"></sectionlabel>
+            <sectionlabel class="appname"></sectionlabel>
             <maker>Made by ChangUk (<a href="https://changuk.github.io" target="_blank">changuk.github.io</a>)</maker>
             <item>Features and Tips</item>
             <ul>

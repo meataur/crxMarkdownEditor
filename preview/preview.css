@@ -2,7 +2,7 @@
 body, h1, h2, h3, h4, h5, h6, p, blockquote, pre, hr, dl, dd, ol, ul, figure { margin: 0; padding: 0; }
 
 body {
-    margin: 1em;
+    padding: 1em;
 
     font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol";
     font-size: 16px;
@@ -45,7 +45,7 @@ tablecaption, figcaption > strong { user-select: none; margin-right: .5em; }
 
 ul, ol { margin: 1.6em; }
 li { margin-bottom: .4em; }
-li > ul, li > ol { margin-top: 1em; margin-bottom: 1em; }
+li > ul, li > ol { margin-top: 1em; margin-right: 0; margin-bottom: 1em; }
 
 p { margin: .6em 0; }
 
@@ -70,7 +70,7 @@ code {
     font-size: .9em;
 }
 
-pre { margin: 0; padding: 1em; font-family: consolas; overflow-x: auto; background: #1d1f21 !important; color: #c5c8c6 }
+pre { margin: 1em 0; padding: 1em; font-family: consolas; overflow-x: auto; background: #1d1f21 !important; color: #c5c8c6 }
 pre > code { border: 0; padding: 0; background: none; }
 pre > code table { margin: 0; border: 0; }
 pre > code table td { padding: 0; border: 0; }
