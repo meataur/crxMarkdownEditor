@@ -2,8 +2,8 @@ var manifestData = chrome.runtime.getManifest();
 var editor = null;
 
 var docs = [];
-var justTabCreated = false;
-var prevTabIdx = -1;
+var isNewTabCreated = false;
+var prevTabIdx = 0;
 
 var isPanelResizing = false;
 
@@ -11,7 +11,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fill extension title into the app title division
     var appTitleDivs = document.getElementsByClassName("appname");
     for (var i = 0; i < appTitleDivs.length; i++)
-        appTitleDivs[i].innerHTML = manifestData.name; // + " v" + manifestData.version;
+        appTitleDivs[i].innerHTML = manifestData.name;
+    var appVersDivs = document.getElementsByClassName("appvers");
+    for (var i = 0; i < appVersDivs.length; i++)
+        appVersDivs[i].innerHTML = "v" + manifestData.version;
 
     // Create markdown editor
     var textarea = document.getElementsByTagName('textarea')[0];
@@ -38,20 +41,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     editor.on("change", function(evt) {
         var parsed = parse(editor.getValue());
-        var tabs = document.getElementsByClassName("tab");
-        for (var i = 0; i < tabs.length - 1; i++) {
-            if (tabs[i].hasAttribute("active")) {
-                // Update document title of tab
-                var docTitle = tabs[i].getElementsByClassName("doc-title")[0];
-                docTitle.innerHTML = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
+        var activeTab = getActiveTab();
+        if (activeTab) {
+            // Active tab index
+            var tab = activeTab.tab;
+            var i = activeTab.index;
 
-                // Update last modified datetime of tab
-                docs[i].last_modified = getCurDatetimeString();
-                
-                break;
-            }
+            // Update document title of tab
+            var docTitle = tab.getElementsByClassName("doc-title")[0];
+            docs[i].texts = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
+            docTitle.innerHTML = docs[i].texts;
+
+            // Update last modified datetime of tab
+            var docDatetime = tab.getElementsByClassName("doc-datetime")[0];
+            docs[i].last_modified = (parsed.header.date && parsed.header.date.length) ? parsed.header.date : getCurDatetimeString();
+            docDatetime.innerHTML = docs[i].last_modified.split(' ')[0];
+
+            // Set mouse over title
+            tab.title = docDatetime.innerHTML + "\n" + docTitle.innerHTML;
+
+            // Automatic preview rendering
+            preview(parsed);
         }
-        preview(parsed);
     });
 
     // Load settings value
@@ -92,17 +103,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Set buttons event handler
-    document.getElementById('newtab').onclick = newTab;
+    document.getElementById('newtab').onclick = addNewTab;
+    document.getElementById('btn-run-jekyllserve').onclick = runJekyll;
     document.getElementById('btn-info').onclick = openExtensionInfo;
 
-    document.getElementById('btn-tool-new').onclick = resetEditor;
+    document.getElementById('btn-tool-new').onclick = initTextarea;
     document.getElementById('btn-tool-open').onclick = openfile;
     document.getElementById('btn-tool-save').onclick = savefile;
-    document.getElementById('btn-tool-delete').onclick = closeTab;
     document.getElementById('btn-tool-attachment').onclick = attachments;
     document.getElementById('btn-tool-prettify').onclick = prettify;
     document.getElementById('btn-tool-resettime').onclick = resetPostingTime;
-    document.getElementById('btn-tool-run-jekyllserve').onclick = runJekyll;
     document.getElementById('btn-tool-settings').onclick = openSettings;
 
     document.getElementById('localhost-port').onkeypress = numberOnly;
@@ -125,6 +135,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Keyboard shortcut
+    document.onkeydown = function(e) {
+        if (e.ctrlKey) {
+            switch (e.which) {      // Ctrl + S
+            case 83:
+                e.preventDefault();
+                savefile();
+                break;
+            }
+        } else {
+            switch (e.which) {
+            case 27:
+                e.preventDefault();
+                document.getElementsByTagName('overlay')[0].click();
+                break;
+            }
+        }
+    };
+
+    // Save the last state of workspace
     window.onbeforeunload = function(e) {
         saveSettings();
 
@@ -146,19 +176,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    window.onresize = function(e) {
-        var bodyWidth = parseInt(window.getComputedStyle(document.body).width);
-        var tabs = document.getElementsByClassName("tab");
-        var nTabs = tabs.length - 1;
-        var tabWidth = parseInt(window.getComputedStyle(tabs[0]).width);
-
-        console.log(bodyWidth, tabWidth);
-        if (nTabs * tabWidth )
-        for (var i = 0; i < nTabs; i++) {
-
-        }
-    }
+    window.onresize = resizeTabWidths;
 });
+
+function messageBox(text) {
+    var info = document.getElementsByTagName("info")[0];
+    info.style.display = "none";
+    var settings = document.getElementsByTagName('settings')[0];
+    settings.style.display = 'none';
+
+    var overlay = document.getElementsByTagName("overlay")[0];
+    overlay.style.display = "block";
+    var messageBox = document.getElementsByTagName("messagebox")[0];
+    messageBox.innerHTML = text.replace(/\n/g, '<br />');;
+    messageBox.style.display = "block";
+}
 
 function loadSettings() {
     chrome.storage.local.get('working_dirpath', function(result) {
@@ -242,6 +274,35 @@ function saveSettings() {
     }
 }
 
+function getActiveTab() {
+    var tabs = document.getElementsByClassName("tab");
+    for (var i = 0; i < tabs.length - 1; i++) {
+        if (tabs[i].hasAttribute("active"))
+            return { tab: tabs[i], index: i };
+    }
+    return null;
+}
+
+function createTab(docDatetime, docTitle) {
+    var divDatetime = document.createElement("div");
+    divDatetime.className = "doc-datetime";
+    divDatetime.innerHTML = docDatetime;
+
+    var divTitle = document.createElement("div");
+    divTitle.className = "doc-title";
+    divTitle.innerHTML = docTitle;
+
+    var li = document.createElement("li");
+    li.className = "tab";
+    li.style.display = "none";
+    li.title = docDatetime + "\n" + docTitle;
+    li.appendChild(divDatetime);
+    li.appendChild(divTitle);
+    li.addEventListener("click", onTabClick);
+
+    return li;
+}
+
 function loadPrevWorks() {
     // Load previous workspace
     chrome.storage.local.get("documents", function(result) {
@@ -250,146 +311,69 @@ function loadPrevWorks() {
 
             if (docs.length) {
                 var ul = document.getElementById("tabs");
+                var activeTab = null;
                 docs.forEach(function(doc) {
                     // Parse document text data
                     var parsed = parse(doc.texts);
+                    var docDatetime = doc.last_modified.split(' ')[0];
+                    var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
 
-                    // Create new tab
-                    var divDatetime = document.createElement("div");
-                    divDatetime.className = "doc-datetime";
-                    divDatetime.innerHTML = doc.last_modified;
-                    var divTitle = document.createElement("div");
-                    divTitle.className = "doc-title";
-                    divTitle.innerHTML = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
-                    var a = document.createElement("a");
-                    a.appendChild(divDatetime);
-                    a.appendChild(divTitle);
-                    var li = document.createElement("li");
-                    li.className = "tab";
-                    if (doc.active) {
-                        li.setAttribute("active", "");
-                        editor.setValue(doc.texts);
-                        editor.scrollTo(doc.scrollbar.left, doc.scrollbar.top);
-                        editor.focus();
-                        editor.setCursor(doc.cursor.line, doc.cursor.ch);
-                    }
-                    li.appendChild(a);
-                    li.addEventListener("click", onTabClick);
+                    // Create tab
+                    var tab = createTab(docDatetime, docTitle);
+                    if (doc.active) activeTab = tab;
                     
                     // Add tab
-                    ul.insertBefore(li, ul.children[ul.children.length - 1]);
+                    ul.insertBefore(tab, ul.children[ul.children.length - 1]);
                 });
+
+                // Click active tab
+                if (activeTab) activeTab.click();
             } else {
-                newTab();
+                addNewTab();
             }
         } else {
-            newTab();
+            addNewTab();
         }
+
+        resizeTabWidths();
     });
 }
 
-function messageBox(text) {
-    var info = document.getElementsByTagName("info")[0];
-    info.style.display = "none";
-    var settings = document.getElementsByTagName('settings')[0];
-    settings.style.display = 'none';
-
-    var overlay = document.getElementsByTagName("overlay")[0];
-    overlay.style.display = "block";
-    var messageBox = document.getElementsByTagName("messagebox")[0];
-    messageBox.innerHTML = text.replace(/\n/g, '<br />');;
-    messageBox.style.display = "block";
-}
-
-function newTab() {
-    // Save current work
-    var tabs = document.getElementsByClassName("tab");
-    for (var i = 0; i < tabs.length - 1; i++) {
-        if (tabs[i].hasAttribute("active")) {
-            docs[i].texts = editor.getValue();
-            docs[i].scrollbar = editor.getScrollInfo(),
-            docs[i].cursor = editor.getCursor(),
-            docs[i].active = false;
-            prevTabIdx = i;
-        }
-        tabs[i].removeAttribute("active");
-    }
-
+function addNewTab() {
     // Create new tab
-    var divDatetime = document.createElement("div");
-    divDatetime.className = "doc-datetime";
-    divDatetime.innerHTML = getCurDatetimeString().split(' ')[0];
-    var divTitle = document.createElement("div");
-    divTitle.className = "doc-title";
-    divTitle.innerHTML = "Untitled Document";
-    var a = document.createElement("a");
-    a.appendChild(divDatetime);
-    a.appendChild(divTitle);
-    var li = document.createElement("li");
-    li.className = "tab";
-    li.setAttribute("active", "");
-    li.appendChild(a);
-    li.addEventListener("click", onTabClick);
-    li.click();
+    var newtab = createTab(getCurDatetimeString().split(' ')[0], "Untitled Document");
 
     // Add tab
     var ul = document.getElementById("tabs");
-    ul.insertBefore(li, ul.children[ul.children.length - 1]);
-    justTabCreated = true;
+    ul.insertBefore(newtab, ul.children[ul.children.length - 1]);
 
-    // Add to document list
+    // Add empty document to list
     docs.push({
-        last_modified: getCurDatetimeString(),
+        last_modified: "",
         texts: "",
-        cursor: "",
-        scrollbar: "",
-        active: true
+        scrollbar: { left: 0, top: 0 },
+        cursor: { line: 0, ch: 0 },
+        active: false
     });
 
+    // Adjust tab widths
+    resizeTabWidths();
+
+    // Click newly-created tab
+    newtab.click();
+
     // Set default format
-    resetEditor();
-}
+    initTextarea();
 
-function closeTab() {
-    var tabs = document.getElementsByClassName("tab");
-    if (tabs.length === 2) {
-        resetEditor();
-        return;
-    }
-
-    // Find currently active tab
-    for (var i = 0; i < tabs.length - 1; i++) {
-        if (tabs[i].hasAttribute("active")) {
-            if (i === tabs.length - 2) {
-                if (justTabCreated) {
-                    tabs[prevTabIdx].click();
-                    justTabCreated = false;
-                } else {
-                    tabs[i - 1].click();
-                }
-            } else {
-                tabs[i + 1].click();
-            }
-
-            // Remove from document list
-            docs.splice(i, 1);
-
-            // Remove from tabs
-            var ul = document.getElementById("tabs");
-            ul.removeChild(tabs[i]);
-
-            // Save current workspace
-            chrome.storage.local.set({ "documents": docs });
-            break;
-        }
-    }
+    // Set tab creation flag
+    isNewTabCreated = true;
 }
 
 function onTabClick() {
     if (this.hasAttribute("active"))
         return;
 
-    // Save current work
+    // Save editing environment if there exists currently active tab
     var tabs = document.getElementsByClassName("tab");
     for (var i = 0; i < tabs.length - 1; i++) {
         if (tabs[i].hasAttribute("active")) {
@@ -398,19 +382,35 @@ function onTabClick() {
             docs[i].cursor = editor.getCursor();
             docs[i].active = false;
             prevTabIdx = i;
+            
+            // Remove active attribute
+            tabs[i].removeAttribute("active");
+
+            // Remove tab-close button
+            tabs[i].removeChild(tabs[i].getElementsByClassName("tab-close")[0]);
+            break;
         }
-        tabs[i].removeAttribute("active");
     }
 
     // Load selected document texts
     this.setAttribute("active", "");
     for (var i = 0; i < tabs.length - 1; i++) {
         if (tabs[i].hasAttribute("active")) {
+            // Load editing environment
             editor.setValue(docs[i].texts);
             editor.scrollTo(docs[i].scrollbar.left, docs[i].scrollbar.top);
             editor.focus();
             editor.setCursor(docs[i].cursor.line, docs[i].cursor.ch);
+
+            // Set active
             docs[i].active = true;
+
+            // Activate tab-close button
+            var divClose = document.createElement("div");
+            divClose.className = "tab-close";
+            divClose.innerHTML = "<svg><use xlink:href=\"images/md.svg#icon-tab-close\"></use></svg>";
+            divClose.onclick = closeTab;
+            tabs[i].appendChild(divClose);
             break;
         }
     }
@@ -419,7 +419,61 @@ function onTabClick() {
     chrome.storage.local.set({ documents: docs });
 
     // Release tab creation flag
-    justTabCreated = false;
+    isNewTabCreated = false;
+}
+
+function closeTab() {
+    var tabs = document.getElementsByClassName("tab");
+    var nTabs = tabs.length - 1;
+    if (nTabs == 1) {
+        initTextarea();
+        return;
+    }
+
+    var activeTab = getActiveTab();
+    if (activeTab) {
+        // Remove from document list
+        docs.splice(activeTab.index, 1);
+
+        // Remove from tabs
+        document.getElementById("tabs").removeChild(activeTab.tab);
+
+        // Move to another tab
+        if (activeTab.index === nTabs - 1) {
+            if (isNewTabCreated) {
+                tabs[prevTabIdx].click();
+                isNewTabCreated = false;
+            } else {
+                tabs[activeTab.index - 1].click();
+            }
+        } else {
+            tabs[activeTab.index].click();
+        }
+
+        // Save current workspace
+        chrome.storage.local.set({ "documents": docs });
+    }
+
+    resizeTabWidths();
+}
+
+function resizeTabWidths() {
+    var bodyWidth = parseInt(window.getComputedStyle(document.body).width);
+    var menuWidth = 0;
+    Array.from(document.getElementsByClassName("menuitem")).forEach(function(menuItem) {
+        menuWidth += parseInt(window.getComputedStyle(menuItem).width);
+    });
+
+    var tabs = document.getElementsByClassName("tab");
+    var addTabBtnWidth = parseInt(window.getComputedStyle(document.getElementById("newtab")).width);
+    var newWidth = (bodyWidth - menuWidth - addTabBtnWidth - 100) / (tabs.length - 1);
+    if (newWidth > 180) newWidth = 180;
+    Array.from(tabs).forEach(function(tab) {
+        if (tab.id !== "newtab") {
+            tab.style.width = newWidth + "px";
+            tab.style.display = "block";
+        }
+    });
 }
 
 function openExtensionInfo() {
@@ -595,7 +649,7 @@ function getCurDatetimeString() {
     return strDatetime;
 }
 
-function resetEditor() {
+function initTextarea() {
     if (editor) {
         // Make document template
         var template = "---\n\n";
@@ -610,6 +664,7 @@ function resetEditor() {
         editor.focus();
         editor.setCursor(editor.lineCount(), 0);
 
+        // Automatic preview rendering
         preview(parse(editor.getValue()));
     }
 }
@@ -829,18 +884,18 @@ function openfile() {
 }
 
 function runJekyll() {
-    document.getElementById('btn-tool-run-jekyllserve').disabled = true;
+    document.getElementById('btn-run-jekyllserve').disabled = true;
     var localhost_port = document.getElementById("localhost-port").value;
     if (!localhost_port) {
         messageBox("Invalid localhost port!");
-        document.getElementById('btn-tool-run-jekyllserve').disabled = false;
+        document.getElementById('btn-run-jekyllserve').disabled = false;
         return;
     }
 
     var xhr = new XMLHttpRequest();
     xhr.addEventListener("load", function() {
         messageBox("Jekyll is now running on port " + localhost_port + ".");
-        document.getElementById('btn-tool-run-jekyllserve').disabled = false;
+        document.getElementById('btn-run-jekyllserve').disabled = false;
     });
     xhr.addEventListener("error", function() {
         chrome.runtime.sendNativeMessage("jekyllserve" + localhost_port, { text: "" }, function(response) {
@@ -861,7 +916,7 @@ function runJekyll() {
                     }
                 }
             }
-            document.getElementById('btn-tool-run-jekyllserve').disabled = false;
+            document.getElementById('btn-run-jekyllserve').disabled = false;
         });
     });
     xhr.open("GET", "http://localhost:" + localhost_port + "/", true);

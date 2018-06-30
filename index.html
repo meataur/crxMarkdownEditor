@@ -101,15 +101,14 @@
   <nav>
     <ul id="tabs">
       <li id="newtab" class="tab">
-        <a><svg style="width: 1em; height: 60px; stroke-width: 1px;"><use xlink:href="images/md.svg#icon-plus"></use></svg></a>
+        <svg style="width: 1em; height: 60px; stroke-width: 1px;"><use xlink:href="images/md.svg#icon-plus"></use></svg>
       </li>
     </ul>
   </nav>
   <menu>
     <ul id="menu">
-      <li id="btn-info" class="menuitem">
-        <a class="appname"></a>
-      </li>
+      <li id="btn-info" class="menuitem"><span class="appname"></span></li>
+      <li id="btn-run-jekyllserve" class="menuitem">JekyllServe</li>
     </ul>
   </menu>
 </header>
@@ -121,12 +120,12 @@
       <toolbox>
         <button type="button" id="btn-tool-new" title="Make New Document"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-empty"></use></svg></button>
         <button type="button" id="btn-tool-open" title="Open"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-open"></use></svg></button>
-				<button type="button" id="btn-tool-save" title="Save"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-save"></use></svg></button>
-				<button type="button" id="btn-tool-delete" title="Delete"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-delete"></use></svg></button>
+        <button type="button" id="btn-tool-save" title="Save"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-save"></use></svg></button>
+        <middot></middot>
         <button type="button" id="btn-tool-attachment" title="Attachments"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-attachment"></use></svg></button>
         <button type="button" id="btn-tool-prettify" title="Prettify Code"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg></button>
         <button type="button" id="btn-tool-resettime" title="Reset Datetime"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg></button>
-        <button type="button" id="btn-tool-run-jekyllserve" title="Run Local Server"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-power"></use></svg></button>
+        <middot></middot>
         <button type="button" id="btn-tool-settings" title="Settings"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg></button>
       </toolbox>
     </div>
@@ -153,7 +152,7 @@
     <messagebox class="modal"></messagebox>
     <info class="modal">
         <section>
-            <sectionlabel class="appname"></sectionlabel>
+            <sectionlabel><span class="appname"></span> <span class="appvers"></span></sectionlabel>
             <maker>Made by ChangUk (<a href="https://changuk.github.io" target="_blank">changuk.github.io</a>)</maker>
             <item>Features and Tips</item>
             <ul>
