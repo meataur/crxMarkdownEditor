@@ -102,8 +102,7 @@ content { display: block; position: relative; height: calc(100vh - 60px); }
 .vpanel-header > toolbox > button:active { color: #fff; }
 
 .svg-btn { display: inline-block; width: 1.1em; height: 1.1em; }
-middot { margin-left: .3em; padding: 0 .5em; color: #a8afbd; }
-middot:after { content: "·"; }
+toolbox > sep { margin: 0 .5em 0 .8em; height: 1em; border-left: 1px solid #383838; }
 
 .vpanel-content { position: relative; height: calc(100vh - 105px); overflow-x: hidden; overflow-y: auto; }
 

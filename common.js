@@ -1,11 +1,23 @@
+// Load manifest data
 var manifestData = chrome.runtime.getManifest();
+
+// CodeMirro editor variable
 var editor = null;
 
+// The variable storing current workspaces
 var docs = [];
+
+// Tab-related variables
 var isNewTabCreated = false;
 var prevTabIdx = 0;
+var srcTab = null;
+var dragImage = null;
 
+// Splitter bar flag
 var isPanelResizing = false;
+
+// Create mousedown event
+var mousedownEvent = new MouseEvent("mousedown");
 
 document.addEventListener('DOMContentLoaded', function() {
     // Fill extension title into the app title division
@@ -298,7 +310,94 @@ function createTab(docDatetime, docTitle) {
     li.title = docDatetime + "\n" + docTitle;
     li.appendChild(divDatetime);
     li.appendChild(divTitle);
-    li.addEventListener("click", onTabClick);
+    li.setAttribute("draggable", "true");
+    li.addEventListener("dragstart", function(e) {
+        e.dataTransfer.effectAllowed = "move";
+        srcTab = e.target;
+
+        // Prepare dragging image by element copy
+        dragImage = srcTab.cloneNode(true);
+        dragImage.style.display = "none";
+        document.body.appendChild(dragImage);
+        e.dataTransfer.setDragImage(dragImage, 5, 5);
+    });
+    li.addEventListener("dragover", function(e) {
+        // Change mouse cursor on drag
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+
+        // Select list item
+        var dstTab = e.target;
+        while (dstTab.tagName.toLowerCase() != "li")
+            dstTab = dstTab.parentNode;
+
+        // Swap two list-items
+        var srcIdx = Array.prototype.indexOf.call(dstTab.parentNode.children, srcTab);
+        var dstIdx = Array.prototype.indexOf.call(dstTab.parentNode.children, dstTab);
+        if (dstIdx < srcIdx) {
+            dstTab.parentNode.insertBefore(srcTab, dstTab);
+            docs[srcIdx] = docs.splice(dstIdx, 1, docs[srcIdx])[0];
+        } else if (srcIdx < dstIdx) {
+            dstTab.parentNode.insertBefore(srcTab, dstTab.nextSibling);
+            docs[srcIdx] = docs.splice(dstIdx, 1, docs[srcIdx])[0];
+        }
+    });
+    li.addEventListener("dragend", function(e) {
+        dragImage.parentNode.removeChild(dragImage);
+        srcTab = null;
+    });
+    li.addEventListener("mousedown", function(e) {
+        if (this.hasAttribute("active"))
+            return;
+
+        // Save editing environment if there exists currently active tab
+        var tabs = document.getElementsByClassName("tab");
+        for (var i = 0; i < tabs.length - 1; i++) {
+            if (tabs[i].hasAttribute("active")) {
+                docs[i].texts = editor.getValue();
+                docs[i].scrollbar = editor.getScrollInfo();
+                docs[i].cursor = editor.getCursor();
+                docs[i].active = false;
+                prevTabIdx = i;
+                
+                // Remove active attribute
+                tabs[i].removeAttribute("active");
+
+                // Remove tab-close button
+                tabs[i].removeChild(tabs[i].getElementsByClassName("tab-close")[0]);
+                break;
+            }
+        }
+
+        // Load selected document texts
+        this.setAttribute("active", "");
+        for (var i = 0; i < tabs.length - 1; i++) {
+            if (tabs[i].hasAttribute("active")) {
+                // Load editing environment
+                editor.setValue(docs[i].texts);
+                editor.scrollTo(docs[i].scrollbar.left, docs[i].scrollbar.top);
+                editor.focus();
+                editor.setCursor(docs[i].cursor.line, docs[i].cursor.ch);
+
+                // Set active
+                docs[i].active = true;
+
+                // Activate tab-close button
+                var divClose = document.createElement("div");
+                divClose.className = "tab-close";
+                divClose.innerHTML = "<svg><use xlink:href=\"images/md.svg#icon-tab-close\"></use></svg>";
+                divClose.onclick = closeTab;
+                tabs[i].appendChild(divClose);
+                break;
+            }
+        }
+
+        // Save current workspace
+        chrome.storage.local.set({ documents: docs });
+
+        // Release tab creation flag
+        isNewTabCreated = false;
+    });
 
     return li;
 }
@@ -327,7 +426,7 @@ function loadPrevWorks() {
                 });
 
                 // Click active tab
-                if (activeTab) activeTab.click();
+                if (activeTab) activeTab.dispatchEvent(mousedownEvent);
             } else {
                 addNewTab();
             }
@@ -360,66 +459,13 @@ function addNewTab() {
     resizeTabWidths();
 
     // Click newly-created tab
-    newtab.click();
+    newtab.dispatchEvent(mousedownEvent);
 
     // Set default format
     initTextarea();
 
     // Set tab creation flag
     isNewTabCreated = true;
-}
-
-function onTabClick() {
-    if (this.hasAttribute("active"))
-        return;
-
-    // Save editing environment if there exists currently active tab
-    var tabs = document.getElementsByClassName("tab");
-    for (var i = 0; i < tabs.length - 1; i++) {
-        if (tabs[i].hasAttribute("active")) {
-            docs[i].texts = editor.getValue();
-            docs[i].scrollbar = editor.getScrollInfo();
-            docs[i].cursor = editor.getCursor();
-            docs[i].active = false;
-            prevTabIdx = i;
-            
-            // Remove active attribute
-            tabs[i].removeAttribute("active");
-
-            // Remove tab-close button
-            tabs[i].removeChild(tabs[i].getElementsByClassName("tab-close")[0]);
-            break;
-        }
-    }
-
-    // Load selected document texts
-    this.setAttribute("active", "");
-    for (var i = 0; i < tabs.length - 1; i++) {
-        if (tabs[i].hasAttribute("active")) {
-            // Load editing environment
-            editor.setValue(docs[i].texts);
-            editor.scrollTo(docs[i].scrollbar.left, docs[i].scrollbar.top);
-            editor.focus();
-            editor.setCursor(docs[i].cursor.line, docs[i].cursor.ch);
-
-            // Set active
-            docs[i].active = true;
-
-            // Activate tab-close button
-            var divClose = document.createElement("div");
-            divClose.className = "tab-close";
-            divClose.innerHTML = "<svg><use xlink:href=\"images/md.svg#icon-tab-close\"></use></svg>";
-            divClose.onclick = closeTab;
-            tabs[i].appendChild(divClose);
-            break;
-        }
-    }
-
-    // Save current workspace
-    chrome.storage.local.set({ documents: docs });
-
-    // Release tab creation flag
-    isNewTabCreated = false;
 }
 
 function closeTab() {
@@ -441,13 +487,13 @@ function closeTab() {
         // Move to another tab
         if (activeTab.index === nTabs - 1) {
             if (isNewTabCreated) {
-                tabs[prevTabIdx].click();
+                tabs[prevTabIdx].dispatchEvent(mousedownEvent);
                 isNewTabCreated = false;
             } else {
-                tabs[activeTab.index - 1].click();
+                tabs[activeTab.index - 1].dispatchEvent(mousedownEvent);
             }
         } else {
-            tabs[activeTab.index].click();
+            tabs[activeTab.index].dispatchEvent(mousedownEvent);
         }
 
         // Save current workspace
