@@ -10,6 +10,12 @@ chrome.browserAction.onClicked.addListener(function(tab) {
                     if (tabId === newtab.id) {
                         var view = chrome.extension.getViews({ type: "tab" })[0];
                         var editor = view.document.getElementsByClassName("CodeMirror")[0].CodeMirror;
+                        var editor_texts = editor.getValue();
+                        var editor_scrollbar = editor.getScrollInfo();
+                        var editor_cursor = editor.getCursor();
+
+                        var viewer = view.document.getElementById("viewer");
+                        var viewer_scroll =  viewer.scrollTop;
 
                         // Find current active tab index and set its data
                         chrome.storage.local.get("documents", function(result) {
@@ -21,13 +27,15 @@ chrome.browserAction.onClicked.addListener(function(tab) {
                                         // Update active document data
                                         docs[i] = {
                                             last_modified: docs[i].last_modified,
-                                            texts: editor.getValue(),
-                                            scrollbar: editor.getScrollInfo(),
-                                            cursor: editor.getCursor(),
+                                            texts_original: docs[i].texts_original,
+                                            texts: editor_texts,
+                                            scrollbar: editor_scrollbar,
+                                            cursor: editor_cursor,
+                                            viewer_scroll: viewer_scroll,
                                             active: true
                                         };
 
-                                        // Save previous works
+                                        // Save current work
                                         chrome.storage.local.set({ documents: docs });
                                         break;
                                     }

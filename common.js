@@ -4,12 +4,17 @@ var manifestData = chrome.runtime.getManifest();
 // CodeMirro editor variable
 var editor = null;
 
+// Vertical panels
+var contentWrapper = null;
+var panelEditor = null;
+var panelViewer = null;
+
 // The variable storing current workspaces
 var docs = [];
 
 // Tab-related variables
 var isNewTabCreated = false;
-var prevTabIdx = 0;
+var prevWorkingTabIdx = 0;
 var srcTab = null;
 var dragImage = null;
 
@@ -18,8 +23,12 @@ var isPanelResizing = false;
 
 // Create mousedown event
 var mousedownEvent = new MouseEvent("mousedown");
+Element.prototype.mousedown = function() { this.dispatchEvent(mousedownEvent); }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Set tab title
+    document.title = manifestData.name;
+
     // Fill extension title into the app title division
     var appTitleDivs = document.getElementsByClassName("appname");
     for (var i = 0; i < appTitleDivs.length; i++)
@@ -61,8 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Update document title of tab
             var docTitle = tab.getElementsByClassName("doc-title")[0];
-            docs[i].texts = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
-            docTitle.innerHTML = docs[i].texts;
+            docTitle.innerHTML = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
 
             // Update last modified datetime of tab
             var docDatetime = tab.getElementsByClassName("doc-datetime")[0];
@@ -76,6 +84,11 @@ document.addEventListener('DOMContentLoaded', function() {
             preview(parsed);
         }
     });
+
+    // Panels
+    contentWrapper = document.getElementsByTagName("content")[0];
+    panelEditor = document.getElementsByTagName("editor")[0];
+    panelViewer = document.getElementsByTagName("viewer")[0];
 
     // Load settings value
     loadSettings();
@@ -94,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Enable panel splitter dragging
-    document.getElementById('gutter').onmousedown = function(evt) {
+    document.getElementsByTagName("splitter")[0].onmousedown = function(evt) {
         isPanelResizing = true;
     };
     document.onmouseup = function(evt) {
@@ -102,16 +115,13 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     document.onmousemove = function(evt) {
         if (!isPanelResizing) return;
-        var container = document.getElementsByTagName("content")[0];
-        var panelEditor = document.getElementsByTagName("editor")[0];
-        var panelPreview = document.getElementsByTagName("preview")[0];
 
-        var offset = evt.clientX - container.offsetLeft;
-        if (offset < 350 || (container.clientWidth - offset) < 350) return;
+        var offset = evt.clientX - contentWrapper.offsetLeft;
+        if (offset < 350 || (contentWrapper.clientWidth - offset) < 350) return;
 
-        var ratio = offset / container.clientWidth * 100;
+        var ratio = offset / contentWrapper.clientWidth * 100;
         panelEditor.style.width = "calc(" + ratio + "% - 0.5px)";
-        panelPreview.style.width = "calc(" + (100 - ratio) + "% - 0.5px)";
+        panelViewer.style.width = "calc(" + (100 - ratio) + "% - 0.5px)";
     }
 
     // Set buttons event handler
@@ -177,9 +187,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Update active document data
                 docs[i] = {
                     last_modified: docs[i].last_modified,
+                    texts_original: docs[i].texts_original,
                     texts: editor.getValue(),
                     scrollbar: editor.getScrollInfo(),
                     cursor: editor.getCursor(),
+                    viewer_scroll: document.getElementById("viewer").scrollTop,
                     active: true
                 };
                 chrome.storage.local.set({ documents: docs });
@@ -351,45 +363,49 @@ function createTab(docDatetime, docTitle) {
             return;
 
         // Save editing environment if there exists currently active tab
-        var tabs = document.getElementsByClassName("tab");
-        for (var i = 0; i < tabs.length - 1; i++) {
-            if (tabs[i].hasAttribute("active")) {
-                docs[i].texts = editor.getValue();
-                docs[i].scrollbar = editor.getScrollInfo();
-                docs[i].cursor = editor.getCursor();
-                docs[i].active = false;
-                prevTabIdx = i;
-                
-                // Remove active attribute
-                tabs[i].removeAttribute("active");
+        var activeTab = getActiveTab();
+        if (activeTab) {
+            var i = activeTab.index;
+            
+            docs[i].texts = editor.getValue();
+            docs[i].scrollbar = editor.getScrollInfo();
+            docs[i].cursor = editor.getCursor();
+            docs[i].viewer_scroll = document.getElementById("viewer").scrollTop;
+            docs[i].active = false;
+            prevWorkingTabIdx = i;
 
-                // Remove tab-close button
-                tabs[i].removeChild(tabs[i].getElementsByClassName("tab-close")[0]);
-                break;
-            }
+            // Remove active attribute
+            activeTab.tab.removeAttribute("active");
+
+            // Remove tab-close button
+            activeTab.tab.removeChild(activeTab.tab.getElementsByClassName("tab-close")[0]);
         }
 
         // Load selected document texts
         this.setAttribute("active", "");
-        for (var i = 0; i < tabs.length - 1; i++) {
-            if (tabs[i].hasAttribute("active")) {
-                // Load editing environment
-                editor.setValue(docs[i].texts);
-                editor.scrollTo(docs[i].scrollbar.left, docs[i].scrollbar.top);
-                editor.focus();
-                editor.setCursor(docs[i].cursor.line, docs[i].cursor.ch);
+        activeTab = getActiveTab();
+        if (activeTab) {
+            var i = activeTab.index;
 
-                // Set active
-                docs[i].active = true;
+            // Load editing environment
+            editor.setValue(docs[i].texts);
+            editor.scrollTo(docs[i].scrollbar.left, docs[i].scrollbar.top);
+            document.getElementById("viewer").scrollTop = docs[i].viewer_scroll;
+            editor.focus();
+            editor.setCursor(docs[i].cursor.line, docs[i].cursor.ch);
 
-                // Activate tab-close button
-                var divClose = document.createElement("div");
-                divClose.className = "tab-close";
-                divClose.innerHTML = "<svg><use xlink:href=\"images/md.svg#icon-tab-close\"></use></svg>";
-                divClose.onclick = closeTab;
-                tabs[i].appendChild(divClose);
-                break;
-            }
+            // Set browser tab title
+            document.title = manifestData.name + " - " + activeTab.tab.getElementsByClassName("doc-title")[0].innerHTML;
+
+            // Set active
+            docs[i].active = true;
+
+            // Activate tab-close button
+            var divClose = document.createElement("div");
+            divClose.className = "tab-close";
+            divClose.innerHTML = "<svg><use xlink:href=\"images/md.svg#icon-tab-close\"></use></svg>";
+            divClose.onclick = closeTab;
+            activeTab.tab.appendChild(divClose);
         }
 
         // Save current workspace
@@ -426,7 +442,7 @@ function loadPrevWorks() {
                 });
 
                 // Click active tab
-                if (activeTab) activeTab.dispatchEvent(mousedownEvent);
+                if (activeTab) activeTab.mousedown();
             } else {
                 addNewTab();
             }
@@ -449,9 +465,11 @@ function addNewTab() {
     // Add empty document to list
     docs.push({
         last_modified: "",
+        texts_original: "",
         texts: "",
         scrollbar: { left: 0, top: 0 },
         cursor: { line: 0, ch: 0 },
+        viewer_scroll: 0,
         active: false
     });
 
@@ -459,16 +477,26 @@ function addNewTab() {
     resizeTabWidths();
 
     // Click newly-created tab
-    newtab.dispatchEvent(mousedownEvent);
+    newtab.mousedown();
 
     // Set default format
-    initTextarea();
+    var template = initTextarea();
+    docs[docs.length - 1].texts_original = template;
+    docs[docs.length - 1].texts = template;
 
     // Set tab creation flag
     isNewTabCreated = true;
 }
 
 function closeTab() {
+    // Not to ask if confirmed to close the tab if the previous work is empty
+    var activeTab = getActiveTab();
+    var parsed = parse(editor.getValue());
+    if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
+        if (!confirm("Changes you made may not be saved.\nAre you sure to close the tab?"))
+            return;
+    }
+
     var tabs = document.getElementsByClassName("tab");
     var nTabs = tabs.length - 1;
     if (nTabs == 1) {
@@ -476,31 +504,32 @@ function closeTab() {
         return;
     }
 
-    var activeTab = getActiveTab();
     if (activeTab) {
-        // Remove from document list
-        docs.splice(activeTab.index, 1);
-
-        // Remove from tabs
-        document.getElementById("tabs").removeChild(activeTab.tab);
-
         // Move to another tab
         if (activeTab.index === nTabs - 1) {
             if (isNewTabCreated) {
-                tabs[prevTabIdx].dispatchEvent(mousedownEvent);
+                tabs[prevWorkingTabIdx].mousedown();
                 isNewTabCreated = false;
             } else {
-                tabs[activeTab.index - 1].dispatchEvent(mousedownEvent);
+                tabs[activeTab.index - 1].mousedown();
             }
         } else {
-            tabs[activeTab.index].dispatchEvent(mousedownEvent);
+            tabs[activeTab.index + 1].mousedown();
         }
 
-        // Save current workspace
+        // Remove from document list
+        docs.splice(activeTab.index, 1);
         chrome.storage.local.set({ "documents": docs });
+        
+        // Tab removal animation
+        activeTab.tab.innerHTML = "";
+        activeTab.tab.style.padding = 0;
+        activeTab.tab.style.width = 0;
+        setTimeout(function() {
+            document.getElementById("tabs").removeChild(activeTab.tab);
+            resizeTabWidths();
+        }, 300);
     }
-
-    resizeTabWidths();
 }
 
 function resizeTabWidths() {
@@ -712,6 +741,8 @@ function initTextarea() {
 
         // Automatic preview rendering
         preview(parse(editor.getValue()));
+
+        return template;
     }
 }
 
@@ -778,13 +809,7 @@ function attachments() {
         }
     });
 
-    if (document.createEvent) {
-        var event = document.createEvent('MouseEvents');
-        event.initEvent('click', true, true);
-        input.dispatchEvent(event);
-    } else {
-        input.click();
-    }
+    input.click();
 }
 
 var Working = Object.freeze({ "READY": {}, "HEADER": {}, "BODY": {} });
@@ -905,6 +930,14 @@ function resetPostingTime() {
 }
 
 function openfile() {
+    // Not to ask if confirmed to open another document if the previous work is empty
+    var activeTab = getActiveTab();
+    var parsed = parse(editor.getValue());
+    if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
+        if (!confirm("Changes you made may not be saved.\nAre you sure to open another document?"))
+            return;
+    }
+
     var input = document.createElement("input");
     input.type = "file";
     input.name = "file";
@@ -916,17 +949,13 @@ function openfile() {
                 editor.setValue(evt.target.result);
                 editor.focus();
                 editor.setCursor(0, 0);
+
+                docs[activeTab.index].texts_original = editor.getValue();
             }
         };
         reader.readAsText(e.target.files[0]);
     });
-    if (document.createEvent) {
-        var event = document.createEvent('MouseEvents');
-        event.initEvent('click', true, true);
-        input.dispatchEvent(event);
-    } else {
-        input.click();
-    }
+    input.click();
 }
 
 function runJekyll() {
@@ -978,7 +1007,7 @@ function preview(parsed) {
             data += parsed.body.texts;
         
         // Show preview panel
-        var preview = document.getElementById("preview");
+        var viewer = document.getElementById("viewer");
         // ifrm.innerHTML += "<meta charset='utf-8'>";
         // ifrm.innerHTML += "<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
         // ifrm.innerHTML += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
@@ -987,7 +1016,7 @@ function preview(parsed) {
         // ifrm.innerHTML += "<link rel='stylesheet' href='preview/font-awesome/4.7.0/css/font-awesome.min.css'>";
         // ifrm.innerHTML += "<script type='text/x-mathjax-config' src='preview/preview.js'></script>";
         // ifrm.innerHTML += "<script type='text/javascript' async src='preview/mathjax/2.7.4/MathJax.js'></script>";
-        preview.innerHTML = marked(data);
+        viewer.innerHTML = marked(data);
     }
 }
 
@@ -1027,11 +1056,34 @@ function savefile() {
         filename += docHeader["title"].toLowerCase().split(" ").join("-")+".md";
 
         // Create download link element
+        chrome.downloads.setShelfEnabled(false);
         chrome.downloads.download({
             url: URL.createObjectURL(new Blob([data], {type: "text/x-markdown"})),
             filename: filename,
             conflictAction: "overwrite",
             saveAs: true
+        }, function(downloadId) {
+            chrome.downloads.onChanged.addListener(function(e) {
+                if (e.id == downloadId && e.state.current === "complete") {
+                    // Display alert message
+                    alert("Download Complete!");
+
+                    // Re-enable download shelf
+                    chrome.downloads.setShelfEnabled(true);
+
+                    // Save workspace data
+                    var activeTab = getActiveTab();
+                    docs[activeTab.index] = {
+                        last_modified: docs[activeTab.index].last_modified,
+                        texts_original: editor.getValue(),
+                        texts: editor.getValue(),
+                        scrollbar: editor.getScrollInfo(),
+                        cursor: editor.getCursor(),
+                        viewer_scroll: document.getElementById("viewer").scrollTop,
+                        active: true
+                    };
+                }
+            })
         });
     }
 }

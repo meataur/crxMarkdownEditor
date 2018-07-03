@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>mdEditor</title>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" href="font.css?family=Source+Sans+Pro:400,600,700">
   <link rel="stylesheet" href="style.css">
@@ -133,10 +132,10 @@
       <textarea spellcheck="false"></textarea>
     </div>
   </editor>
-  <div id="gutter"></div>
-  <preview style="width: calc(50% - 0.5px);">
+  <splitter></splitter>
+  <viewer style="width: calc(50% - 0.5px);">
     <div class="vpanel-header">
-      <label>Preview</label>
+      <label>Viewer</label>
       <toolbox>
         <!--
         <button type="button" id="btn-tool-html" title="Export as HTML">HTML</button>
@@ -145,9 +144,9 @@
       </toolbox>
     </div>
     <div class="vpanel-content">
-      <div id="preview"></div>
+      <div id="viewer"></div>
     </div>
-  </preview>
+  </viewer>
 </content>
 
 <overlay>

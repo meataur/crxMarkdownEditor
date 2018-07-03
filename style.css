@@ -34,7 +34,7 @@ body {
 
 header {
   display: block; position: relative; height: 60px;
-  background: #2d2d2d; font-family: "Source Sans Pro";
+  background: #383838; font-family: "Source Sans Pro";
   user-select: none;
 }
 header:after { content: ""; display: table; clear: both; }
@@ -54,14 +54,14 @@ li.tab {
   border-right: solid 1px #1e1e1e;
 }
 li.tab:last-child { padding: 0 1.6em; width: unset; font-size: .875em; }
-li.tab:hover { background: #383838; }
+li.tab:hover { background: #424242; }
 li.tab:active { color: #fff; }
 li.tab[active] { color: #fff; background: #1e1e1e; }
 li.tab div { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-li.tab .doc-datetime { font-size: .7em; line-height: 1; }
-li.tab .doc-title { font-size: .95em; line-height: 1.2; }
+li.tab .doc-datetime { font-size: .68em; line-height: 1; }
+li.tab .doc-title { font-size: .92em; line-height: 1.31; }
 li.tab .tab-close { position: absolute; width: 18px; height: 18px; padding: 5px; top: 5px; right: 5px; color: #a8afbd; }
-li.tab .tab-close:hover { background: #383838; border-radius: 3px; }
+li.tab .tab-close:hover { background: #424242; border-radius: 3px; }
 li.tab .tab-close:active { color: #fff; }
 li.tab .tab-close > svg { width: 8px; height: 8px; }
 
@@ -79,7 +79,7 @@ li.menuitem {
   float: right;
   border-left: solid 1px #1e1e1e;
 }
-li.menuitem:hover { background: #383838; }
+li.menuitem:hover { background: #424242; }
 
 
 
@@ -98,22 +98,22 @@ content { display: block; position: relative; height: calc(100vh - 60px); }
 }
 .vpanel-header > toolbox { display: flex; justify-content: flex-end; align-items: center; flex: 1; background-color: #1e1e1e; }
 .vpanel-header > toolbox > button { margin-left: .3em; padding: .2em .5em; height: 2em; border: none; border-radius: 3px; color: #a8afbd; background: none; }
-.vpanel-header > toolbox > button:hover { background-color: #383838; }
+.vpanel-header > toolbox > button:hover { background-color: #424242; }
 .vpanel-header > toolbox > button:active { color: #fff; }
 
 .svg-btn { display: inline-block; width: 1.1em; height: 1.1em; }
-toolbox > sep { margin: 0 .5em 0 .8em; height: 1em; border-left: 1px solid #383838; }
+toolbox > sep { margin: 0 .5em 0 .8em; height: 1em; border-left: 1px solid #424242; }
 
 .vpanel-content { position: relative; height: calc(100vh - 105px); overflow-x: hidden; overflow-y: auto; }
 
 editor { position: relative; height: 100%; float: left; user-select: none; }
 editor textarea { display: block; width: 100%; border: none; resize: vertical; font-family: 'consolas'; }
-div#gutter { position: relative; width: 1px; height: 100%; float: left; background: #1e1e1e; cursor: ew-resize; }
-div#gutter:after { content: ""; position: absolute; width: 8px; height: 100%; left: -3px; z-index: 100; }
-preview { position: relative; height: 100%; float: left; }
-div#preview {
+splitter { position: relative; width: 1px; height: 100%; float: left; background: #1e1e1e; cursor: ew-resize; }
+splitter:after { content: ""; position: absolute; width: 8px; height: 100%; left: -3px; z-index: 100; }
+viewer { position: relative; height: 100%; float: left; }
+div#viewer {
   display: block; padding: 1em; width: 100%; height: 100%;
-  font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .875em;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .92em;
   line-height: 1.6;
   transform: rotate(-0.0000000001deg);
   text-shadow: 0 0 1px rgba(0,0,0,.3);
