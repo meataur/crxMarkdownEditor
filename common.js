@@ -203,17 +203,25 @@ document.addEventListener('DOMContentLoaded', function() {
     window.onresize = resizeTabWidths;
 });
 
-function messageBox(text) {
+function messageBox(texts, duration) {
     var info = document.getElementsByTagName("info")[0];
     info.style.display = "none";
     var settings = document.getElementsByTagName('settings')[0];
     settings.style.display = 'none';
 
-    var overlay = document.getElementsByTagName("overlay")[0];
-    overlay.style.display = "block";
-    var messageBox = document.getElementsByTagName("messagebox")[0];
-    messageBox.innerHTML = text.replace(/\n/g, '<br />');;
-    messageBox.style.display = "block";
+    if (typeof(duration) === "undefined")
+        duration = 2000;
+
+    var tmpmsg = document.getElementsByTagName("tmpmsg")[0];
+    tmpmsg.innerHTML = texts.replace(/\n/g, '<br />');
+    tmpmsg.style.visibility = "visible";
+    tmpmsg.style.opacity = 1;
+    setTimeout(function() {
+        tmpmsg.style.opacity = 0;
+        setTimeout(function() {
+            tmpmsg.style.visibility = "hidden";
+        }, 300);
+    }, duration);
 }
 
 function loadSettings() {
@@ -1064,9 +1072,9 @@ function savefile() {
             saveAs: true
         }, function(downloadId) {
             chrome.downloads.onChanged.addListener(function(e) {
-                if (e.id == downloadId && e.state.current === "complete") {
+                if (e.id == downloadId && e.state && e.state.current === "complete") {
                     // Display alert message
-                    alert("Download Complete!");
+                    messageBox("Download Complete!");
 
                     // Re-enable download shelf
                     chrome.downloads.setShelfEnabled(true);
