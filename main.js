@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-tool-attachment').onclick = attachments;
     document.getElementById('btn-tool-prettify').onclick = prettify;
     document.getElementById('btn-tool-resettime').onclick = resetPostingTime;
-    document.getElementById('btn-tool-settings').onclick = openSettings;
+    document.getElementById('btn-tool-settings').onclick = openControlPanel;
 
     document.getElementById('localhost-port').onkeypress = numberOnly;
     document.getElementById('btn-download-ruby').onclick = downloadRuby;
@@ -146,16 +146,45 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('select-theme').onchange = selectTheme;
     document.getElementById('select-fontsize').onchange = selectFontsize;
 
-    // Set overlay handler
-    window.onclick = function(e) {
+    document.onmousedown = function(e) {
+        // Set overlay handler
         if (e.target == document.getElementsByTagName('overlay')[0]) {
             saveSettings();
             document.getElementsByTagName('overlay')[0].style.display = "none";
             document.getElementsByTagName("messagebox")[0].style.display = "none";
             document.getElementsByTagName("settings")[0].style.display = "none";
             document.getElementsByTagName("info")[0].style.display = "none";
+        } else {
+            collapseAll();
+            deselectAll();
         }
     }
+
+    // Set list item event handler
+    Array.from(document.getElementsByClassName("toolmenu")).forEach(function(toolmenu) {
+        toolmenu.addEventListener("mouseover", function(e) { this.classList.add("highlight"); });
+        toolmenu.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
+        toolmenu.addEventListener("click", function(e) {
+            collapseAll();
+            this.getElementsByClassName("dropdown")[0].style.display = "block";
+
+            deselectAll();
+            this.classList.add("selected");
+
+            e.stopPropagation();
+        });
+
+        Array.from(toolmenu.getElementsByClassName("dropdown")[0].children).forEach(function(menuitem) {
+            menuitem.addEventListener("mouseover", function(e) { this.classList.add("highlight"); e.stopPropagation(); });
+            menuitem.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
+            menuitem.addEventListener("click", function(e) {
+                collapseAll();
+                deselectAll();
+
+                e.stopPropagation();
+            });
+        });
+    });
 
     // Keyboard shortcut
     document.onkeydown = function(e) {
@@ -559,6 +588,17 @@ function resizeTabWidths() {
     });
 }
 
+function collapseAll() {
+    Array.from(document.getElementsByClassName("dropdown")).forEach(function(dropdown) {
+        dropdown.style.display = "none";
+    });
+}
+function deselectAll() {
+    Array.from(document.getElementsByClassName("selected")).forEach(function(selected) {
+        selected.classList.remove("selected");
+    });
+}
+
 function openExtensionInfo() {
     var overlay = document.getElementsByTagName("overlay")[0];
     overlay.style.display = "block";
@@ -566,7 +606,7 @@ function openExtensionInfo() {
     info.style.display = "block";
 }
 
-function openSettings() {
+function openControlPanel() {
     // Load setting values
     loadSettings();
 

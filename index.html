@@ -92,8 +92,8 @@
   <!-- Marked -->
 	<script src="marked/marked.min.js"></script>
 
-  <!-- Common Script -->
-  <script src="common.js"></script>
+  <!-- Main Script -->
+  <script src="main.js"></script>
 </head>
 <body>
 <header>
@@ -137,13 +137,25 @@
     <div class="vpanel-header">
       <label>Viewer</label>
       <toolbox>
-        <!--
-        <button type="button" id="btn-tool-html" title="Export as HTML">HTML</button>
-				<button type="button" id="btn-tool-pdf" title="Export as PDF">PDF</button>
-				-->
+        <ul>
+					<li class="toolmenu">
+						<span>export as</span>
+						<ul class="dropdown">
+							<li>HTML</li>
+							<li>PDF</li>
+						</ul>
+					</li>
+					<li class="toolmenu">
+						<span>view as</span>
+						<ul class="dropdown">
+							<li>HTML</li>
+							<li>PDF</li>
+						</ul>
+					</li>
+        </ul>
       </toolbox>
     </div>
-    <div class="vpanel-content">
+    <div class="vpanel-body">
       <div id="viewer"></div>
     </div>
   </viewer>
