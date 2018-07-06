@@ -8,6 +8,8 @@ var editor = null;
 var contentWrapper = null;
 var panelEditor = null;
 var panelViewer = null;
+var splitter = null;
+var isPanelResizing = false;
 
 // The variable storing current workspaces
 var docs = [];
@@ -18,12 +20,25 @@ var prevWorkingTabIdx = 0;
 var srcTab = null;
 var dragImage = null;
 
-// Splitter bar flag
-var isPanelResizing = false;
-
 // Create mousedown event
 var mousedownEvent = new MouseEvent("mousedown");
 Element.prototype.mousedown = function() { this.dispatchEvent(mousedownEvent); }
+
+// Set function to get ancestor element
+Element.prototype.getAncestorByTagName = function(tagName) {
+    var ancestor = this;
+    tagName = tagName.toLowerCase();
+    while (ancestor.tagName.toLowerCase() !== "body" && ancestor.tagName.toLowerCase() !== tagName)
+        ancestor = ancestor.parentNode;
+    return (ancestor.tagName.toLowerCase() === "body") ? null : ancestor;
+}
+Element.prototype.getAncestorByClassName = function(className) {
+    var ancestor = this;
+    className = className.toLowerCase();
+    while (ancestor.tagName.toLowerCase() !== "body" && !ancestor.classList.contains(className))
+        ancestor = ancestor.parentNode;
+    return (ancestor.tagName.toLowerCase() === "body") ? null : ancestor;
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     // Set tab title
@@ -85,10 +100,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Panels
+    // Panels and its splitter
     contentWrapper = document.getElementsByTagName("content")[0];
     panelEditor = document.getElementsByTagName("editor")[0];
     panelViewer = document.getElementsByTagName("viewer")[0];
+    splitter = document.getElementsByTagName("splitter")[0];
 
     // Load settings value
     loadSettings();
@@ -107,8 +123,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Enable panel splitter dragging
-    document.getElementsByTagName("splitter")[0].onmousedown = function(evt) {
+    splitter.onmousedown = function(evt) {
         isPanelResizing = true;
+    };
+    splitter.ondblclick = function(evt) {
+        panelEditor.style.width = "calc(50% - 0.5px)";
+        panelViewer.style.width = "calc(50% - 0.5px)";
     };
     document.onmouseup = function(evt) {
         isPanelResizing = false;
@@ -161,30 +181,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Set list item event handler
-    Array.from(document.getElementsByClassName("toolmenu")).forEach(function(toolmenu) {
-        toolmenu.addEventListener("mouseover", function(e) { this.classList.add("highlight"); });
-        toolmenu.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
-        toolmenu.addEventListener("click", function(e) {
-            collapseAll();
-            this.getElementsByClassName("dropdown")[0].style.display = "block";
+    Array.from(document.getElementsByClassName("panelmenu")).forEach(function(panelMenu) {
+        Array.from(panelMenu.getElementsByTagName("li")).forEach(function(menuItem) {
+            var dropdown = menuItem.getElementsByClassName("dropdown")[0];
+            if (dropdown) {
+                // Add caret to panel item
+                menuItem.classList.add("has-dropdown");
+                
+                // Set dropdown menu item's event handler
+                Array.from(dropdown.children).forEach(function(dropdownItem) {
+                    dropdownItem.addEventListener("mouseover", function(e) { this.classList.add("highlight"); e.stopPropagation(); });
+                    dropdownItem.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
+                    dropdownItem.addEventListener("click", function(e) {
+                        collapseAll();
+                        deselectAll();
 
-            deselectAll();
-            this.classList.add("selected");
+                        e.stopPropagation();
+                    });
+                });
+            }
 
-            e.stopPropagation();
-        });
-
-        Array.from(toolmenu.getElementsByClassName("dropdown")[0].children).forEach(function(menuitem) {
-            menuitem.addEventListener("mouseover", function(e) { this.classList.add("highlight"); e.stopPropagation(); });
-            menuitem.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
-            menuitem.addEventListener("click", function(e) {
+            menuItem.addEventListener("mouseover", function(e) { this.classList.add("highlight"); });
+            menuItem.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
+            menuItem.addEventListener("mousedown", function(e) {
                 collapseAll();
-                deselectAll();
 
-                e.stopPropagation();
+                // Show dropdown menu
+                if (dropdown) {
+                    dropdown.style.display = "block";
+
+                    // Adjust dropdown menu's position
+                    adjustDropdownPosition(this);
+
+                    // Deselect all panel items
+                    deselectAll();
+
+                    // Select current panel item
+                    this.classList.add("selected");
+
+                    e.stopPropagation();
+                }
             });
         });
     });
+
+    document.getElementById("viewer-print").onclick = printPreview;
+    document.getElementById("viewer-expand").onclick = expandViewer;
 
     // Keyboard shortcut
     document.onkeydown = function(e) {
@@ -376,19 +418,18 @@ function createTab(docDatetime, docTitle) {
         e.dataTransfer.dropEffect = "move";
 
         // Select list item
-        var dstTab = e.target;
-        while (dstTab.tagName.toLowerCase() != "li")
-            dstTab = dstTab.parentNode;
-
-        // Swap two list-items
-        var srcIdx = Array.prototype.indexOf.call(dstTab.parentNode.children, srcTab);
-        var dstIdx = Array.prototype.indexOf.call(dstTab.parentNode.children, dstTab);
-        if (dstIdx < srcIdx) {
-            dstTab.parentNode.insertBefore(srcTab, dstTab);
-            docs[srcIdx] = docs.splice(dstIdx, 1, docs[srcIdx])[0];
-        } else if (srcIdx < dstIdx) {
-            dstTab.parentNode.insertBefore(srcTab, dstTab.nextSibling);
-            docs[srcIdx] = docs.splice(dstIdx, 1, docs[srcIdx])[0];
+        var dstTab = e.target.getAncestorByTagName("li");
+        if (dstTab) {
+            // Swap two list-items
+            var srcIdx = Array.prototype.indexOf.call(dstTab.parentNode.children, srcTab);
+            var dstIdx = Array.prototype.indexOf.call(dstTab.parentNode.children, dstTab);
+            if (dstIdx < srcIdx) {
+                dstTab.parentNode.insertBefore(srcTab, dstTab);
+                docs[srcIdx] = docs.splice(dstIdx, 1, docs[srcIdx])[0];
+            } else if (srcIdx < dstIdx) {
+                dstTab.parentNode.insertBefore(srcTab, dstTab.nextSibling);
+                docs[srcIdx] = docs.splice(dstIdx, 1, docs[srcIdx])[0];
+            }
         }
     });
     li.addEventListener("dragend", function(e) {
@@ -440,8 +481,12 @@ function createTab(docDatetime, docTitle) {
             // Activate tab-close button
             var divClose = document.createElement("div");
             divClose.className = "tab-close";
+            divClose.title = "Close tab";
             divClose.innerHTML = "<svg><use xlink:href=\"images/md.svg#icon-tab-close\"></use></svg>";
             divClose.onclick = closeTab;
+            divClose.onmouseover = function(e) { e.stopPropagation(); }
+
+            // Attach tab-close button to each tab
             activeTab.tab.appendChild(divClose);
         }
 
@@ -588,6 +633,24 @@ function resizeTabWidths() {
     });
 }
 
+function adjustDropdownPosition(el) {
+    var dropdown = el.getElementsByClassName("dropdown")[0];
+    if (dropdown.style.display === "none")
+        return;
+    
+    var containerWidth = parseInt(window.getComputedStyle(el.getAncestorByClassName("vpanel-header")).width);
+    var thisLeft = parseInt(el.offsetLeft);
+    var dropdownWidth = parseInt(window.getComputedStyle(dropdown).width);
+
+    if (containerWidth - thisLeft > dropdownWidth) {
+        dropdown.classList.remove("leftward");
+        dropdown.classList.add("rightward");
+    } else {
+        dropdown.classList.remove("rightward");
+        dropdown.classList.add("leftward");
+    }
+}
+
 function collapseAll() {
     Array.from(document.getElementsByClassName("dropdown")).forEach(function(dropdown) {
         dropdown.style.display = "none";
@@ -597,6 +660,42 @@ function deselectAll() {
     Array.from(document.getElementsByClassName("selected")).forEach(function(selected) {
         selected.classList.remove("selected");
     });
+}
+
+function printPreview(e) {
+    var ifrm = document.createElement("iframe");
+    ifrm.style.position = "absolute";
+    ifrm.style.top = 0;
+    ifrm.style.width = 0;
+    document.body.appendChild(ifrm);
+
+    ifrm.contentDocument.head.innerHTML = "<link rel=\"stylesheet\" type=\"text/css\" href=\"preview.css\" media=\"print\">";
+    ifrm.contentDocument.body.appendChild(document.getElementById("viewer").cloneNode("true"));
+    ifrm.contentWindow.print();
+
+    document.body.removeChild(ifrm);
+}
+
+function expandViewer(e) {
+    if (this.hasAttribute("expanded")) {
+        this.removeAttribute("expanded");
+        this.getElementsByTagName("span")[0].innerHTML = "expanded mode";
+        document.getElementsByTagName("header")[0].style.display = "block";
+        document.getElementsByTagName("content")[0].style.height = "calc(100vh - 60px)";
+        document.getElementById("viewer").getAncestorByClassName("vpanel-body").style.height = "calc(100vh - 105px)";
+        panelEditor.style.display = "block";
+        splitter.style.display = "block";
+        panelViewer.style.width = "calc(50% - 0.5px)";
+    } else {
+        this.setAttribute("expanded", "");
+        this.getElementsByTagName("span")[0].innerHTML = "normal mode";
+        document.getElementsByTagName("header")[0].style.display = "none";
+        document.getElementsByTagName("content")[0].style.height = "calc(100vh)";
+        document.getElementById("viewer").getAncestorByClassName("vpanel-body").style.height = "calc(100vh - 45px)";
+        panelEditor.style.display = "none";
+        splitter.style.display = "none";
+        panelViewer.style.width = "100%";
+    }
 }
 
 function openExtensionInfo() {

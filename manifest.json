@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "MDEditor",
     "description": "This extension makes it easy for you to post markdown document for static blog generator such as Jekyll",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "offline_enabled": true,
     "background": {
         "scripts": ["background.js"],
