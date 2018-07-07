@@ -88,6 +88,9 @@
 	<script src="codemirror/dialog/dialog.js"></script>
 	<script src="codemirror/activeline/active-line.js"></script>
 
+	<!-- JSZip -->
+	<script src="jszip/jszip.min.js"></script>
+
 	<!-- Marked -->
 	<script src="marked/marked.min.js"></script>
 
@@ -165,16 +168,31 @@
 
 		<localhost>
 			<div class="vpanel-header">
-				<label>localhost jekyll</label>
+				<label>jekyll on localhost</label>
 				<toolbox>
 					<ul class="panelmenu">
 						<li id="localhost-run-jekyll"><span>run jekyll</span></li>
-						<li id="localhost-save-settings"><span>save settings</span></li>
 					</ul>
 				</toolbox>
 			</div>
 			<div class="vpanel-body">
-				<div id="localhost" class="ext-page"></div>
+				<div id="localhost" class="ext-page">
+					<h1>Jekyll on Localhost</h1>
+					<h2>One-Time Installation Steps</h2>
+					<h3>Step 1. Install Jekyll</h3>
+					<div>Download and execute the latest version of Ruby language and Jekyll-Standalone installer:</div>
+					<button type="button" id="btn-download-ruby"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> RubyInstaller</button>
+					<button type="button" id="btn-download-jekyll"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll-Standalone v3.7.3</button>
+					<h3>Step 2. Set Localhost Environment</h3>
+					<ul>
+						<li><strong>Working Directory Path: </strong>
+						<input type="text" id="setting-jekyll-localpath" spellcheck="false"></li>
+						<li><strong>Port: </strong><input type="text" id="setting-jekyll-port" spellcheck="false" maxlength="5" size="5"></li>
+					</ul>
+					<h3>Step 3. Install Jekyll Launcher</h3>
+					<div>Download and execute the Jekyll Launcher:</div>
+					<button type="button" id="btn-download-jekylllauncher"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll Launcher</button>
+				</div>
 			</div>
 		</localhost>
 
@@ -188,9 +206,9 @@
 			</div>
 			<div class="vpanel-body">
 				<div id="appinfo" class="ext-page">
-					<h2><span class="appname"></span> <span class="appvers"></span></h2>
-					<p>Made by ChangUk (<a href="https://changuk.github.io" target="_blank">changuk.github.io</a>)</p>
-					<h3>Features and Tips</h3>
+					<h1><span class="appname"></span> <span class="appvers"></span></h1>
+					<div>Made by ChangUk (<a href="https://changuk.github.io" target="_blank">changuk.github.io</a>)</div>
+					<h2>Features and Tips</h2>
 					<ul>
 						<li>Support drag-and-drop to present files attached to markdown document.</li>
 						<li>Support hashing for preventing duplication of resource filenames.</li>
@@ -198,7 +216,7 @@
 						<li>Enable easy blog-posting through browser setting to ask where to save file before downloading.</li>
 						<li>Jekyll standalone installer is available at <a href="https://github.com/ChangUk/jekyll-standalone" target="_blank">github.com/ChangUk/jekyll-standalone</a>.</li>
 					</ul>
-					<h3>Keyboard Shortcuts</h3>
+					<h2>Keyboard Shortcuts</h2>
 					<ul>
 						<li>Find text matches: <kbd>Ctrl</kbd> + <kbd>F</kbd></li>
 						<li>Find next: <kbd>Enter</kbd></li>
@@ -206,11 +224,12 @@
 						<li>Replace all: <kbd>Ctrl</kbd> + <kbd>H</kbd></li>
 						<li>Jump to line: <kbd>Alt</kbd> + <kbd>G</kbd></li>
 					</ul>
-					<h3>Dependents</h3>
+					<h2>Dependents</h2>
 					<ul>
 						<li><a href="https://codemirror.net/" target="_blank">CodeMirror</a></li>
 						<li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
 						<li><a href="https://marked.js.org" target="_blank">Marked.js</a></li>
+						<li><a href="https://stuk.github.io/jszip/" target="_blank">JSZip.js</a></li>
 						<li><a href="https://icomoon.io" target="_blank">IcoMoon</a></li>
 					</ul>
 				</div>
@@ -220,13 +239,6 @@
 
 </content>
 
-<messagebox></messagebox>
-
-
-
-
-
-
 
 
 
@@ -234,30 +246,7 @@
 <overlay>
 	<settings class="modal">
 		<section>
-			<sectionlabel>JEKYLL EXECUTION :: LOCALHOST SETUP</sectionlabel>
-			<subsection>
-				<subsectionlabel>Working Directory Path:</subsectionlabel>
-				<subsectionvalue>
-					<input type="text" id="working-dirpath" spellcheck="false">
-				</subsectionvalue>
-			</subsection>
-			<subsection>
-				<inlinesubsectionlabel>Localhost Port:</inlinesubsectionlabel>
-				<input type="text" id="localhost-port" spellcheck="false" maxlength="5" size="5">
-			</subsection>
-			<subsection>
-				<inlinesubsectionlabel>Jekyll Setup:</inlinesubsectionlabel>
-				<button type="button" id="btn-download-ruby"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> RubyInstaller</button>
-				<button type="button" id="btn-download-jekyll"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll-Standalone v3.7.3</button>
-			</subsection>
-			<subsection>
-				<inlinesubsectionlabel>JekyllServe Installation:</inlinesubsectionlabel>
-				<button type="button" id="btn-download-installer"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Installer</button>
-				<button type="button" id="btn-download-uninstaller"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Uninstaller</button>
-			</subsection>
-		</section>
-		<section>
-			<sectionlabel>EDITOR :: APPEARANCE</sectionlabel>
+			<sectionlabel>APPEARANCE</sectionlabel>
 			<subsection>
 				<inlinesubsectionlabel>Theme: </inlinesubsectionlabel>
 				<select id="select-theme">
@@ -335,7 +324,7 @@
 			</subsection>
 		</section>
 		<section>
-			<sectionlabel>EDITOR :: ATTACHMENT SYNTAX</sectionlabel>
+			<sectionlabel>ATTACHMENT SYNTAX</sectionlabel>
 			<subsection>
 				<subsectionlabel>Location:</subsectionlabel>
 				<subsectionvalue>

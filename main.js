@@ -168,14 +168,22 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-tool-resettime').onclick = resetPostingTime;
     document.getElementById('btn-tool-settings').onclick = openControlPanel;
 
-    document.getElementById('localhost-port').onkeypress = numberOnly;
+    document.getElementById('setting-jekyll-port').onkeypress = numberOnly;
     document.getElementById('btn-download-ruby').onclick = downloadRuby;
     document.getElementById('btn-download-jekyll').onclick = downloadJekyllStandalone;
-    document.getElementById('btn-download-installer').onclick = downloadJekyllServeInstaller;
-    document.getElementById('btn-download-uninstaller').onclick = downloadJekyllServeUninstaller;
+    document.getElementById('btn-download-jekylllauncher').onclick = downloadJekyllServeInstaller;
 
+    // Setting values onchange handlers
     document.getElementById('select-theme').onchange = selectTheme;
     document.getElementById('select-fontsize').onchange = selectFontsize;
+    document.getElementById("setting-jekyll-localpath").onchange = function(e) {
+        chrome.storage.local.set({ settingJekyllLocalpath: document.getElementById("setting-jekyll-localpath").value.replace(/\\+$/, '') });
+        messageBox("Auto Save");
+    }
+    document.getElementById("setting-jekyll-port").onchange = function(e) {
+        chrome.storage.local.set({ settingJekyllPort: document.getElementById("setting-jekyll-port").value.replace(/\\+$/, '') });
+        messageBox("Auto Save");
+    }
 
     document.onmousedown = function(e) {
         // Set overlay handler
@@ -290,16 +298,20 @@ function messageBox(texts, duration) {
     settings.style.display = 'none';
 
     if (typeof(duration) === "undefined")
-        duration = 2000;
+        duration = texts.length * 60;
+    if (duration >= 3000)
+        duration = 3000;
 
-    var msgbox = document.getElementsByTagName("messagebox")[0];
+    var msgbox = document.createElement("messagebox");
     msgbox.innerHTML = texts.replace(/\n/g, '<br />');
-    msgbox.style.visibility = "visible";
-    msgbox.style.opacity = 1;
+    document.body.appendChild(msgbox);
+    setTimeout(function() {
+        msgbox.style.opacity = 1;
+    }, 100);
     setTimeout(function() {
         msgbox.style.opacity = 0;
         setTimeout(function() {
-            msgbox.style.visibility = "hidden";
+            msgbox.parentNode.removeChild(msgbox);
         }, 300);
     }, duration);
 }
@@ -311,32 +323,19 @@ function messageBox(texts, duration) {
  */
 
 function loadSettings() {
-    chrome.storage.local.get('working_dirpath', function(result) {
-        if (result.working_dirpath) {
-            document.getElementById("working-dirpath").value = result.working_dirpath;
-        }
+    chrome.storage.local.get('settingJekyllLocalpath', function(result) {
+        document.getElementById("setting-jekyll-localpath").value = result.settingJekyllLocalpath ? result.settingJekyllLocalpath : "";
     });
-    chrome.storage.local.get('localhost_port', function(result) {
-        if (result.localhost_port) {
-            document.getElementById("localhost-port").value = result.localhost_port;
-        } else {
-            document.getElementById("localhost-port").value = 4000;
-        }
+    chrome.storage.local.get("settingJekyllPort", function(result) {
+        document.getElementById("setting-jekyll-port").value = result.settingJekyllPort ? result.settingJekyllPort : 4000;
     });
     chrome.storage.local.get('theme', function(result) {
-        if (result.theme) {
-            document.getElementById("select-theme").value = result.theme;
-            selectTheme();
-        }
+        document.getElementById("select-theme").value = result.theme ? result.theme : "default";
+        selectTheme();
     });
     chrome.storage.local.get('fontsize', function(result) {
-        if (result.fontsize) {
-            document.getElementById("select-fontsize").value = result.fontsize;
-            selectFontsize();
-        } else {
-            document.getElementById("select-fontsize").value = "14";
-            selectFontsize();
-        }
+        document.getElementById("select-fontsize").value = result.fontsize ? result.fontsize : "14";
+        selectFontsize();
     });
     chrome.storage.local.get('attachment_location', function(result) {
         if (result.attachment_location) {
@@ -370,8 +369,6 @@ function saveSettings() {
     var fontsizeselector = document.getElementById("select-fontsize");
     
     chrome.storage.local.set({
-        'working_dirpath': document.getElementById("working-dirpath").value.replace(/\\+$/, ''),
-        'localhost_port': document.getElementById("localhost-port").value,
         'theme': themeselector.options[themeselector.selectedIndex].textContent,
         'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
         'attachment_location': document.getElementById('attachment-location').value.replace(/\/+$/, ''),
@@ -541,7 +538,6 @@ function createTab(docDatetime, docTitle) {
             divClose.title = "Close tab";
             divClose.innerHTML = "<svg><use xlink:href=\"images/md.svg#icon-tab-close\"></use></svg>";
             divClose.onclick = closeTab;
-            divClose.onmouseover = function(e) { e.stopPropagation(); }
 
             // Attach tab-close button to each tab
             activeTab.tab.appendChild(divClose);
@@ -774,7 +770,7 @@ function expandViewer() {
 
  function runJekyll() {
     document.getElementById('localhost-run-jekyll').disabled = true;
-    var localhost_port = document.getElementById("localhost-port").value;
+    var localhost_port = document.getElementById("setting-jekyll-port").value;
     if (!localhost_port) {
         messageBox("Invalid localhost port!");
         document.getElementById('localhost-run-jekyll').disabled = false;
@@ -810,7 +806,7 @@ function expandViewer() {
     });
     xhr.open("GET", "http://localhost:" + localhost_port + "/", true);
     xhr.send();
- }
+}
 
 
 
@@ -854,19 +850,19 @@ function downloadJekyllStandalone() {
 }
 
 function downloadJekyllServeInstaller() {
-    var workingDirectory = document.getElementById("working-dirpath").value;
+    var workingDirectory = document.getElementById("setting-jekyll-localpath").value;
     if (!workingDirectory) {
         messageBox("Invalid working directory path!");
         return;
     }
 
-    var localhostPort = document.getElementById("localhost-port").value;
+    var localhostPort = document.getElementById("setting-jekyll-port").value;
     if (!localhostPort) {
         messageBox("Invalid localhost port!");
         return;
     }
 
-    var filedata = `@ECHO OFF
+    var installer = `@ECHO OFF
 SETLOCAL ENABLEDELAYEDEXPANSION
 
 SET JEKYLLSERVE_PORT=` + localhostPort + `
@@ -912,20 +908,7 @@ EXIT /b
     EXIT /b
 `;
 
-    var a = document.createElement('a');
-    a.href = 'data:application/x-bat,' + encodeURI(filedata);
-    a.download = "install_jekyllserve.bat";
-    a.click();
-}
-
-function downloadJekyllServeUninstaller() {
-    var localhostPort = document.getElementById("localhost-port").value;
-    if (!localhostPort) {
-        messageBox("Invalid localhost port!");
-        return;
-    }
-
-    var filedata = `@ECHO OFF
+    var uninstaller = `@ECHO OFF
 SETLOCAL ENABLEDELAYEDEXPANSION
 
 SET JEKYLLSERVE_PORT=` + localhostPort + `
@@ -956,10 +939,15 @@ EXIT /b
     EXIT /b
 `;
 
-    var a = document.createElement('a');
-    a.href = 'data:application/x-bat,' + encodeURI(filedata);
-    a.download = "uninstall_jekyllserve.bat";
-    a.click();
+    var zip = new JSZip();
+    zip.file("installer.bat", installer);
+    zip.file("uninstaller.bat", uninstaller);
+    zip.generateAsync({ type: "blob" }).then(function(zipped) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(zipped);
+        a.download = "jekyll_launcher.zip";
+        a.click();
+    });
 }
 
 function selectTheme() {

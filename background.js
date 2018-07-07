@@ -44,26 +44,24 @@ chrome.browserAction.onClicked.addListener(function(tab) {
                         });
 
                         // Save setting values
-                        var themeselector = view.document.getElementById("select-theme");
-                        var fontsizeselector = view.document.getElementById("select-fontsize");
-                        chrome.storage.local.set({
-                            'working_dirpath': view.document.getElementById("working-dirpath").value.replace(/\\+$/, ''),
-                            'localhost_port': view.document.getElementById("localhost-port").value,
-                            'theme': themeselector.options[themeselector.selectedIndex].textContent,
-                            'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
-                            'attachment_location': view.document.getElementById('attachment-location').value.replace(/\/+$/, ''),
-                            'hashing': view.document.querySelector('input[name="hashing"]:checked').value
-                        });
+                        // var themeselector = view.document.getElementById("select-theme");
+                        // var fontsizeselector = view.document.getElementById("select-fontsize");
+                        // chrome.storage.local.set({
+                        //     'theme': themeselector.options[themeselector.selectedIndex].textContent,
+                        //     'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
+                        //     'attachment_location': view.document.getElementById('attachment-location').value.replace(/\/+$/, ''),
+                        //     'hashing': view.document.querySelector('input[name="hashing"]:checked').value
+                        // });
 
-                        try {
-                            // JSON parsing test
-                            JSON.parse(view.document.getElementById('attachment-type').value);
-                            chrome.storage.local.set({
-                                'attachment_type': view.document.getElementById('attachment-type').value.split(' ').join('')
-                            });
-                        } catch (err) {
-                            console.log(err);
-                        }
+                        // try {
+                        //     // JSON parsing test
+                        //     JSON.parse(view.document.getElementById('attachment-type').value);
+                        //     chrome.storage.local.set({
+                        //         'attachment_type': view.document.getElementById('attachment-type').value.split(' ').join('')
+                        //     });
+                        // } catch (err) {
+                        //     console.log(err);
+                        // }
                     }
                 });
             });
