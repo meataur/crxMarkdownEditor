@@ -22,7 +22,10 @@ svg { display: inline-flex; align-self: center; fill: currentColor; stroke: curr
 @media screen and (min-width: 30em) {
 }
 
-body { min-width: 800px; min-height: 500px; font-weight: 400; }
+body {
+  min-width: 800px; min-height: 500px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400;
+}
 
 
 
@@ -30,7 +33,7 @@ body { min-width: 800px; min-height: 500px; font-weight: 400; }
 
 header {
   display: block; position: relative; height: 60px;
-  background: #383838; font-family: "Source Sans Pro"; user-select: none;
+  background: #383838; user-select: none;
 }
 header:after { content: ""; display: table; clear: both; }
 
@@ -43,23 +46,23 @@ li.tab {
   float: left;
   border-right: solid 1px #1e1e1e;
 }
-li.tab:last-child { padding: 0 1.6em; width: unset; font-size: .875rem; }
+li.tab:last-child { padding: 0 1.6em; width: unset; font-size: .75rem; }
 li.tab:hover { background: #424242; }
 li.tab:active { color: #fff; }
 li.tab[active] { color: #fff; background: #1e1e1e; }
 li.tab div { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-li.tab .doc-datetime { font-size: .68rem; line-height: 1; }
-li.tab .doc-title { font-size: .92rem; line-height: 1.31; }
+li.tab .doc-datetime { margin-top: 1px; margin-bottom: -1px; font-size: .65rem; line-height: 1; }
+li.tab .doc-title { font-size: .85rem; line-height: 1.4; }
 li.tab .tab-close { position: absolute; width: 1em; height: 1em; top: 7px; right: 7px; color: #424242; transition-duration: .3s; }
 li.tab .tab-close:hover { color: #a8afbd; }
 li.tab .tab-close:active { color: #fff; }
 li.tab .tab-close > svg { width: 1em; height: 1em; }
 
-menu { display: block; float: right; }
+menu { display: block; float: right; color: #a8afbd; }
 ul#menu { list-style: none; }
 li.menuitem {
   position: relative; margin: 0; padding: 0 1.6em; height: 60px; float: right;
-  color: #a8afbd; font-size: .875rem; font-family: "Source Sans Pro"; line-height: 60px;
+  font-size: .75rem; text-transform: uppercase; line-height: 60px;
   transition-duration: .3s;
 }
 li.menuitem:hover { background: #424242; }
@@ -78,11 +81,14 @@ content { display: block; position: relative; height: calc(100vh - 60px); }
 }
 .vpanel-header:after { content: ""; display: table; clear: both; }
 .vpanel-header > label {
-  display: block; padding-top: 8px; height: 45px; float: left;
-  color: #a8afbd; font-family: "Source Sans Pro"; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; line-height: 37px;
+  display: block; padding-top: 8px; height: 45px; line-height: 37px; float: left;
+  color: #a8afbd; font-size: .6rem; text-transform: uppercase; letter-spacing: .5px;
 }
 .vpanel-header > toolbox { display: block; float: right; height: 45px; line-height: 45px; }
-.vpanel-header > toolbox > button { margin-left: .3em; padding: .5em; border: none; border-radius: 3px; color: #a8afbd; background: none; }
+.vpanel-header > toolbox > button {
+  margin-left: .3em; padding: .5em;
+  border: none; border-radius: 3px; color: #a8afbd; background: none; transition-duration: .3s;
+}
 .vpanel-header > toolbox > button:hover { color: #fff; background-color: #424242; }
 .vpanel-header > toolbox > button:active { color: #fff; }
 .vpanel-header > toolbox > sep { margin: 0 .5em 0 .8em; height: 1em; border-left: 1px solid #424242; }
@@ -90,8 +96,9 @@ content { display: block; position: relative; height: calc(100vh - 60px); }
 toolbox ul { list-style: none; font-size: 0; line-height: 1; }
 toolbox ul > li {
   position: relative; display: inline-block; margin: 0; padding: 0 1.6em; height: 45px;
-  color: #a8afbd; font-family: "Source Sans Pro"; font-size: .75rem; text-transform: uppercase; line-height: 45px;
+  color: #a8afbd; font-size: .7rem; text-transform: uppercase; line-height: 45px;
 }
+toolbox ul.panelmenu > li { transition: color .3s; }
 toolbox ul.panelmenu > li.selected { color: #fff; background: #005e9c; }
 toolbox ul.panelmenu > li.highlight { color: #fff; }
 toolbox ul.panelmenu > li:active { background: #005e9c; }
@@ -101,7 +108,7 @@ toolbox ul.panelmenu > li.has-dropdown:after {
   vertical-align: middle;
   border-top: 4px solid; border-right: 4px solid transparent; border-left: 4px solid transparent;
 }
-toolbox ul.dropdown { position: absolute; right: 0; display: none; background: #005e9c; white-space: nowrap; min-width: 150px; z-index: 1; }
+toolbox ul.dropdown { position: absolute; right: 0; display: none; background: #005e9c; white-space: nowrap; min-width: 150px; z-index: 102; }
 toolbox ul.dropdown.leftward { right: 0; }
 toolbox ul.dropdown.rightward { left: 0; }
 toolbox ul.dropdown > li { display: block; padding: 0 1.6em; color: #fff; transition-duration: .3s; }
@@ -113,20 +120,58 @@ toolbox ul.dropdown > li:hover { background: #0473bc; }
 
 .vpanel-body { position: relative; height: calc(100vh - 105px); overflow-x: hidden; overflow-y: auto; }
 
-editor { position: relative; height: 100%; float: left; user-select: none; }
-editor textarea { display: block; width: 100%; border: none; resize: vertical; font-family: 'consolas'; }
-splitter { position: relative; width: 1px; height: 100%; float: left; background: #1e1e1e; cursor: ew-resize; }
+editor {
+  position: relative; float: left; width: calc(50% - 0.5px);
+  user-select: none;
+}
+editor textarea { display: block; width: 100%; border: none; resize: vertical; font-family: 'consolas';}
+splitter {
+  position: relative; width: 1px; height: 100%; float: left;
+  background: #1e1e1e; cursor: ew-resize;
+}
 splitter:after { content: ""; position: absolute; width: 8px; height: 100%; left: -3px; z-index: 100; }
-viewer { position: relative; height: 100%; float: left; }
+splitter:hover:after { width: 9px; left: -4px; background: #a8afbd54; z-index: 101; }
+splitter:active:after { background: #42424254; }
+extension { position: relative; width: calc(50% - 0.5px); height: 100%; float: left; }
+viewer, localhost, appinfo { display: none; }
 div#viewer {
   display: block; padding: 1em; width: 100%; height: 100%;
-  font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .92rem;
-  line-height: 1.6;
+  font-size: .9rem; line-height: 1.6; background: #fff;
   transform: rotate(-0.0000000001deg);
   text-shadow: 0 0 1px rgba(0,0,0,.3);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden; overflow-y: scroll;
+}
+
+
+
+/* Extension page style */
+
+.ext-page {
+  display: block; padding: 1em; width: 100%; height: 100%;
+  font-size: .9rem; line-height: 1.6; background: #eee;
+  transform: rotate(-0.0000000001deg);
+  text-shadow: 0 0 1px rgba(0,0,0,.3);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; overflow-y: scroll;
+  user-select: none;
+}
+.ext-page ul, ol { margin: 1em 1.3em; }
+.ext-page li { margin-bottom: .4em; }
+.ext-page li > ul, li > ol { margin-top: 1em; margin-right: 0; margin-bottom: 1em; }
+
+
+
+/* Utilities */
+
+messagebox {
+  position: absolute; left: 50%; top: 120px; padding: 1em; transform: translateX(-50%);
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .9rem; user-select: none;
+  background-color: #fff; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px;
+  transition: opacity .3s; opacity: 0; visibility: hidden;
+  z-index: 2147483647;
 }
 
 
@@ -140,14 +185,7 @@ overlay { position: fixed; display: none; top: 0; right: 0; bottom: 0; left: 0; 
   background-color: #eee; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px;
   transform: translate(-50%, -50%);
 }
-tmpmsg {
-  position: absolute; left: 50%; top: 120px; padding: 1em; transform: translateX(-50%);
-  font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .9rem; user-select: none;
-  background-color: #fff; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px;
-  transition: opacity .3s; opacity: 0; visibility: hidden;
-  z-index: 2147483647;
-}
-messagebox { z-index: 2147483647; }
+
 settings { width: 510px; }
 
 section { display: block; margin-bottom: 1.6em; }
@@ -176,6 +214,7 @@ kbd {
   display: inline-block;
   margin: 0; padding: 0 .4em;
   border: 1px solid rgba(63,63,63,.25); border-radius: 3px; box-shadow: 0 1px 0 rgba(63,63,63,.25);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #fff; color: #333; font-size: .9rem; white-space: nowrap;
   user-select: none;
 }

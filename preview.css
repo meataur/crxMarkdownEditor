@@ -21,11 +21,8 @@
 #viewer figure { margin: 1.6em 0; }
 #viewer figure > img { display: block; }
 #viewer tablecaption, figcaption {
-  display: block;
-  font-size: 0.875rem;
-  text-align: center;
-  margin-bottom: 1.6em * 2;
-  color: #aaa;
+    display: block; margin-bottom: 1.6em * 2;
+    color: #aaa; font-size: 0.875rem; text-align: center;
 }
 #viewer tablecaption, figcaption > strong { user-select: none; margin-right: .5em; }
 
@@ -39,8 +36,7 @@
 #viewer a:hover { color: #111; text-decoration: underline; }
 
 #viewer blockquote {
-    margin: 1.6em 0;
-    padding: 1em 1.6em;
+    margin: 1.6em 0; padding: 1em 1.6em;
     border-left: 0.7em solid #eaeaea;
     background-color: #f7f7f7;
 }

@@ -7,7 +7,10 @@ var editor = null;
 // Vertical panels
 var contentWrapper = null;
 var panelEditor = null;
+var panelExtension = null;
 var panelViewer = null;
+var panelLocalhost = null;
+var panelAppInfo = null;
 var splitter = null;
 var isPanelResizing = false;
 
@@ -103,13 +106,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Panels and its splitter
     contentWrapper = document.getElementsByTagName("content")[0];
     panelEditor = document.getElementsByTagName("editor")[0];
+    panelExtension = document.getElementsByTagName("extension")[0];
     panelViewer = document.getElementsByTagName("viewer")[0];
+    panelLocalhost = document.getElementsByTagName("localhost")[0];
+    panelAppInfo = document.getElementsByTagName("appinfo")[0];
     splitter = document.getElementsByTagName("splitter")[0];
 
-    // Load settings value
-    loadSettings();
+    // Panel selection
+    document.getElementById('menu-viewer').onclick = openViewer;
+    document.getElementById('menu-localhost').onclick = openPanelLocalhost;
+    document.getElementById('menu-appinfo').onclick = openAppInfo;
+    document.getElementById('menu-viewer').click();
 
-    // Load previous works
+    // Extension functions
+    document.getElementById("localhost-run-jekyll").onclick = runJekyll;
+
+    // Load previous workspaces
+    loadSettings();
     loadPrevWorks();
 
     // Check real-time JSON format
@@ -128,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     splitter.ondblclick = function(evt) {
         panelEditor.style.width = "calc(50% - 0.5px)";
-        panelViewer.style.width = "calc(50% - 0.5px)";
+        panelExtension.style.width = "calc(50% - 0.5px)";
     };
     document.onmouseup = function(evt) {
         isPanelResizing = false;
@@ -141,13 +154,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         var ratio = offset / contentWrapper.clientWidth * 100;
         panelEditor.style.width = "calc(" + ratio + "% - 0.5px)";
-        panelViewer.style.width = "calc(" + (100 - ratio) + "% - 0.5px)";
+        panelExtension.style.width = "calc(" + (100 - ratio) + "% - 0.5px)";
     }
 
     // Set buttons event handler
     document.getElementById('newtab').onclick = addNewTab;
-    document.getElementById('btn-run-jekyllserve').onclick = runJekyll;
-    document.getElementById('btn-info').onclick = openExtensionInfo;
 
     document.getElementById('btn-tool-new').onclick = initTextarea;
     document.getElementById('btn-tool-open').onclick = openfile;
@@ -171,9 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target == document.getElementsByTagName('overlay')[0]) {
             saveSettings();
             document.getElementsByTagName('overlay')[0].style.display = "none";
-            document.getElementsByTagName("messagebox")[0].style.display = "none";
             document.getElementsByTagName("settings")[0].style.display = "none";
-            document.getElementsByTagName("info")[0].style.display = "none";
         } else {
             collapseAll();
             deselectAll();
@@ -225,6 +234,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    document.getElementById("viewer-export-html").onclick = saveAsHtml;
+    document.getElementById("viewer-export-pdf").onclick = saveAsPdf;
     document.getElementById("viewer-print").onclick = printPreview;
     document.getElementById("viewer-expand").onclick = expandViewer;
 
@@ -275,25 +286,29 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function messageBox(texts, duration) {
-    var info = document.getElementsByTagName("info")[0];
-    info.style.display = "none";
     var settings = document.getElementsByTagName('settings')[0];
     settings.style.display = 'none';
 
     if (typeof(duration) === "undefined")
         duration = 2000;
 
-    var tmpmsg = document.getElementsByTagName("tmpmsg")[0];
-    tmpmsg.innerHTML = texts.replace(/\n/g, '<br />');
-    tmpmsg.style.visibility = "visible";
-    tmpmsg.style.opacity = 1;
+    var msgbox = document.getElementsByTagName("messagebox")[0];
+    msgbox.innerHTML = texts.replace(/\n/g, '<br />');
+    msgbox.style.visibility = "visible";
+    msgbox.style.opacity = 1;
     setTimeout(function() {
-        tmpmsg.style.opacity = 0;
+        msgbox.style.opacity = 0;
         setTimeout(function() {
-            tmpmsg.style.visibility = "hidden";
+            msgbox.style.visibility = "hidden";
         }, 300);
     }, duration);
 }
+
+
+
+/**
+ * Workspaces
+ */
 
 function loadSettings() {
     chrome.storage.local.get('working_dirpath', function(result) {
@@ -376,6 +391,48 @@ function saveSettings() {
         return false;
     }
 }
+
+function loadPrevWorks() {
+    // Load previous workspace
+    chrome.storage.local.get("documents", function(result) {
+        if (result.documents) {
+            result.documents.forEach(function(doc) { docs.push(doc) });
+
+            if (docs.length) {
+                var ul = document.getElementById("tabs");
+                var activeTab = null;
+                docs.forEach(function(doc) {
+                    // Parse document text data
+                    var parsed = parse(doc.texts);
+                    var docDatetime = doc.last_modified.split(' ')[0];
+                    var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
+
+                    // Create tab
+                    var tab = createTab(docDatetime, docTitle);
+                    if (doc.active) activeTab = tab;
+                    
+                    // Add tab
+                    ul.insertBefore(tab, ul.children[ul.children.length - 1]);
+                });
+
+                // Click active tab
+                if (activeTab) activeTab.mousedown();
+            } else {
+                addNewTab();
+            }
+        } else {
+            addNewTab();
+        }
+
+        resizeTabWidths();
+    });
+}
+
+
+
+/**
+ * tabs
+ */
 
 function getActiveTab() {
     var tabs = document.getElementsByClassName("tab");
@@ -500,42 +557,6 @@ function createTab(docDatetime, docTitle) {
     return li;
 }
 
-function loadPrevWorks() {
-    // Load previous workspace
-    chrome.storage.local.get("documents", function(result) {
-        if (result.documents) {
-            result.documents.forEach(function(doc) { docs.push(doc) });
-
-            if (docs.length) {
-                var ul = document.getElementById("tabs");
-                var activeTab = null;
-                docs.forEach(function(doc) {
-                    // Parse document text data
-                    var parsed = parse(doc.texts);
-                    var docDatetime = doc.last_modified.split(' ')[0];
-                    var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
-
-                    // Create tab
-                    var tab = createTab(docDatetime, docTitle);
-                    if (doc.active) activeTab = tab;
-                    
-                    // Add tab
-                    ul.insertBefore(tab, ul.children[ul.children.length - 1]);
-                });
-
-                // Click active tab
-                if (activeTab) activeTab.mousedown();
-            } else {
-                addNewTab();
-            }
-        } else {
-            addNewTab();
-        }
-
-        resizeTabWidths();
-    });
-}
-
 function addNewTab() {
     // Create new tab
     var newtab = createTab(getCurDatetimeString().split(' ')[0], "Untitled Document");
@@ -633,6 +654,45 @@ function resizeTabWidths() {
     });
 }
 
+
+
+/**
+ * Panels
+ */
+
+function closeAllPanels() {
+    panelViewer.style.display = "none";
+    document.getElementById("menu-viewer").style.color = "unset";
+    panelLocalhost.style.display = "none";
+    document.getElementById("menu-localhost").style.color = "unset";
+    panelAppInfo.style.display = "none";
+    document.getElementById("menu-appinfo").style.color = "unset";
+}
+
+function openViewer() {
+    closeAllPanels();
+    panelViewer.style.display = "block";
+    document.getElementById("menu-viewer").style.color = "#fff";
+}
+
+function openPanelLocalhost() {
+    closeAllPanels();
+    panelLocalhost.style.display = "block";
+    document.getElementById("menu-localhost").style.color = "#fff";
+}
+
+function openAppInfo() {
+    closeAllPanels();
+    panelAppInfo.style.display = "block";
+    document.getElementById("menu-appinfo").style.color = "#fff";
+}
+
+
+
+/**
+ * Dropdown menu
+ */
+
 function adjustDropdownPosition(el) {
     var dropdown = el.getElementsByClassName("dropdown")[0];
     if (dropdown.style.display === "none")
@@ -662,7 +722,21 @@ function deselectAll() {
     });
 }
 
-function printPreview(e) {
+
+
+/**
+ * Extension functions
+ */
+
+function saveAsHtml() {
+    messageBox("Preparing...");
+}
+
+function saveAsPdf() {
+    messageBox("Preparing...");
+}
+
+function printPreview() {
     var ifrm = document.createElement("iframe");
     ifrm.style.position = "absolute";
     ifrm.style.top = 0;
@@ -676,7 +750,7 @@ function printPreview(e) {
     document.body.removeChild(ifrm);
 }
 
-function expandViewer(e) {
+function expandViewer() {
     if (this.hasAttribute("expanded")) {
         this.removeAttribute("expanded");
         this.getElementsByTagName("span")[0].innerHTML = "expanded mode";
@@ -685,7 +759,7 @@ function expandViewer(e) {
         document.getElementById("viewer").getAncestorByClassName("vpanel-body").style.height = "calc(100vh - 105px)";
         panelEditor.style.display = "block";
         splitter.style.display = "block";
-        panelViewer.style.width = "calc(50% - 0.5px)";
+        panelExtension.style.width = "calc(50% - 0.5px)";
     } else {
         this.setAttribute("expanded", "");
         this.getElementsByTagName("span")[0].innerHTML = "normal mode";
@@ -694,16 +768,55 @@ function expandViewer(e) {
         document.getElementById("viewer").getAncestorByClassName("vpanel-body").style.height = "calc(100vh - 45px)";
         panelEditor.style.display = "none";
         splitter.style.display = "none";
-        panelViewer.style.width = "100%";
+        panelExtension.style.width = "100%";
     }
 }
 
-function openExtensionInfo() {
-    var overlay = document.getElementsByTagName("overlay")[0];
-    overlay.style.display = "block";
-    var info = document.getElementsByTagName("info")[0];
-    info.style.display = "block";
-}
+ function runJekyll() {
+    document.getElementById('localhost-run-jekyll').disabled = true;
+    var localhost_port = document.getElementById("localhost-port").value;
+    if (!localhost_port) {
+        messageBox("Invalid localhost port!");
+        document.getElementById('localhost-run-jekyll').disabled = false;
+        return;
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener("load", function() {
+        messageBox("Jekyll is now running on port " + localhost_port + ".");
+        document.getElementById('localhost-run-jekyll').disabled = false;
+    });
+    xhr.addEventListener("error", function() {
+        chrome.runtime.sendNativeMessage("jekyllserve" + localhost_port, { text: "" }, function(response) {
+            if (!response) {
+                var lastError = chrome.runtime.lastError;
+                if (lastError) {
+                    if (lastError.message == "Access to the specified native messaging host is forbidden.") {
+                        // Do nothing
+                        messageBox("Invalid \"allowed_origins\" value in manifest JSON file!\nRe-install JekyllServe.");
+                    } else if (lastError.message == "Specified native messaging host not found.") {
+                        // Not found host application
+                        messageBox("Not found host application!\nInstall JekyllServe to be running on port " + localhost_port + ".");
+                    } else if (lastError.message == "Error when communicating with the native messaging host.") {
+                        // Jekyll is shut down.
+                    } else {
+                        // Do nothing
+                        messageBox("Unknown error occurred!");
+                    }
+                }
+            }
+            document.getElementById('localhost-run-jekyll').disabled = false;
+        });
+    });
+    xhr.open("GET", "http://localhost:" + localhost_port + "/", true);
+    xhr.send();
+ }
+
+
+
+/**
+ * Et cetera
+ */
 
 function openControlPanel() {
     // Load setting values
@@ -1103,46 +1216,6 @@ function openfile() {
         reader.readAsText(e.target.files[0]);
     });
     input.click();
-}
-
-function runJekyll() {
-    document.getElementById('btn-run-jekyllserve').disabled = true;
-    var localhost_port = document.getElementById("localhost-port").value;
-    if (!localhost_port) {
-        messageBox("Invalid localhost port!");
-        document.getElementById('btn-run-jekyllserve').disabled = false;
-        return;
-    }
-
-    var xhr = new XMLHttpRequest();
-    xhr.addEventListener("load", function() {
-        messageBox("Jekyll is now running on port " + localhost_port + ".");
-        document.getElementById('btn-run-jekyllserve').disabled = false;
-    });
-    xhr.addEventListener("error", function() {
-        chrome.runtime.sendNativeMessage("jekyllserve" + localhost_port, { text: "" }, function(response) {
-            if (!response) {
-                var lastError = chrome.runtime.lastError;
-                if (lastError) {
-                    if (lastError.message == "Access to the specified native messaging host is forbidden.") {
-                        // Do nothing
-                        messageBox("Invalid \"allowed_origins\" value in manifest JSON file!\nRe-install JekyllServe.");
-                    } else if (lastError.message == "Specified native messaging host not found.") {
-                        // Not found host application
-                        messageBox("Not found host application!\nInstall JekyllServe to be running on port " + localhost_port + ".");
-                    } else if (lastError.message == "Error when communicating with the native messaging host.") {
-                        // Jekyll is shut down.
-                    } else {
-                        // Do nothing
-                        messageBox("Unknown error occurred!");
-                    }
-                }
-            }
-            document.getElementById('btn-run-jekyllserve').disabled = false;
-        });
-    });
-    xhr.open("GET", "http://localhost:" + localhost_port + "/", true);
-    xhr.send();
 }
 
 function preview(parsed) {
