@@ -10,7 +10,7 @@ var panelEditor = null;
 var panelExtension = null;
 var panelViewer = null;
 var panelLocalhost = null;
-var panelAppInfo = null;
+var panelAbout = null;
 var splitter = null;
 var isPanelResizing = false;
 
@@ -109,13 +109,13 @@ document.addEventListener('DOMContentLoaded', function() {
     panelExtension = document.getElementsByTagName("extension")[0];
     panelViewer = document.getElementsByTagName("viewer")[0];
     panelLocalhost = document.getElementsByTagName("localhost")[0];
-    panelAppInfo = document.getElementsByTagName("appinfo")[0];
+    panelAbout = document.getElementsByTagName("about")[0];
     splitter = document.getElementsByTagName("splitter")[0];
 
     // Panel selection
     document.getElementById('menu-viewer').onclick = openViewer;
     document.getElementById('menu-localhost').onclick = openPanelLocalhost;
-    document.getElementById('menu-appinfo').onclick = openAppInfo;
+    document.getElementById('menu-about').onclick = openAbout;
     document.getElementById('menu-viewer').click();
 
     // Extension functions
@@ -159,14 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Set buttons event handler
     document.getElementById("create-tab").onclick = addNewTab;
-
-    document.getElementById('btn-tool-new').onclick = initTextarea;
-    document.getElementById('btn-tool-open').onclick = openfile;
-    document.getElementById('btn-tool-save').onclick = savefile;
-    document.getElementById('btn-tool-attachment').onclick = attachments;
-    document.getElementById('btn-tool-prettify').onclick = prettify;
-    document.getElementById('btn-tool-resettime').onclick = resetPostingTime;
-    document.getElementById('btn-tool-settings').onclick = openControlPanel;
 
     document.getElementById('setting-jekyll-port').onkeypress = numberOnly;
     document.getElementById('btn-download-ruby').onclick = downloadRuby;
@@ -242,10 +234,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    document.getElementById("editor-import-local").onclick = openfile;
+    document.getElementById("editor-save-local").onclick = savefile;
+    document.getElementById('editor-tools-template').onclick = initTextarea;
+    document.getElementById('editor-tools-attachment').onclick = attachments;
+    document.getElementById('editor-tools-prettify').onclick = prettify;
+    document.getElementById('editor-tools-updtdatetime').onclick = resetPostingTime;
+    document.getElementById('editor-tools-settings').onclick = openControlPanel;
+
     document.getElementById("viewer-export-html").onclick = saveAsHtml;
     document.getElementById("viewer-export-pdf").onclick = saveAsPdf;
     document.getElementById("viewer-print").onclick = printPreview;
-    document.getElementById("viewer-expand").onclick = expandViewer;
+    document.getElementById("viewer-view-expand").onclick = expandViewer;
 
     // Keyboard shortcut
     document.onkeydown = function(e) {
@@ -666,8 +666,8 @@ function closeAllPanels() {
     document.getElementById("menu-viewer").style.color = "unset";
     panelLocalhost.style.display = "none";
     document.getElementById("menu-localhost").style.color = "unset";
-    panelAppInfo.style.display = "none";
-    document.getElementById("menu-appinfo").style.color = "unset";
+    panelAbout.style.display = "none";
+    document.getElementById("menu-about").style.color = "unset";
 }
 
 function openViewer() {
@@ -682,10 +682,10 @@ function openPanelLocalhost() {
     document.getElementById("menu-localhost").style.color = "#fff";
 }
 
-function openAppInfo() {
+function openAbout() {
     closeAllPanels();
-    panelAppInfo.style.display = "block";
-    document.getElementById("menu-appinfo").style.color = "#fff";
+    panelAbout.style.display = "block";
+    document.getElementById("menu-about").style.color = "#fff";
 }
 
 
@@ -729,32 +729,58 @@ function deselectAll() {
  * Extension functions
  */
 
-function saveAsHtml() {
-    messageBox("Preparing...");
-}
-
-function saveAsPdf() {
-    messageBox("Preparing...");
-}
-
-function printPreview() {
+function createIframe(docTitle) {
     var ifrm = document.createElement("iframe");
     ifrm.style.position = "absolute";
     ifrm.style.top = 0;
     ifrm.style.width = 0;
+    ifrm.style.height = 0;
     document.body.appendChild(ifrm);
 
-    ifrm.contentDocument.head.innerHTML = "<link rel=\"stylesheet\" type=\"text/css\" href=\"preview.css\" media=\"print\">";
-    ifrm.contentDocument.body.appendChild(document.getElementById("viewer").cloneNode("true"));
-    ifrm.contentWindow.print();
+    // Method #1
+    ifrm.contentWindow.document.open();
+    ifrm.contentWindow.document.write("<html>\n<head>\n<title>" + docTitle + "</title>\n");
+    ifrm.contentWindow.document.write("<link rel=\"stylesheet\" href=\"preview/preview.css\">\n");
+    ifrm.contentWindow.document.write("<script type=\"text/javascript\" async src=\"lib/mathjax-2.7.4/MathJax.js\"></script>\n");
+    ifrm.contentWindow.document.write("<script type=\"text/javascript\" async src=\"preview/preview.js\"></script>\n");
+    ifrm.contentWindow.document.write("</head>\n");
+    ifrm.contentWindow.document.write("<body>\n" + document.getElementById("viewer").innerHTML + "</body>\n");
+    ifrm.contentWindow.document.write("</html>");
+    ifrm.contentWindow.document.close();
 
-    document.body.removeChild(ifrm);
+    return ifrm;
+}
+
+function saveAsHtml() {
+    var docTitle = getActiveTab().tab.getElementsByClassName("doc-title")[0].innerHTML;
+    var ifrm = createIframe(docTitle);
+    setTimeout(function () {
+        var link = document.createElement("a");
+        link.href = "data:text/html;charset=utf-8," + encodeURIComponent(ifrm.contentWindow.document.documentElement.outerHTML);
+        link.download = docTitle + ".html";
+        link.click();
+        document.body.removeChild(ifrm);
+    }, 500);
+}
+
+function saveAsPdf() {
+    messageBox("Not support yet...");
+}
+
+function printPreview() {
+    var docTitle = getActiveTab().tab.getElementsByClassName("doc-title")[0].innerHTML;
+    var ifrm = createIframe(docTitle);
+    setTimeout(function () {
+        ifrm.contentWindow.focus();
+        ifrm.contentWindow.print();
+        document.body.removeChild(ifrm);
+    }, 500);
 }
 
 function expandViewer() {
     if (this.hasAttribute("expanded")) {
         this.removeAttribute("expanded");
-        this.getElementsByTagName("span")[0].innerHTML = "expanded mode";
+        this.getElementsByTagName("span")[0].innerHTML = "expand screen";
         document.getElementsByTagName("header")[0].style.display = "block";
         document.getElementsByTagName("content")[0].style.height = "calc(100vh - 60px)";
         document.getElementById("viewer").getAncestorByClassName("vpanel-body").style.height = "calc(100vh - 105px)";
@@ -763,7 +789,7 @@ function expandViewer() {
         panelExtension.style.width = "calc(50% - 0.5px)";
     } else {
         this.setAttribute("expanded", "");
-        this.getElementsByTagName("span")[0].innerHTML = "normal mode";
+        this.getElementsByTagName("span")[0].innerHTML = "back to editor";
         document.getElementsByTagName("header")[0].style.display = "none";
         document.getElementsByTagName("content")[0].style.height = "calc(100vh)";
         document.getElementById("viewer").getAncestorByClassName("vpanel-body").style.height = "calc(100vh - 45px)";
@@ -1218,6 +1244,9 @@ function preview(parsed) {
             data += "# " + parsed.header.title + "\n\n";
         if (parsed.body.texts.length)
             data += parsed.body.texts;
+
+        // Set site's base url to localhost
+        data = data.replace(/{{ site.baseurl }}/gi, "http://localhost:" + document.getElementById("setting-jekyll-port").value);
         
         // Show preview panel
         var viewer = document.getElementById("viewer");

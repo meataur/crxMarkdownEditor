@@ -80,7 +80,7 @@
 	<script src="lib/codemirror-5.39.0/addon/selection/mark-selection.js"></script>
 	<script src="lib/codemirror-5.39.0/addon/selection/selection-pointer.js"></script>
 
-	<!-- CodeMirro stylesheet customization -->
+	<!-- CodeMirror stylesheet customization -->
 	<style type="text/css">
 		.CodeMirror { width: 100%; height: calc(100vh - 105px); font-family: 'consolas'; color: black; direction: ltr; cursor: text; font-weight: 300; }
 		.cm-s-default .cm-trailing-space-a:before,
@@ -125,7 +125,7 @@
 	</nav>
 	<menu>
 		<ul id="menu">
-			<li id="menu-appinfo" class="menuitem">help</li>
+			<li id="menu-about" class="menuitem">about</li>
 			<li id="menu-localhost" class="menuitem">jekyll</li>
 			<li id="menu-viewer" class="menuitem">viewer</li>
 		</ul>
@@ -137,15 +137,30 @@
 		<div class="vpanel-header">
 			<label>Editor</label>
 			<toolbox>
-				<button type="button" id="btn-tool-new" title="Make New Document"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-empty"></use></svg></button>
-				<button type="button" id="btn-tool-open" title="Open"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-open"></use></svg></button>
-				<button type="button" id="btn-tool-save" title="Save"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-file-save"></use></svg></button>
-				<sep></sep>
-				<button type="button" id="btn-tool-attachment" title="Attachments"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-attachment"></use></svg></button>
-				<button type="button" id="btn-tool-prettify" title="Prettify Code"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-formatting"></use></svg></button>
-				<button type="button" id="btn-tool-resettime" title="Reset Datetime"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-datetime"></use></svg></button>
-				<sep></sep>
-				<button type="button" id="btn-tool-settings" title="Settings"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-settings"></use></svg></button>
+				<ul class="panelmenu">
+					<li>
+						<span>import from</span>
+						<ul class="dropdown">
+							<li id="editor-import-local"><span>local system</span></li>
+						</ul>
+					</li>
+					<li>
+						<span>save to</span>
+						<ul class="dropdown">
+							<li id="editor-save-local"><span>local system</span></li>
+						</ul>
+					</li>
+					<li>
+						<span>tools</span>
+						<ul class="dropdown">
+							<li id="editor-tools-template"><span>make new</span></li>
+							<li id="editor-tools-attachment"><span>attachment</span></li>
+							<li id="editor-tools-prettify"><span>prettify</span></li>
+							<li id="editor-tools-updtdatetime"><span>update datetime</span></li>
+							<li id="editor-tools-settings"><span>settings</span></li>
+						</ul>
+					</li>
+				</ul>
 			</toolbox>
 		</div>
 		<div class="vpanel-content">
@@ -170,9 +185,9 @@
 							</ul>
 						</li>
 						<li>
-							<span>view as</span>
+							<span>view</span>
 							<ul class="dropdown">
-								<li id="viewer-expand"><span>expanded mode</span></li>
+								<li id="viewer-view-expand"><span>expand screen</span></li>
 							</ul>
 						</li>
 					</ul>
@@ -209,13 +224,14 @@
 					<h3>Step 3. Install Jekyll Launcher</h3>
 					<div>Download and execute the Jekyll Launcher:</div>
 					<button type="button" id="btn-download-jekylllauncher"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll Launcher</button>
+					<h3>Step 4. Enjoy Jekyll on Localhost</h3>
 				</div>
 			</div>
 		</localhost>
 
-		<appinfo>
+		<about>
 			<div class="vpanel-header">
-				<label>help page</label>
+				<label>about</label>
 				<toolbox>
 					<ul class="panelmenu">
 					</ul>
@@ -246,14 +262,13 @@
 					<h2>Dependents</h2>
 					<ul>
 						<li><a href="https://codemirror.net/" target="_blank">CodeMirror</a></li>
-						<li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
 						<li><a href="https://marked.js.org" target="_blank">Marked.js</a></li>
+						<li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
 						<li><a href="https://stuk.github.io/jszip/" target="_blank">JSZip.js</a></li>
-						<li><a href="https://www.flaticon.com" target="_blank">Flaticon</a></li>
 					</ul>
 				</div>
 			</div>
-		</appinfo>
+		</about>
 	</extension>
 
 </content>
