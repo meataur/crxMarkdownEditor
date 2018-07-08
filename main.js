@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Set buttons event handler
-    document.getElementById('newtab').onclick = addNewTab;
+    document.getElementById("create-tab").onclick = addNewTab;
 
     document.getElementById('btn-tool-new').onclick = initTextarea;
     document.getElementById('btn-tool-open').onclick = openfile;
@@ -451,7 +451,7 @@ function createTab(docDatetime, docTitle) {
 
     var li = document.createElement("li");
     li.className = "tab";
-    li.style.display = "none";
+    li.style.width = 0;
     li.title = docDatetime + "\n" + docTitle;
     li.appendChild(divDatetime);
     li.appendChild(divTitle);
@@ -554,11 +554,13 @@ function createTab(docDatetime, docTitle) {
 }
 
 function addNewTab() {
+    var ul = document.getElementById("tabs");
+
+    if (ul.children.length >= 10)
+        document.getElementById("create-tab").style.display = "none";
+
     // Create new tab
     var newtab = createTab(getCurDatetimeString().split(' ')[0], "Untitled Document");
-
-    // Add tab
-    var ul = document.getElementById("tabs");
     ul.insertBefore(newtab, ul.children[ul.children.length - 1]);
 
     // Add empty document to list
@@ -601,6 +603,8 @@ function closeTab() {
     if (nTabs == 1) {
         initTextarea();
         return;
+    } else if (nTabs == 10) {
+        document.getElementById("create-tab").style.display = "block";
     }
 
     if (activeTab) {
@@ -639,14 +643,15 @@ function resizeTabWidths() {
     });
 
     var tabs = document.getElementsByClassName("tab");
-    var addTabBtnWidth = parseInt(window.getComputedStyle(document.getElementById("newtab")).width);
+    var addTabBtn = document.getElementById("create-tab");
+    var addTabBtnWidth = parseInt(window.getComputedStyle(addTabBtn).width);
+    if (addTabBtn.style.display === "none")
+        addTabBtnWidth = 0;
     var newWidth = (bodyWidth - menuWidth - addTabBtnWidth - 100) / (tabs.length - 1);
     if (newWidth > 180) newWidth = 180;
     Array.from(tabs).forEach(function(tab) {
-        if (tab.id !== "newtab") {
+        if (tab.id !== "create-tab")
             tab.style.width = newWidth + "px";
-            tab.style.display = "block";
-        }
     });
 }
 
@@ -1264,7 +1269,6 @@ function savefile() {
         filename += docHeader["title"].toLowerCase().split(" ").join("-")+".md";
 
         // Create download link element
-        chrome.downloads.setShelfEnabled(false);
         chrome.downloads.download({
             url: URL.createObjectURL(new Blob([data], {type: "text/x-markdown"})),
             filename: filename,
@@ -1275,9 +1279,6 @@ function savefile() {
                 if (e.id == downloadId && e.state && e.state.current === "complete") {
                     // Display alert message
                     messageBox("Download Complete!");
-
-                    // Re-enable download shelf
-                    chrome.downloads.setShelfEnabled(true);
 
                     // Save workspace data
                     var activeTab = getActiveTab();

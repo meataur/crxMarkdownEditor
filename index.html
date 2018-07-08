@@ -4,95 +4,111 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="preview.css">
+	
+	<!-- CodeMirror -->
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/codemirror.css">
+	<script src="lib/codemirror-5.39.0/codemirror.js"></script>
+	<script src="lib/codemirror-5.39.0/mode/markdown/markdown.js"></script>
+	<script src="lib/codemirror-5.39.0/mode/xml/xml.js"></script>
 
-	<link rel="stylesheet" href="codemirror/editor.css">
-	<link rel="stylesheet" href="codemirror/dialog/dialog.css">
-	<link rel="stylesheet" href="codemirror/search/matchesonscrollbar.css">
+	<!-- CodeMirror themes -->
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/3024-night.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/abcdef.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/ambiance.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/bespin.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/blackboard.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/cobalt.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/colorforth.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/darcula.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/dracula.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/duotone-dark.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/duotone-light.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/eclipse.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/elegant.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/erlang-dark.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/gruvbox-dark.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/hopscotch.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/icecoder.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/isotope.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/lesser-dark.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/liquibyte.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/lucario.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/material.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/mbo.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/mdn-like.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/midnight.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/monokai.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/neat.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/neo.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/night.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/oceanic-next.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/panda-syntax.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/paraiso-dark.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/paraiso-light.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/pastel-on-dark.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/railscasts.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/rubyblue.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/seti.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/shadowfox.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/solarized.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/the-matrix.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/tomorrow-night-bright.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/tomorrow-night-eighties.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/ttcn.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/twilight.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/vibrant-ink.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/xq-dark.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/xq-light.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/yeti.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/idea.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/zenburn.css">
 
-	<link rel="stylesheet" href="theme/3024-night.css">
-	<link rel="stylesheet" href="theme/abcdef.css">
-	<link rel="stylesheet" href="theme/ambiance.css">
-	<link rel="stylesheet" href="theme/bespin.css">
-	<link rel="stylesheet" href="theme/blackboard.css">
-	<link rel="stylesheet" href="theme/cobalt.css">
-	<link rel="stylesheet" href="theme/colorforth.css">
-	<link rel="stylesheet" href="theme/dracula.css">
-	<link rel="stylesheet" href="theme/duotone-dark.css">
-	<link rel="stylesheet" href="theme/duotone-light.css">
-	<link rel="stylesheet" href="theme/eclipse.css">
-	<link rel="stylesheet" href="theme/elegant.css">
-	<link rel="stylesheet" href="theme/erlang-dark.css">
-	<link rel="stylesheet" href="theme/gruvbox-dark.css">
-	<link rel="stylesheet" href="theme/hopscotch.css">
-	<link rel="stylesheet" href="theme/icecoder.css">
-	<link rel="stylesheet" href="theme/isotope.css">
-	<link rel="stylesheet" href="theme/lesser-dark.css">
-	<link rel="stylesheet" href="theme/liquibyte.css">
-	<link rel="stylesheet" href="theme/lucario.css">
-	<link rel="stylesheet" href="theme/material.css">
-	<link rel="stylesheet" href="theme/mbo.css">
-	<link rel="stylesheet" href="theme/mdn-like.css">
-	<link rel="stylesheet" href="theme/midnight.css">
-	<link rel="stylesheet" href="theme/monokai.css">
-	<link rel="stylesheet" href="theme/neat.css">
-	<link rel="stylesheet" href="theme/neo.css">
-	<link rel="stylesheet" href="theme/night.css">
-	<link rel="stylesheet" href="theme/oceanic-next.css">
-	<link rel="stylesheet" href="theme/panda-syntax.css">
-	<link rel="stylesheet" href="theme/paraiso-dark.css">
-	<link rel="stylesheet" href="theme/paraiso-light.css">
-	<link rel="stylesheet" href="theme/pastel-on-dark.css">
-	<link rel="stylesheet" href="theme/railscasts.css">
-	<link rel="stylesheet" href="theme/rubyblue.css">
-	<link rel="stylesheet" href="theme/seti.css">
-	<link rel="stylesheet" href="theme/shadowfox.css">
-	<link rel="stylesheet" href="theme/solarized.css">
-	<link rel="stylesheet" href="theme/the-matrix.css">
-	<link rel="stylesheet" href="theme/tomorrow-night-bright.css">
-	<link rel="stylesheet" href="theme/tomorrow-night-eighties.css">
-	<link rel="stylesheet" href="theme/ttcn.css">
-	<link rel="stylesheet" href="theme/twilight.css">
-	<link rel="stylesheet" href="theme/vibrant-ink.css">
-	<link rel="stylesheet" href="theme/xq-dark.css">
-	<link rel="stylesheet" href="theme/xq-light.css">
-	<link rel="stylesheet" href="theme/yeti.css">
-	<link rel="stylesheet" href="theme/idea.css">
-	<link rel="stylesheet" href="theme/zenburn.css">
+	<!-- CodeMirror addons -->
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/addon/search/matchesonscrollbar.css">
+	<script src="lib/codemirror-5.39.0/addon/search/jump-to-line.js"></script>
+	<script src="lib/codemirror-5.39.0/addon/search/matchesonscrollbar.js"></script>
+	<script src="lib/codemirror-5.39.0/addon/search/match-highlighter.js"></script>
+	<script src="lib/codemirror-5.39.0/addon/search/search.js"></script>
+	<script src="lib/codemirror-5.39.0/addon/search/searchcursor.js"></script>
 
+	<script src="lib/codemirror-5.39.0/addon/scroll/annotatescrollbar.js"></script>
+
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/addon/dialog/dialog.css">
+	<script src="lib/codemirror-5.39.0/addon/dialog/dialog.js"></script>
+
+	<script src="lib/codemirror-5.39.0/addon/selection/active-line.js"></script>
+	<script src="lib/codemirror-5.39.0/addon/selection/mark-selection.js"></script>
+	<script src="lib/codemirror-5.39.0/addon/selection/selection-pointer.js"></script>
+
+	<!-- CodeMirro stylesheet customization -->
 	<style type="text/css">
 		.CodeMirror { width: 100%; height: calc(100vh - 105px); font-family: 'consolas'; color: black; direction: ltr; cursor: text; font-weight: 300; }
 		.cm-s-default .cm-trailing-space-a:before,
 		.cm-s-default .cm-trailing-space-b:before { position: absolute; content: "\00B7"; color: #777; }
 		.cm-s-default .cm-trailing-space-new-line:before { position: absolute; content: "\21B5"; color: #777; }
+
+		.CodeMirror-dialog { margin: 0; padding: .5em 1.6em; background: #1e1e1e; }
+		.CodeMirror-dialog input { color: #a8afbd; font-family: consolas; }
+		.CodeMirror-search-label, .CodeMirror-search-hint {
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400; font-size: .6rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd;
+		}
 	</style>
 
 	<!-- CryptoJS -->
-	<script src="cryptojs/core.js"></script>
-	<script src="cryptojs/x64-core.js"></script>
-	<script src="cryptojs/lib-typedarrays.js"></script>
-	<script src="cryptojs/md5.js"></script>
-	<script src="cryptojs/sha1.js"></script>
-	<script src="cryptojs/sha256.js"></script>
-	<script src="cryptojs/sha224.js"></script>
-	<script src="cryptojs/sha512.js"></script>
-	
-	<!-- CodeMirror -->
-	<script src="codemirror/editor.js"></script>
-	<script src="codemirror/markdown.js"></script>
-	<script src="codemirror/xml.js"></script>
-	<script src="codemirror/search/search.js"></script>
-	<script src="codemirror/search/searchcursor.js"></script>
-	<script src="codemirror/search/jump-to-line.js"></script>
-	<script src="codemirror/scroll/annotatescrollbar.js"></script>
-	<script src="codemirror/search/matchesonscrollbar.js"></script>
-	<script src="codemirror/dialog/dialog.js"></script>
-	<script src="codemirror/activeline/active-line.js"></script>
+	<script src="lib/crypto-js-3.1.2/core.js"></script>
+	<script src="lib/crypto-js-3.1.2/x64-core.js"></script>
+	<script src="lib/crypto-js-3.1.2/lib-typedarrays.js"></script>
+	<script src="lib/crypto-js-3.1.2/md5.js"></script>
+	<script src="lib/crypto-js-3.1.2/sha1.js"></script>
+	<script src="lib/crypto-js-3.1.2/sha256.js"></script>
+	<script src="lib/crypto-js-3.1.2/sha224.js"></script>
+	<script src="lib/crypto-js-3.1.2/sha512.js"></script>
 
 	<!-- JSZip -->
-	<script src="jszip/jszip.min.js"></script>
+	<script src="lib/jszip-3.1.5/jszip.min.js"></script>
 
 	<!-- Marked -->
-	<script src="marked/marked.min.js"></script>
+	<script src="lib/marked-0.4.0/marked.min.js"></script>
 
 	<!-- Main Script -->
 	<script src="main.js"></script>
@@ -101,7 +117,7 @@
 <header>
 	<nav>
 		<ul id="tabs">
-			<li id="newtab" class="tab">
+			<li id="create-tab" class="tab">
 				<svg style="width: 1em; height: 60px; stroke-width: 1px;"><use xlink:href="images/md.svg#icon-plus"></use></svg>
 			</li>
 		</ul>
@@ -219,8 +235,10 @@
 					<h2>Keyboard Shortcuts</h2>
 					<ul>
 						<li>Find text matches: <kbd>Ctrl</kbd> + <kbd>F</kbd></li>
-						<li>Find next: <kbd>Enter</kbd></li>
-						<li>Find previous: <kbd>Shift</kbd> + <kbd>Enter</kbd></li>
+						<ul>
+							<li>Find next: <kbd>Enter</kbd></li>
+							<li>Find previous: <kbd>Shift</kbd> + <kbd>Enter</kbd></li>
+						</ul>
 						<li>Replace all: <kbd>Ctrl</kbd> + <kbd>H</kbd></li>
 						<li>Jump to line: <kbd>Alt</kbd> + <kbd>G</kbd></li>
 					</ul>
@@ -230,7 +248,7 @@
 						<li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
 						<li><a href="https://marked.js.org" target="_blank">Marked.js</a></li>
 						<li><a href="https://stuk.github.io/jszip/" target="_blank">JSZip.js</a></li>
-						<li><a href="https://icomoon.io" target="_blank">IcoMoon</a></li>
+						<li><a href="https://www.flaticon.com" target="_blank">Flaticon</a></li>
 					</ul>
 				</div>
 			</div>
@@ -261,6 +279,7 @@
 					<option>blackboard</option>
 					<option>cobalt</option>
 					<option>colorforth</option>
+					<option>darcula</option>
 					<option>dracula</option>
 					<option>duotone-dark</option>
 					<option>duotone-light</option>
