@@ -647,7 +647,7 @@ function resizeTabWidths() {
     var addTabBtnWidth = parseInt(window.getComputedStyle(addTabBtn).width);
     if (addTabBtn.style.display === "none")
         addTabBtnWidth = 0;
-    var newWidth = (bodyWidth - menuWidth - addTabBtnWidth - 100) / (tabs.length - 1);
+    var newWidth = (bodyWidth - menuWidth - addTabBtnWidth - 80) / (tabs.length - 1);
     if (newWidth > 180) newWidth = 180;
     Array.from(tabs).forEach(function(tab) {
         if (tab.id !== "create-tab")

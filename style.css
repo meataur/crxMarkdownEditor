@@ -43,13 +43,13 @@ header:after { content: ""; display: table; clear: both; }
 nav { display: block; float: left; }
 ul#tabs { list-style: none; }
 li.tab {
-  position: relative; padding: 1.6em 1.6em 0; height: 60px;
+  position: relative; padding: 20px 20px 0; height: 60px;
   color: #a8afbd;
   transition-duration: .3s;
   float: left;
   border-right: solid 1px #1e1e1e;
 }
-li.tab:last-child { padding: 0 1.6em; width: unset; font-size: .75rem; }
+li.tab:last-child { padding-top: 0; width: unset; font-size: .75rem; }
 li.tab:hover { background: #424242; }
 li.tab:active { color: #fff; }
 li.tab[active] { color: #fff; background: #1e1e1e; }
@@ -78,7 +78,7 @@ li.menuitem:active { color: #fff; }
 content { display: block; position: relative; height: calc(100vh - 60px); }
 
 .vpanel-header {
-  display: block; padding-left: 1.6em; height: 45px;
+  display: block; padding-left: 20px; height: 45px;
   background: #1e1e1e; user-select: none;
 }
 .vpanel-header:after { content: ""; display: table; clear: both; }
