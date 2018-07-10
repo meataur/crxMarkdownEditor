@@ -111,6 +111,9 @@
 	<!-- Marked -->
 	<script src="lib/marked-0.4.0/marked.min.js"></script>
 
+	<!-- OAuth2 -->
+	<script async defer src="oauth/gapi.js"></script>
+
 	<!-- Main Script -->
 	<script src="main.js"></script>
 </head>
@@ -142,16 +145,18 @@
 						<span>import from</span>
 						<ul class="dropdown">
 							<li id="editor-import-local"><span>local system</span></li>
+							<li id="editor-import-googledrive"><span>google drive</span></li>
 						</ul>
 					</li>
 					<li>
 						<span>save to</span>
 						<ul class="dropdown">
 							<li id="editor-save-local"><span>local system</span></li>
+							<li id="editor-save-googledrive"><span>google drive</span></li>
 						</ul>
 					</li>
 					<li>
-						<span>tools</span>
+						<span>editor</span>
 						<ul class="dropdown">
 							<li id="editor-tools-template"><span>make new</span></li>
 							<li id="editor-tools-attachment"><span>attachment</span></li>
@@ -170,7 +175,7 @@
 
 	<splitter></splitter>
 
-	<extension>
+	<helper>
 		<viewer>
 			<div class="vpanel-header">
 				<label>viewer</label>
@@ -185,7 +190,7 @@
 							</ul>
 						</li>
 						<li>
-							<span>view</span>
+							<span>viewer</span>
 							<ul class="dropdown">
 								<li id="viewer-view-expand"><span>expand screen</span></li>
 							</ul>
@@ -269,10 +274,9 @@
 				</div>
 			</div>
 		</about>
-	</extension>
+	</helper>
 
 </content>
-
 
 
 
