@@ -1340,54 +1340,45 @@ function savefile() {
   }
 }
 
-function appendPre(message) {
-  console.log(message);
-  // var pre = document.getElementById('content');
-  // var textContent = document.createTextNode(message + '\n');
-  // pre.appendChild(textContent);
-}
+var oauthToken;
+var developerKey = "AIzaSyDVcjhklCvt0NKtN9ithQOSJJfHU-QcAXY";
 
-function updateSigninStatus(isSignedIn) {
-  if (isSignedIn) {
-    gapi.client.drive.files.list({
-      'pageSize': 10,
-      'fields': "nextPageToken, files(id, name)"
-    }).then(function(response) {
-      appendPre('Files:');
-      var files = response.result.files;
-      if (files && files.length > 0) {
-        for (var i = 0; i < files.length; i++) {
-          var file = files[i];
-          appendPre(file.name + ' (' + file.id + ')');
-        }
-      } else {
-        appendPre('No files found.');
-      }
-    });
+function pickerCallback(data) {
+  var url = 'nothing';
+  if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+    var doc = data[google.picker.Response.DOCUMENTS][0];
+    url = doc[google.picker.Document.URL];
   }
+  var message = 'You picked: ' + url;
+  console.log(message);
 }
 
 function importFromGoogleDrive() {
-  gapi.load("client:auth2", function() {
-    gapi.client.init({
-      apiKey: "AIzaSyDVcjhklCvt0NKtN9ithQOSJJfHU-QcAXY",
-      clientId: manifestData.oauth2.client_id,
-      discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-      scope: manifestData.oauth2.scopes
-    }).then(function() {
-      gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-      updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-      gapi.auth2.getAuthInstance().signIn();
-    });
+  chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://www.googleapis.com/drive/v3/files?access_token=' + access_token);
+    xhr.onload = function() {
+      console.log(xhr.response);
+    };
+    xhr.send();
+
+    // let init = {
+    //   method: 'GET',
+    //   async: true,
+    //   headers: {
+    //     Authorization: 'Bearer ' + token,
+    //     'Content-Type': 'application/json'
+    //   },
+    //   'contentType': 'json'
+    // };
+    // fetch("https://people.googleapis.com/v1/contactGroups/all?maxMembers=20&key=<API_Key_Here>", init)
+    // .then((response) => response.json())
+    // .then(function(data) {
+    //   console.log(data)
+    // });
   });
 }
 
 function saveToGoogleDrive() {
-  chrome.identity.getAuthToken({ interactive: true }, function(token) {
-    if (chrome.runtime.lastError) {
-      alert(chrome.runtime.lastError.message);
-      return;
-    }
-    console.log(token);
-  });
+  messageBox("Not support yet...");
 }
