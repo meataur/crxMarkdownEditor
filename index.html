@@ -22,56 +22,7 @@
 	<script src="lib/codemirror-5.39.0/mode/xml/xml.js"></script>
 
 	<!-- CodeMirror themes -->
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/3024-night.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/abcdef.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/ambiance.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/bespin.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/blackboard.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/cobalt.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/colorforth.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/darcula.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/dracula.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/duotone-dark.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/duotone-light.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/eclipse.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/elegant.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/erlang-dark.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/gruvbox-dark.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/hopscotch.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/icecoder.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/isotope.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/lesser-dark.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/liquibyte.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/lucario.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/material.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/mbo.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/mdn-like.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/midnight.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/monokai.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/neat.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/neo.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/night.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/oceanic-next.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/panda-syntax.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/paraiso-dark.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/paraiso-light.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/pastel-on-dark.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/railscasts.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/rubyblue.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/seti.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/shadowfox.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/solarized.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/the-matrix.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/tomorrow-night-bright.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/tomorrow-night-eighties.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/ttcn.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/twilight.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/vibrant-ink.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/xq-dark.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/xq-light.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/yeti.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/idea.css">
-	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme/zenburn.css">
+	<link rel="stylesheet" href="themes.css">
 
 	<!-- CodeMirror addons -->
 	<link rel="stylesheet" href="lib/codemirror-5.39.0/addon/search/matchesonscrollbar.css">
@@ -97,12 +48,13 @@
 		.cm-s-default .cm-trailing-space-b:before { position: absolute; content: "\00B7"; color: #777; }
 		.cm-s-default .cm-trailing-space-new-line:before { position: absolute; content: "\21B5"; color: #777; }
 
-		.CodeMirror-search-field { width: 20em !important; }
+		.CodeMirror-dialog { margin: 0; padding: 0 20px; background: #1e1e1e; }
+		.CodeMirror-search-field { margin-bottom: 10px; width: 100% !important; }
 		.CodeMirror-search-label, .CodeMirror-search-hint {
-			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400; font-size: .6rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd;
+			display: block; margin-bottom: 10px; padding: 0;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400; font-size: .6rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important;
 		}
-		.CodeMirror-dialog { margin: 0; padding: 5px 20px; background: #383838; }
-		.CodeMirror-dialog input { color: #a8afbd; font-family: consolas; }
+		.CodeMirror-dialog input { padding: .5em; color: #a8afbd; background: #383838; font-family: consolas; border-radius: 0; }
 	</style>
 
 	<!-- JSZip -->
@@ -284,79 +236,11 @@
 			<sectionlabel>APPEARANCE</sectionlabel>
 			<subsection>
 				<inlinesubsectionlabel>Theme: </inlinesubsectionlabel>
-				<select id="select-theme">
-					<option>default</option>
-					<option>3024-day</option>
-					<option>3024-night</option>
-					<option>abcdef</option>
-					<option>ambiance</option>
-					<option>base16-dark</option>
-					<option>base16-light</option>
-					<option>bespin</option>
-					<option>blackboard</option>
-					<option>cobalt</option>
-					<option>colorforth</option>
-					<option>darcula</option>
-					<option>dracula</option>
-					<option>duotone-dark</option>
-					<option>duotone-light</option>
-					<option>eclipse</option>
-					<option>elegant</option>
-					<option>erlang-dark</option>
-					<option>gruvbox-dark</option>
-					<option>hopscotch</option>
-					<option>icecoder</option>
-					<option>idea</option>
-					<option>isotope</option>
-					<option>lesser-dark</option>
-					<option>liquibyte</option>
-					<option>lucario</option>
-					<option>material</option>
-					<option>mbo</option>
-					<option>mdn-like</option>
-					<option>midnight</option>
-					<option>monokai</option>
-					<option>neat</option>
-					<option>neo</option>
-					<option>night</option>
-					<option>oceanic-next</option>
-					<option>panda-syntax</option>
-					<option>paraiso-dark</option>
-					<option>paraiso-light</option>
-					<option>pastel-on-dark</option>
-					<option>railscasts</option>
-					<option>rubyblue</option>
-					<option>seti</option>
-					<option>shadowfox</option>
-					<option>solarized dark</option>
-					<option>solarized light</option>
-					<option>the-matrix</option>
-					<option>tomorrow-night-bright</option>
-					<option>tomorrow-night-eighties</option>
-					<option>ttcn</option>
-					<option>twilight</option>
-					<option>vibrant-ink</option>
-					<option>xq-dark</option>
-					<option>xq-light</option>
-					<option>yeti</option>
-					<option>zenburn</option>
-				</select>
+				<select id="select-theme"><option>default</option></select>
 			</subsection>
 			<subsection>
 				<inlinesubsectionlabel>Font Size: </inlinesubsectionlabel>
-				<select id="select-fontsize">
-					<option>10</option>
-					<option>11</option>
-					<option>12</option>
-					<option>13</option>
-					<option>14</option>
-					<option>16</option>
-					<option>18</option>
-					<option>20</option>
-					<option>24</option>
-					<option>28</option>
-					<option>32</option>
-				</select>
+				<select id="select-fontsize"></select>
 			</subsection>
 		</section>
 		<section>

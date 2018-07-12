@@ -83,7 +83,7 @@ content { display: block; position: relative; height: calc(100vh - 60px); }
 }
 .vpanel-header:after { content: ""; display: table; clear: both; }
 .vpanel-header > label {
-  display: block; padding-top: 8px; height: 45px; line-height: 37px; float: left;
+  display: block; height: 45px; line-height: 45px; float: left;
   color: #585858; font-size: .6rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;
 }
 .vpanel-header > toolbox { display: block; float: right; height: 45px; line-height: 45px; }

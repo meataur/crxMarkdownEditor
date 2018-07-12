@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Panels and its splitter
+  // Content panels and its splitter
   contentWrapper = document.getElementsByTagName("content")[0];
   panelEditor = document.getElementsByTagName("editor")[0];
   panelHelper = document.getElementsByTagName("helper")[0];
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Set list item event handler
+  // Set menu event handler of content panels
   Array.from(document.getElementsByClassName("panelmenu")).forEach(function(panelMenu) {
     Array.from(panelMenu.getElementsByTagName("li")).forEach(function(menuItem) {
       var dropdown = menuItem.getElementsByClassName("dropdown")[0];
@@ -344,11 +344,40 @@ function loadSettings() {
     document.getElementById("setting-jekyll-port").value = result.settingJekyllPort ? result.settingJekyllPort : 4000;
   });
   chrome.storage.local.get('theme', function(result) {
-    document.getElementById("select-theme").value = result.theme ? result.theme : "default";
-    selectTheme();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "themes.css");
+    xhr.onloadend = function() {
+      var themeselector = document.getElementById("select-theme");
+
+      // Insert theme options
+      var lines = xhr.responseText.match(/[^\r\n]+/g);
+      lines.forEach(function(line) {
+        var cssPath = line.match(/".*?"/g)[0].replace(/"/gi,"");
+        var option = document.createElement("option");
+        option.innerHTML = cssPath.replace(/^.*[\\\/]/, "").replace(/\.[^/.]+$/, "");
+        themeselector.appendChild(option);
+      });
+
+      // Select editor's theme
+      themeselector.value = result.theme ? result.theme : "default";
+      selectTheme();
+    }
+    xhr.send();
   });
   chrome.storage.local.get('fontsize', function(result) {
-    document.getElementById("select-fontsize").value = result.fontsize ? result.fontsize : "14";
+    var fontsizeselector = document.getElementById("select-fontsize");
+
+    // Insert font-size options
+    var fontsizes = [10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 28, 32];
+    fontsizes.forEach(function(fontsize) {
+      console.log(fontsize);
+      var option = document.createElement("option");
+      option.innerHTML = fontsize;
+      fontsizeselector.appendChild(option);
+    });
+
+    // Select editor's font size
+    fontsizeselector.value = result.fontsize ? result.fontsize : "13";
     selectFontsize();
   });
   chrome.storage.local.get('attachment_location', function(result) {
@@ -861,7 +890,7 @@ function runJekyll() {
 
 function openControlPanel() {
   // Load setting values
-  loadSettings();
+  //loadSettings();
 
   // Close settings
   var overlay = document.getElementsByTagName("overlay")[0];
@@ -996,13 +1025,13 @@ EXIT /b
 }
 
 function selectTheme() {
-  var selector = document.getElementById("select-theme")
+  var selector = document.getElementById("select-theme");
   var theme = selector.options[selector.selectedIndex].textContent;
   editor.setOption("theme", theme);
 }
 
 function selectFontsize() {
-  var selector = document.getElementById("select-fontsize")
+  var selector = document.getElementById("select-fontsize");
   var fontsize = selector.options[selector.selectedIndex].textContent;
   var editorObj = document.getElementsByClassName('CodeMirror')[0];
   editorObj.style["font-size"] = fontsize + "px";
@@ -1340,23 +1369,11 @@ function savefile() {
   }
 }
 
-var oauthToken;
-var developerKey = "AIzaSyDVcjhklCvt0NKtN9ithQOSJJfHU-QcAXY";
-
-function pickerCallback(data) {
-  var url = 'nothing';
-  if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
-    var doc = data[google.picker.Response.DOCUMENTS][0];
-    url = doc[google.picker.Document.URL];
-  }
-  var message = 'You picked: ' + url;
-  console.log(message);
-}
-
 function importFromGoogleDrive() {
   chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://www.googleapis.com/drive/v3/files?access_token=' + access_token);
+    xhr.open("GET", "https://www.googleapis.com/drive/v3/files");
+    xhr.setRequestHeader("Authorization", "Bearer " + access_token)
     xhr.onload = function() {
       console.log(xhr.response);
     };
