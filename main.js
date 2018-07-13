@@ -135,28 +135,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Enable panel splitter dragging
-  splitter.onmousedown = function(evt) {
-    isPanelResizing = true;
-  };
-  splitter.ondblclick = function(evt) {
-    panelEditor.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
-    panelHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
-  };
-  document.onmouseup = function(evt) {
-    isPanelResizing = false;
-  };
-  document.onmousemove = function(evt) {
-    if (!isPanelResizing) return;
-
-    var offset = evt.clientX - contentWrapper.offsetLeft;
-    if (offset < 400 || (contentWrapper.clientWidth - offset) < 400) return;
-
-    var ratio = offset / contentWrapper.clientWidth * 100;
-    panelEditor.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
-    panelHelper.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
-  }
-
   // Set buttons event handler
   document.getElementById("create-tab").onclick = addNewTab;
 
@@ -177,59 +155,57 @@ document.addEventListener('DOMContentLoaded', function() {
     messageBox("Auto Save");
   }
 
-  document.onmousedown = function(e) {
-    // Set overlay handler
-    if (e.target == document.getElementsByTagName('overlay')[0]) {
-      saveSettings();
-      document.getElementsByTagName('overlay')[0].style.display = "none";
-      document.getElementsByTagName("settings")[0].style.display = "none";
-    } else {
-      collapseAll();
-      deselectAll();
-    }
-  }
-
   // Set menu event handler of content panels
   Array.from(document.getElementsByClassName("panelmenu")).forEach(function(panelMenu) {
-    Array.from(panelMenu.getElementsByTagName("li")).forEach(function(menuItem) {
-      var dropdown = menuItem.getElementsByClassName("dropdown")[0];
+    Array.from(panelMenu.children).forEach(function(panelMenuItem) {
+      var dropdown = panelMenuItem.getElementsByClassName("dropdown")[0];
       if (dropdown) {
         // Add caret to panel item
-        menuItem.classList.add("has-dropdown");
+        panelMenuItem.classList.add("has-dropdown");
         
         // Set dropdown menu item's event handler
         Array.from(dropdown.children).forEach(function(dropdownItem) {
           dropdownItem.addEventListener("mouseover", function(e) { this.classList.add("highlight"); e.stopPropagation(); });
           dropdownItem.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
+          dropdownItem.addEventListener("mousedown", function(e) { e.stopPropagation(); });
           dropdownItem.addEventListener("click", function(e) {
-            collapseAll();
-            deselectAll();
-
-            e.stopPropagation();
+            collapseAllDropdowns();
+            deselectAllPanelmenu();
           });
         });
       }
 
-      menuItem.addEventListener("mouseover", function(e) { this.classList.add("highlight"); });
-      menuItem.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
-      menuItem.addEventListener("mousedown", function(e) {
-        collapseAll();
-
-        // Show dropdown menu
-        if (dropdown) {
-          dropdown.style.display = "block";
-
-          // Adjust dropdown menu's position
-          adjustDropdownPosition(this);
-
-          // Deselect all panel items
-          deselectAll();
-
-          // Select current panel item
-          this.classList.add("selected");
-
-          e.stopPropagation();
+      panelMenuItem.addEventListener("mouseover", function(e) { this.classList.add("highlight"); });
+      panelMenuItem.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
+      panelMenuItem.addEventListener("mousedown", function(e) {
+        if (e.which !== 1) {
+          e.preventDefault();
+          return;
         }
+
+        collapseAllDropdowns();
+
+        if (this.classList.contains("selected")) {
+          // Deselect all panel menu items
+          deselectAllPanelmenu();
+        } else {
+          // Deselect all panel menu items
+          deselectAllPanelmenu();
+
+          // If a dropdown menu exists
+          if (dropdown) {
+            // Select current panel menu
+            this.classList.add("selected");
+
+            // Show dropdown menu
+            dropdown.style.display = "block";
+
+            // Adjust dropdown menu's position
+            adjustDropdownPosition(this);
+          }
+        }
+
+        e.stopPropagation();
       });
     });
   });
@@ -238,17 +214,51 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("editor-import-googledrive").onclick = importFromGoogleDrive;
   document.getElementById("editor-save-local").onclick = savefile;
   document.getElementById("editor-save-googledrive").onclick = saveToGoogleDrive;
-  document.getElementById('editor-tools-template').onclick = initTextarea;
-  document.getElementById('editor-tools-attachment').onclick = attachments;
-  document.getElementById('editor-tools-prettify').onclick = prettify;
-  document.getElementById('editor-tools-updtdatetime').onclick = resetPostingTime;
-  document.getElementById('editor-tools-settings').onclick = openControlPanel;
+  document.getElementById("editor-tools-template").onclick = initTextarea;
+  document.getElementById("editor-tools-attachment").onclick = attachments;
+  document.getElementById("editor-tools-prettify").onclick = prettify;
+  document.getElementById("editor-tools-updtdatetime").onclick = resetPostingTime;
+  document.getElementById("editor-tools-settings").onclick = openControlPanel;
 
   document.getElementById("viewer-export-html").onclick = saveAsHtml;
   document.getElementById("viewer-export-pdf").onclick = saveAsPdf;
   document.getElementById("viewer-print").onclick = printPreview;
   document.getElementById("viewer-view-expand").onclick = expandViewer;
 
+  // Enable panel splitter dragging
+  splitter.onmousedown = function(evt) {
+    isPanelResizing = true;
+  };
+  splitter.ondblclick = function(evt) {
+    panelEditor.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
+    panelHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
+  };
+  document.onmousemove = function(evt) {
+    if (!isPanelResizing) return;
+
+    var offset = evt.clientX - contentWrapper.offsetLeft;
+    if (offset < 400 || (contentWrapper.clientWidth - offset) < 400) return;
+
+    var ratio = offset / contentWrapper.clientWidth * 100;
+    panelEditor.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
+    panelHelper.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
+  };
+  document.onmouseup = function(e) {
+    // Escape from panel resizing mode
+    isPanelResizing = false;
+  };
+  document.onmousedown = function(e) {
+    // Set overlay handler
+    if (e.target == document.getElementsByTagName('overlay')[0]) {
+      saveSettings();
+      document.getElementsByTagName('overlay')[0].style.display = "none";
+      document.getElementsByTagName("settings")[0].style.display = "none";
+    } else {
+      collapseAllDropdowns();
+      deselectAllPanelmenu();
+    }
+  };
+  
   // Keyboard shortcut
   document.onkeydown = function(e) {
     if (e.ctrlKey) {
@@ -370,7 +380,6 @@ function loadSettings() {
     // Insert font-size options
     var fontsizes = [10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 28, 32];
     fontsizes.forEach(function(fontsize) {
-      console.log(fontsize);
       var option = document.createElement("option");
       option.innerHTML = fontsize;
       fontsizeselector.appendChild(option);
@@ -755,12 +764,12 @@ function adjustDropdownPosition(el) {
   }
 }
 
-function collapseAll() {
+function collapseAllDropdowns() {
   Array.from(document.getElementsByClassName("dropdown")).forEach(function(dropdown) {
     dropdown.style.display = "none";
   });
 }
-function deselectAll() {
+function deselectAllPanelmenu() {
   Array.from(document.getElementsByClassName("selected")).forEach(function(selected) {
     selected.classList.remove("selected");
   });
@@ -889,9 +898,6 @@ function runJekyll() {
  */
 
 function openControlPanel() {
-  // Load setting values
-  //loadSettings();
-
   // Close settings
   var overlay = document.getElementsByTagName("overlay")[0];
   overlay.style.display = "block";

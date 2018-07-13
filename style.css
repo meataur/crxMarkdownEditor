@@ -96,7 +96,7 @@ toolbox ul > li {
 toolbox ul.panelmenu > li { transition: color .3s; }
 toolbox ul.panelmenu > li.selected { color: #fff; background: #005e9c; }
 toolbox ul.panelmenu > li.highlight { color: #fff; }
-toolbox ul.panelmenu > li:active { background: #005e9c; }
+toolbox ul.panelmenu > li:not(.has-dropdown):active { background: #005e9c; }
 toolbox ul.panelmenu > li.has-dropdown:after {
   content: "";
   position: relative; top: -1px; display: inline-block; margin-left: 6px; width: 0; height: 0;
