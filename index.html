@@ -54,7 +54,7 @@
 			display: block; margin-bottom: 10px; padding: 0;
 			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400; font-size: .6rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important;
 		}
-		.CodeMirror-dialog input { padding: .5em; color: #a8afbd; background: #383838; font-family: consolas; border-radius: 0; }
+		.CodeMirror-dialog input { padding: .3em; color: #a8afbd; background: #383838; font-family: consolas; border-radius: 2; }
 	</style>
 
 	<!-- JSZip -->
@@ -119,6 +119,25 @@
 		</div>
 		<div class="vpanel-content">
 			<textarea spellcheck="false"></textarea>
+			<div id="editor-settings" class="settings">
+				<section>
+					<div><span class="settings-label">theme:</span> <select id="select-theme"><option>default</option></select></div>
+					<div><span class="settings-label">font size:</span> <select id="select-fontsize"></select></div>
+				</section>
+				<section>
+					<div style="width: 100%"><span class="settings-label">attachment > location (liquid-syntax):</span> <input type="text" id="attachment-location" spellcheck="false"></div>
+					<div style="width: 100%"><span class="settings-label">attachment > attachment classification (JSON-syntax):</span> <textarea id="attachment-type" spellcheck="false"></textarea></div>
+					<div style="width: 100%">
+						<span class="settings-label">attachment > hash function to avoid filename duplication:</span>
+						<input type="radio" id="hash-none" name="hashing" value="none"><label for="hash-none">None</label>
+						<input type="radio" id="hash-md5" name="hashing" value="md5"><label for="hash-md5">MD5</label>
+						<input type="radio" id="hash-sha1" name="hashing" value="sha1"><label for="hash-sha1">SHA-1</label>
+						<input type="radio" id="hash-sha224" name="hashing" value="sha224"><label for="hash-sha224">SHA-224</label>
+						<input type="radio" id="hash-sha256" name="hashing" value="sha256"><label for="hash-sha256">SHA-256</label>
+						<input type="radio" id="hash-sha512" name="hashing" value="sha512"><label for="hash-sha512">SHA-512</label>
+					</div>
+				</section>
+			</div>
 		</div>
 	</editor>
 
@@ -162,7 +181,7 @@
 				</toolbox>
 			</div>
 			<div class="vpanel-body">
-				<div id="localhost" class="ext-page">
+				<div id="localhost" class="hpage">
 					<h1>Jekyll on Localhost</h1>
 					<h2>One-Time Installation Steps</h2>
 					<h3>Step 1. Install Jekyll</h3>
@@ -192,7 +211,7 @@
 				</toolbox>
 			</div>
 			<div class="vpanel-body">
-				<div id="appinfo" class="ext-page">
+				<div id="appinfo" class="hpage">
 					<h1><span class="appname"></span> <span class="appvers"></span></h1>
 					<div>Made by ChangUk (<a href="https://changuk.github.io" target="_blank">changuk.github.io</a>)</div>
 					<h2>Features and Tips</h2>
@@ -230,33 +249,10 @@
 
 
 
-<overlay>
+<overlay style="display: none">
 	<settings class="modal">
 		<section>
-			<sectionlabel>APPEARANCE</sectionlabel>
-			<subsection>
-				<inlinesubsectionlabel>Theme: </inlinesubsectionlabel>
-				<select id="select-theme"><option>default</option></select>
-			</subsection>
-			<subsection>
-				<inlinesubsectionlabel>Font Size: </inlinesubsectionlabel>
-				<select id="select-fontsize"></select>
-			</subsection>
-		</section>
-		<section>
 			<sectionlabel>ATTACHMENT SYNTAX</sectionlabel>
-			<subsection>
-				<subsectionlabel>Location:</subsectionlabel>
-				<subsectionvalue>
-					<input type="text" id="attachment-location" spellcheck="false">
-				</subsectionvalue>
-			</subsection>
-			<subsection>
-				<subsectionlabel>Attachment Classification (JSON-Format):</subsectionlabel>
-				<subsectionvalue>
-					<input type="text" id="attachment-type" spellcheck="false">
-				</subsectionvalue>
-			</subsection>
 			<subsection>
 				<subsectionlabel>Hash Function to Avoid Filename Duplication:</subsectionlabel>
 				<subsectionvalue>
@@ -271,5 +267,6 @@
 		</section>
 	</settings>
 </overlay>
+
 </body>
 </html>

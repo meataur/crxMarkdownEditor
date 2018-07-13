@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('attachment-type').addEventListener('keyup', function() {
     try {
       JSON.parse(this.value);
-      this.style["background"] = "#fff";
+      this.style["background"] = "#383838";
     } catch(e) {
       this.style["background"] = "rgb(238,97,80)";
     }
@@ -170,7 +170,8 @@ document.addEventListener('DOMContentLoaded', function() {
           dropdownItem.addEventListener("mousedown", function(e) { e.stopPropagation(); });
           dropdownItem.addEventListener("click", function(e) {
             collapseAllDropdowns();
-            deselectAllPanelmenu();
+            deselectAllPanelmenuItems();
+            closeAllSettingsPanel();
           });
         });
       }
@@ -184,13 +185,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         collapseAllDropdowns();
+        closeAllSettingsPanel();
 
         if (this.classList.contains("selected")) {
           // Deselect all panel menu items
-          deselectAllPanelmenu();
+          deselectAllPanelmenuItems();
         } else {
           // Deselect all panel menu items
-          deselectAllPanelmenu();
+          deselectAllPanelmenuItems();
 
           // If a dropdown menu exists
           if (dropdown) {
@@ -225,6 +227,10 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("viewer-print").onclick = printPreview;
   document.getElementById("viewer-view-expand").onclick = expandViewer;
 
+  document.getElementById("editor-settings").addEventListener("mousedown", function(e) {
+    e.stopPropagation();
+  });
+
   // Enable panel splitter dragging
   splitter.onmousedown = function(evt) {
     isPanelResizing = true;
@@ -248,15 +254,9 @@ document.addEventListener('DOMContentLoaded', function() {
     isPanelResizing = false;
   };
   document.onmousedown = function(e) {
-    // Set overlay handler
-    if (e.target == document.getElementsByTagName('overlay')[0]) {
-      saveSettings();
-      document.getElementsByTagName('overlay')[0].style.display = "none";
-      document.getElementsByTagName("settings")[0].style.display = "none";
-    } else {
-      collapseAllDropdowns();
-      deselectAllPanelmenu();
-    }
+    collapseAllDropdowns();
+    deselectAllPanelmenuItems();
+    closeAllSettingsPanel();
   };
   
   // Keyboard shortcut
@@ -399,10 +399,10 @@ function loadSettings() {
   chrome.storage.local.get('attachment_type', function(result) {
     if (result.attachment_type) {
       document.getElementById('attachment-type').value = result.attachment_type;
-      document.getElementById('attachment-type').style["background-color"] = "#fff";
+      document.getElementById('attachment-type').style["background"] = "#383838";
     } else {
-      document.getElementById('attachment-type').value = '{"img":["png","jpg","jpeg","gif","bmp"],"pdf":["pdf"],"doc":["doc","docx","ppt","pptx","xls","xlsx","hwp","txt","html","htm"]}';
-      document.getElementById('attachment-type').style["background-color"] = "#fff";
+      document.getElementById('attachment-type').value = '{\n  "img": ["png","jpg","jpeg","gif","bmp"],\n  "pdf": ["pdf"],\n  "doc": ["doc","docx","ppt","pptx","xls","xlsx","hwp","txt","html","htm"]\n}';
+      document.getElementById('attachment-type').style["background"] = "#383838";
     }
   });
   chrome.storage.local.get('hashing', function(result) {
@@ -769,10 +769,15 @@ function collapseAllDropdowns() {
     dropdown.style.display = "none";
   });
 }
-function deselectAllPanelmenu() {
+
+function deselectAllPanelmenuItems() {
   Array.from(document.getElementsByClassName("selected")).forEach(function(selected) {
     selected.classList.remove("selected");
   });
+}
+
+function closeAllSettingsPanel() {
+  document.getElementById("editor-settings").style.display = "none";
 }
 
 
@@ -898,11 +903,13 @@ function runJekyll() {
  */
 
 function openControlPanel() {
-  // Close settings
-  var overlay = document.getElementsByTagName("overlay")[0];
-  overlay.style.display = "block";
-  var settings = document.getElementsByTagName('settings')[0];
-  settings.style.display = 'block';
+  var div = document.getElementById("editor-settings");
+  div.style.display = "block";
+
+  // var overlay = document.getElementsByTagName("overlay")[0];
+  // overlay.style.display = "block";
+  // var settings = document.getElementsByTagName('settings')[0];
+  // settings.style.display = 'block';
 }
 
 function numberOnly(e) {
