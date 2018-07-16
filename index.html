@@ -55,7 +55,7 @@
 		.CodeMirror-search-field { margin-bottom: 10px; width: 100% !important; }
 		.CodeMirror-search-label, .CodeMirror-search-hint {
 			display: block; margin: 0 0 10px 0; padding: 0;
-			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400; font-size: .6rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important;
 		}
 		.CodeMirror-dialog input { padding: .3em; color: #a8afbd; background: #383838; font-family: consolas; border-radius: 2; }
 	</style>
@@ -90,21 +90,21 @@
 <content>
 	<editor>
 		<div class="vpanel-header">
-			<label>Editor</label>
+			<span>Editor</span>
 			<toolbox>
 				<ul class="panelmenu">
 					<li>
 						<span>import from</span>
 						<ul class="dropdown">
-							<li id="editor-import-local"><span>local system</span></li>
-							<li id="editor-import-googledrive"><span>google drive</span></li>
+							<li id="editor-tools-import-local"><span>local system</span></li>
+							<li id="editor-tools-import-gdrive"><span>google drive</span></li>
 						</ul>
 					</li>
 					<li>
 						<span>save to</span>
 						<ul class="dropdown">
-							<li id="editor-save-local"><span>local system</span></li>
-							<li id="editor-save-googledrive"><span>google drive</span></li>
+							<li id="editor-tools-save-local"><span>local system</span></li>
+							<li id="editor-tools-save-gdrive"><span>google drive</span></li>
 						</ul>
 					</li>
 					<li>
@@ -122,23 +122,47 @@
 		</div>
 		<div class="vpanel-body">
 			<textarea spellcheck="false"></textarea>
+			<div id="editor-import-gdrive" class="dlg">
+				<section>
+					<item>
+						<label>filelist:</label>
+						<ctrl>
+							<ul id="importlist-gdrive"></ul>
+						</ctrl>
+					</item>
+				</section>
+			</div>
 			<div id="editor-settings" class="dlg">
 				<section>
-					<div><span class="settings-label">theme:</span> <select id="select-theme"><option>default</option></select></div>
-					<div><span class="settings-label">font size:</span> <select id="select-fontsize"></select></div>
+					<item class="inline-subsect">
+						<label>theme:</label>
+						<ctrl><select id="select-theme"><option>default</option></select></ctrl>
+					</item>
+					<item class="inline-subsect">
+						<label>font size:</label>
+						<ctrl><select id="select-fontsize"></select></ctrl>
+					</item>
 				</section>
 				<section>
-					<div style="width: 100%"><span class="settings-label">attachment location (liquid-syntax):</span> <input type="text" id="attachment-location" spellcheck="false"></div>
-					<div style="width: 100%"><span class="settings-label">attachment classification (JSON-syntax):</span> <textarea id="attachment-type" spellcheck="false"></textarea></div>
-					<div style="width: 100%">
-						<span class="settings-label">hash function to avoid filename duplication:</span>
-						<input type="radio" id="hash-none" name="hashing" value="none"><label for="hash-none">None</label>
-						<input type="radio" id="hash-md5" name="hashing" value="md5"><label for="hash-md5">MD5</label>
-						<input type="radio" id="hash-sha1" name="hashing" value="sha1"><label for="hash-sha1">SHA-1</label>
-						<input type="radio" id="hash-sha224" name="hashing" value="sha224"><label for="hash-sha224">SHA-224</label>
-						<input type="radio" id="hash-sha256" name="hashing" value="sha256"><label for="hash-sha256">SHA-256</label>
-						<input type="radio" id="hash-sha512" name="hashing" value="sha512"><label for="hash-sha512">SHA-512</label>
-					</div>
+					<item>
+						<label>attachment location (liquid-syntax):</label>
+						<ctrl><input type="text" id="attachment-location" spellcheck="false"></ctrl>
+					</item>
+					<item>
+						<label>attachment classification (JSON-syntax):</label>
+						<ctrl><textarea id="attachment-type" spellcheck="false"></textarea></ctrl>
+					</item>
+					<item>
+						<label>hash function to avoid filename duplication:</label>
+						<ctrl>
+							<input type="radio" id="hash-none" name="hashing" value="none"><optionlabel for="hash-none">None</optionlabel>
+							<input type="radio" id="hash-md5" name="hashing" value="md5"><optionlabel for="hash-md5">MD5</optionlabel>
+							<input type="radio" id="hash-sha1" name="hashing" value="sha1"><optionlabel for="hash-sha1">SHA-1</optionlabel>
+							<input type="radio" id="hash-sha224" name="hashing" value="sha224"><optionlabel for="hash-sha224">SHA-224</optionlabel>
+							<input type="radio" id="hash-sha256" name="hashing" value="sha256"><optionlabel for="hash-sha256">SHA-256</optionlabel>
+							<input type="radio" id="hash-sha512" name="hashing" value="sha512"><optionlabel for="hash-sha512">SHA-512</optionlabel>
+						</ctrl>
+					</item>
 				</section>
 			</div>
 		</div>
@@ -149,15 +173,15 @@
 	<helper>
 		<viewer>
 			<div class="vpanel-header">
-				<label>viewer</label>
+				<span>viewer</span>
 				<toolbox>
 					<ul class="panelmenu">
 						<li>
 							<span>export as</span>
 							<ul class="dropdown">
-								<li id="viewer-export-html"><span>html</span></li>
-								<li id="viewer-export-pdf"><span>pdf</span></li>
-								<li id="viewer-print"><span>print</span></li>
+								<li id="viewer-tools-export-html"><span>html</span></li>
+								<li id="viewer-tools-export-pdf"><span>pdf</span></li>
+								<li id="viewer-tools-print"><span>print</span></li>
 							</ul>
 						</li>
 						<li>
@@ -174,7 +198,10 @@
 				<div id="viewer"></div>
 				<div id="viewer-settings" class="dlg">
 					<section>
-						<div style="width: 100%"><span class="settings-label">{{ site.baseurl }} replacement:</span> <input type="text" id="viewer-baseurl" spellcheck="false"></div>
+						<item>
+							<label>{{ site.baseurl }} replacement:</label>
+							<ctrl><input type="text" id="viewer-baseurl" spellcheck="false"></ctrl>
+						</item>
 					</section>
 				</div>
 			</div>
@@ -182,10 +209,10 @@
 
 		<localhost>
 			<div class="vpanel-header">
-				<label>jekyll on localhost</label>
+				<span>jekyll on localhost</span>
 				<toolbox>
 					<ul class="panelmenu">
-						<li id="localhost-run-jekyll"><span>run jekyll</span></li>
+						<li id="localhost-tools-run-jekyll"><span>run jekyll</span></li>
 					</ul>
 				</toolbox>
 			</div>
@@ -213,7 +240,7 @@
 
 		<about>
 			<div class="vpanel-header">
-				<label>about</label>
+				<span>about</span>
 				<toolbox>
 					<ul class="panelmenu">
 					</ul>

@@ -118,9 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('menu-about').onclick = openAbout;
   document.getElementById('menu-viewer').click();
 
-  // Helper functions
-  document.getElementById("localhost-run-jekyll").onclick = runJekyll;
-
   // Load previous workspaces
   loadSettings();
   loadPrevWorks();
@@ -212,21 +209,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  document.getElementById("editor-import-local").onclick = openfile;
-  document.getElementById("editor-import-googledrive").onclick = importFromGoogleDrive;
-  document.getElementById("editor-save-local").onclick = savefile;
-  document.getElementById("editor-save-googledrive").onclick = saveToGoogleDrive;
+  // Helper functions
+
+  document.getElementById("editor-tools-import-local").onclick = openLocalFile;
+  document.getElementById("editor-tools-import-gdrive").onclick = importFromGoogleDrive;
+  document.getElementById("editor-tools-save-local").onclick = saveAsLocalFile;
+  document.getElementById("editor-tools-save-gdrive").onclick = saveToGoogleDrive;
   document.getElementById("editor-tools-template").onclick = initTextarea;
   document.getElementById("editor-tools-attachment").onclick = attachments;
   document.getElementById("editor-tools-prettify").onclick = prettify;
   document.getElementById("editor-tools-updtdatetime").onclick = resetPostingTime;
   document.getElementById("editor-tools-settings").onclick = openEditorSettingsPanel;
 
-  document.getElementById("viewer-export-html").onclick = saveAsHtml;
-  document.getElementById("viewer-export-pdf").onclick = saveAsPdf;
-  document.getElementById("viewer-print").onclick = printPreview;
+  document.getElementById("viewer-tools-export-html").onclick = saveAsHtml;
+  document.getElementById("viewer-tools-export-pdf").onclick = saveAsPdf;
+  document.getElementById("viewer-tools-print").onclick = printPreview;
   document.getElementById("viewer-tools-expand").onclick = expandViewer;
   document.getElementById("viewer-tools-settings").onclick = openViewerSettingsPanel;
+
+  document.getElementById("localhost-tools-run-jekyll").onclick = runJekyll;
 
   // Prevent event propagation on dialogs
   Array.from(document.getElementsByClassName("dlg")).forEach(function(dialog) {
@@ -269,14 +270,18 @@ document.addEventListener('DOMContentLoaded', function() {
       switch (e.which) {   // Ctrl + S
       case 83:
         e.preventDefault();
-        savefile();
+        saveAsLocalFile();
+        break;
+      case 88:             // Ctrl + X (for testing)
+        e.preventDefault();
+        importFromGoogleDrive();
         break;
       }
     } else {
       switch (e.which) {
-      case 27:
+      case 27:             // Escape key
         e.preventDefault();
-        document.getElementsByTagName('overlay')[0].click();
+        closeAllDialogs();
         break;
       }
     }
@@ -811,8 +816,6 @@ function createIframe(docTitle) {
     ifrm.contentWindow.document.open();
     ifrm.contentWindow.document.write("<html>\n<head>\n<title>" + docTitle + "</title>\n");
     ifrm.contentWindow.document.write("<style>" + xhr.responseText + "</style>\n");
-    ifrm.contentWindow.document.write("<script type=\"text/javascript\" async src=\"lib/mathjax-2.7.4/MathJax.js\"></script>\n");
-    ifrm.contentWindow.document.write("<script type=\"text/javascript\" async src=\"preview/preview.js\"></script>\n");
     ifrm.contentWindow.document.write("</head>\n");
     ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + document.getElementById("viewer").innerHTML + "</body>\n");
     ifrm.contentWindow.document.write("</html>");
@@ -889,18 +892,18 @@ function openViewerSettingsPanel() {
 }
 
 function runJekyll() {
-  document.getElementById('localhost-run-jekyll').disabled = true;
+  document.getElementById('localhost-tools-run-jekyll').disabled = true;
   var localhost_port = document.getElementById("setting-jekyll-port").value;
   if (!localhost_port) {
     messageBox("Invalid localhost port!");
-    document.getElementById('localhost-run-jekyll').disabled = false;
+    document.getElementById('localhost-tools-run-jekyll').disabled = false;
     return;
   }
 
   var xhr = new XMLHttpRequest();
   xhr.addEventListener("load", function() {
     messageBox("Jekyll is now running on port " + localhost_port + ".");
-    document.getElementById('localhost-run-jekyll').disabled = false;
+    document.getElementById('localhost-tools-run-jekyll').disabled = false;
   });
   xhr.addEventListener("error", function() {
     chrome.runtime.sendNativeMessage("jekyllserve" + localhost_port, { text: "" }, function(response) {
@@ -921,7 +924,7 @@ function runJekyll() {
           }
         }
       }
-      document.getElementById('localhost-run-jekyll').disabled = false;
+      document.getElementById('localhost-tools-run-jekyll').disabled = false;
     });
   });
   xhr.open("GET", "http://localhost:" + localhost_port + "/", true);
@@ -1292,7 +1295,7 @@ function resetPostingTime() {
   }
 }
 
-function openfile() {
+function openLocalFile() {
   // Not to ask if confirmed to open another document if the previous work is empty
   var activeTab = getActiveTab();
   var parsed = parse(editor.getValue());
@@ -1347,7 +1350,7 @@ function preview(parsed) {
   }
 }
 
-function savefile() {
+function saveAsLocalFile() {
   if (editor) {
     // Read editor's content
     var data = editor.getValue();
@@ -1412,12 +1415,55 @@ function savefile() {
 }
 
 function importFromGoogleDrive() {
+  var dialog = document.getElementById("editor-import-gdrive");
+  dialog.style.display = "block";
+  var importList = document.getElementById("importlist-gdrive");
+  while (importList.firstChild) {
+    importList.removeChild(importList.firstChild);
+  }
+
   chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "https://www.googleapis.com/drive/v3/files");
     xhr.setRequestHeader("Authorization", "Bearer " + access_token)
     xhr.onload = function() {
-      console.log(xhr.response);
+      var data = JSON.parse(xhr.response);
+      data.files.forEach(function(fileinfo) {
+        var ext = /(?:\.([^.]+))?$/.exec(fileinfo.name)[1];
+        if (ext) {
+          ext = ext.toLowerCase();
+          if (ext === "md" || ext === "markdown") {
+            var li = document.createElement("li");
+            li.innerHTML = fileinfo.name;
+            li.onclick = function(e) {
+              // Get file content
+              var xhr2 = new XMLHttpRequest();
+              xhr2.open("GET", "https://www.googleapis.com/drive/v3/files/" + fileinfo.id + "/export?mimeType=text/plain");
+              xhr2.onload = function() {
+                console.log(xhr2.response);
+
+                var activeTab = getActiveTab();
+                var parsed = parse(editor.getValue());
+                if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
+                  if (!confirm("Changes you made may not be saved.\nAre you sure to open another document?"))
+                    return;
+                }
+
+                editor.setValue(xhr2.response);
+                editor.focus();
+                editor.setCursor(0, 0);
+
+                docs[activeTab.index].texts_original = editor.getValue();
+              };
+              xhr2.send();
+
+              // Close dialog
+              dialog.style.display = "none";
+            }
+            importList.appendChild(li);
+          }
+        }
+      });
     };
     xhr.send();
 
