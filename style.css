@@ -134,7 +134,7 @@ splitter:active:after { background: #4242424d; }
 helper { position: relative; width: calc(50% - 0.5px); height: 100%; float: left; }
 viewer, localhost, about { display: none; }
 div#viewer {
-  display: block; padding: 1em; width: 100%; height: 100%;
+  display: block; width: 100%; height: 100%;
   font-size: .9rem; line-height: 1.6; background: #fff;
   transform: rotate(-0.0000000001deg);
   text-shadow: 0 0 1px rgba(0,0,0,.3);
@@ -148,7 +148,7 @@ div#viewer {
 /* Dialog */
 
 .dlg {
-  display: none; position: absolute; top: 0; right: 0; margin: 24px; min-width: calc(400px - 48px); width: 50%;
+  display: none; position: absolute; top: 0; right: 0; margin: 24px 42px 24px 24px; min-width: calc(400px - 48px - 18px); width: 50%;
   border: solid 24px #1e1e1e; background: #1e1e1e; user-select: none; z-index: 99;
 }
 .dlg > section { display: block; }

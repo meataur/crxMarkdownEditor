@@ -802,34 +802,47 @@ function closeAllDialogs() {
 function createIframe(docTitle) {
   var ifrm = document.createElement("iframe");
   ifrm.style.position = "absolute";
-  ifrm.style.top = 0;
-  ifrm.style.width = 0;
-  ifrm.style.height = 0;
+  ifrm.style.display = "none";
   document.body.appendChild(ifrm);
 
-  // Method #1
-  ifrm.contentWindow.document.open();
-  ifrm.contentWindow.document.write("<html>\n<head>\n<title>" + docTitle + "</title>\n");
-  ifrm.contentWindow.document.write("<link rel=\"stylesheet\" href=\"preview/preview.css\">\n");
-  ifrm.contentWindow.document.write("<script type=\"text/javascript\" async src=\"lib/mathjax-2.7.4/MathJax.js\"></script>\n");
-  ifrm.contentWindow.document.write("<script type=\"text/javascript\" async src=\"preview/preview.js\"></script>\n");
-  ifrm.contentWindow.document.write("</head>\n");
-  ifrm.contentWindow.document.write("<body>\n" + document.getElementById("viewer").innerHTML + "</body>\n");
-  ifrm.contentWindow.document.write("</html>");
-  ifrm.contentWindow.document.close();
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "preview.css");
+  xhr.onloadend = function() {
+    ifrm.contentWindow.document.open();
+    ifrm.contentWindow.document.write("<html>\n<head>\n<title>" + docTitle + "</title>\n");
+    ifrm.contentWindow.document.write("<style>" + xhr.responseText + "</style>\n");
+    ifrm.contentWindow.document.write("<script type=\"text/javascript\" async src=\"lib/mathjax-2.7.4/MathJax.js\"></script>\n");
+    ifrm.contentWindow.document.write("<script type=\"text/javascript\" async src=\"preview/preview.js\"></script>\n");
+    ifrm.contentWindow.document.write("</head>\n");
+    ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + document.getElementById("viewer").innerHTML + "</body>\n");
+    ifrm.contentWindow.document.write("</html>");
+    ifrm.contentWindow.document.close();
+  }
+  xhr.send();
 
   return ifrm;
 }
 
 function saveAsHtml() {
   var docTitle = getActiveTab().tab.getElementsByClassName("doc-title")[0].innerHTML;
+  var filename = docTitle + ".html";
   var ifrm = createIframe(docTitle);
-  setTimeout(function () {
-    var link = document.createElement("a");
-    link.href = "data:text/html;charset=utf-8," + encodeURIComponent(ifrm.contentWindow.document.documentElement.outerHTML);
-    link.download = docTitle + ".html";
-    link.click();
-    document.body.removeChild(ifrm);
+
+  // Create download link element
+  setTimeout(function() {
+    chrome.downloads.download({
+      url: "data:text/html;charset=utf-8," + encodeURIComponent(ifrm.contentWindow.document.documentElement.outerHTML),
+      filename: filename,
+      conflictAction: "overwrite",
+      saveAs: true
+    }, function(downloadId) {
+      chrome.downloads.onChanged.addListener(function(e) {
+        if (e.id == downloadId && e.state && e.state.current === "complete") {
+          messageBox("Download Complete!");
+        }
+        document.body.removeChild(ifrm);
+      })
+    });
   }, 500);
 }
 
