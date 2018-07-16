@@ -50,14 +50,15 @@ chrome.browserAction.onClicked.addListener(function(tab) {
               'theme': themeselector.options[themeselector.selectedIndex].textContent,
               'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
               'attachment_location': view.document.getElementById('attachment-location').value.replace(/\/+$/, ''),
-              'hashing': view.document.querySelector('input[name="hashing"]:checked').value
+              'hashing': view.document.querySelector('input[name="hashing"]:checked').value,
+              'viewer_baseurl': view.document.getElementById('viewer-baseurl').value
             });
 
             try {
               // JSON parsing test
               JSON.parse(view.document.getElementById('attachment-type').value);
               chrome.storage.local.set({
-                'attachment_type': view.document.getElementById('attachment-type').value.split(' ').join('')
+                'attachment_type': view.document.getElementById('attachment-type').value
               });
             } catch (err) {
               console.log(err);

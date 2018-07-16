@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
           dropdownItem.addEventListener("click", function(e) {
             collapseAllDropdowns();
             deselectAllPanelmenuItems();
-            closeAllSettingsPanel();
+            closeAllDialogs();
           });
         });
       }
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         collapseAllDropdowns();
-        closeAllSettingsPanel();
+        closeAllDialogs();
 
         if (this.classList.contains("selected")) {
           // Deselect all panel menu items
@@ -220,29 +220,33 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("editor-tools-attachment").onclick = attachments;
   document.getElementById("editor-tools-prettify").onclick = prettify;
   document.getElementById("editor-tools-updtdatetime").onclick = resetPostingTime;
-  document.getElementById("editor-tools-settings").onclick = openControlPanel;
+  document.getElementById("editor-tools-settings").onclick = openEditorSettingsPanel;
 
   document.getElementById("viewer-export-html").onclick = saveAsHtml;
   document.getElementById("viewer-export-pdf").onclick = saveAsPdf;
   document.getElementById("viewer-print").onclick = printPreview;
-  document.getElementById("viewer-view-expand").onclick = expandViewer;
+  document.getElementById("viewer-tools-expand").onclick = expandViewer;
+  document.getElementById("viewer-tools-settings").onclick = openViewerSettingsPanel;
 
-  document.getElementById("editor-settings").addEventListener("mousedown", function(e) {
-    e.stopPropagation();
+  // Prevent event propagation on dialogs
+  Array.from(document.getElementsByClassName("dlg")).forEach(function(dialog) {
+    dialog.addEventListener("mousedown", function(e) {
+      e.stopPropagation();
+    });
   });
 
   // Enable panel splitter dragging
-  splitter.onmousedown = function(evt) {
+  splitter.onmousedown = function(e) {
     isPanelResizing = true;
   };
-  splitter.ondblclick = function(evt) {
+  splitter.ondblclick = function(e) {
     panelEditor.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
     panelHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
   };
-  document.onmousemove = function(evt) {
+  document.onmousemove = function(e) {
     if (!isPanelResizing) return;
 
-    var offset = evt.clientX - contentWrapper.offsetLeft;
+    var offset = e.clientX - contentWrapper.offsetLeft;
     if (offset < 400 || (contentWrapper.clientWidth - offset) < 400) return;
 
     var ratio = offset / contentWrapper.clientWidth * 100;
@@ -256,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.onmousedown = function(e) {
     collapseAllDropdowns();
     deselectAllPanelmenuItems();
-    closeAllSettingsPanel();
+    closeAllDialogs();
   };
   
   // Keyboard shortcut
@@ -318,9 +322,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function messageBox(texts, duration) {
-  var settings = document.getElementsByTagName('settings')[0];
-  settings.style.display = 'none';
-
   if (typeof(duration) === "undefined")
     duration = texts.length * 60;
   if (duration >= 3000)
@@ -414,6 +415,15 @@ function loadSettings() {
       hashing.checked = true;
     }
   });
+  chrome.storage.local.get('viewer_baseurl', function(result) {
+    if (result.viewer_baseurl) {
+      document.getElementById('viewer-baseurl').value = result.viewer_baseurl;
+      document.getElementById('viewer-baseurl').style["background"] = "#383838";
+    } else {
+      document.getElementById('viewer-baseurl').value = 'http://localhost:4000';
+      document.getElementById('viewer-baseurl').style["background"] = "#383838";
+    }
+  });
 }
 
 function saveSettings() {
@@ -424,7 +434,8 @@ function saveSettings() {
     'theme': themeselector.options[themeselector.selectedIndex].textContent,
     'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
     'attachment_location': document.getElementById('attachment-location').value.replace(/\/+$/, ''),
-    'hashing': document.querySelector('input[name="hashing"]:checked').value
+    'hashing': document.querySelector('input[name="hashing"]:checked').value,
+    'viewer_baseurl': document.getElementById('viewer-baseurl').value
   });
 
   try {
@@ -432,7 +443,7 @@ function saveSettings() {
     JSON.parse(document.getElementById('attachment-type').value);
 
     chrome.storage.local.set({
-      'attachment_type': document.getElementById('attachment-type').value.split(' ').join('')
+      'attachment_type': document.getElementById('attachment-type').value
     });
 
     return true;
@@ -776,8 +787,10 @@ function deselectAllPanelmenuItems() {
   });
 }
 
-function closeAllSettingsPanel() {
-  document.getElementById("editor-settings").style.display = "none";
+function closeAllDialogs() {
+  Array.from(document.getElementsByClassName("dlg")).forEach(function(dialog) {
+    dialog.style.display = "none";
+  });
 }
 
 
@@ -843,7 +856,7 @@ function expandViewer() {
     document.getElementById("viewer").getAncestorByClassName("vpanel-body").style.height = "calc(100vh - 105px)";
     panelEditor.style.display = "block";
     splitter.style.display = "block";
-    panelHelper.style.width = "calc(50% - 0.5px)";
+    panelHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
   } else {
     this.setAttribute("expanded", "");
     this.getElementsByTagName("span")[0].innerHTML = "back to editor";
@@ -854,6 +867,12 @@ function expandViewer() {
     splitter.style.display = "none";
     panelHelper.style.width = "100%";
   }
+}
+
+function openViewerSettingsPanel() {
+  var div = document.getElementById("viewer-settings");
+  div.style.display = "block";
+  document.getElementById("viewer-baseurl").focus();
 }
 
 function runJekyll() {
@@ -902,14 +921,10 @@ function runJekyll() {
  * Et cetera
  */
 
-function openControlPanel() {
+function openEditorSettingsPanel() {
   var div = document.getElementById("editor-settings");
   div.style.display = "block";
-
-  // var overlay = document.getElementsByTagName("overlay")[0];
-  // overlay.style.display = "block";
-  // var settings = document.getElementsByTagName('settings')[0];
-  // settings.style.display = 'block';
+  document.getElementById("select-theme").focus();
 }
 
 function numberOnly(e) {
@@ -1302,7 +1317,8 @@ function preview(parsed) {
       data += parsed.body.texts;
 
     // Set site's base url to localhost
-    data = data.replace(/{{ site.baseurl }}/gi, "http://localhost:" + document.getElementById("setting-jekyll-port").value);
+    var baseurl = document.getElementById("viewer-baseurl").value;
+    data = data.replace(/{{ site.baseurl }}/gi, baseurl);
     
     // Show preview panel
     var viewer = document.getElementById("viewer");

@@ -48,10 +48,13 @@
 		.cm-s-default .cm-trailing-space-b:before { position: absolute; content: "\00B7"; color: #777; }
 		.cm-s-default .cm-trailing-space-new-line:before { position: absolute; content: "\21B5"; color: #777; }
 
-		.CodeMirror-dialog { margin: 0; padding: 0 20px; background: #1e1e1e; }
+		.CodeMirror-dialog {
+			margin: 24px; padding: 0; position: absolute; left: unset !important; top: 0; right: 0; min-width: calc(400px - 48px); width: 33%;
+			border: solid 24px #1e1e1e; background: #1e1e1e;
+		}
 		.CodeMirror-search-field { margin-bottom: 10px; width: 100% !important; }
 		.CodeMirror-search-label, .CodeMirror-search-hint {
-			display: block; margin-bottom: 10px; padding: 0;
+			display: block; margin: 0 0 10px 0; padding: 0;
 			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400; font-size: .6rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important;
 		}
 		.CodeMirror-dialog input { padding: .3em; color: #a8afbd; background: #383838; font-family: consolas; border-radius: 2; }
@@ -117,18 +120,18 @@
 				</ul>
 			</toolbox>
 		</div>
-		<div class="vpanel-content">
+		<div class="vpanel-body">
 			<textarea spellcheck="false"></textarea>
-			<div id="editor-settings" class="settings">
+			<div id="editor-settings" class="dlg">
 				<section>
 					<div><span class="settings-label">theme:</span> <select id="select-theme"><option>default</option></select></div>
 					<div><span class="settings-label">font size:</span> <select id="select-fontsize"></select></div>
 				</section>
 				<section>
-					<div style="width: 100%"><span class="settings-label">attachment > location (liquid-syntax):</span> <input type="text" id="attachment-location" spellcheck="false"></div>
-					<div style="width: 100%"><span class="settings-label">attachment > attachment classification (JSON-syntax):</span> <textarea id="attachment-type" spellcheck="false"></textarea></div>
+					<div style="width: 100%"><span class="settings-label">attachment location (liquid-syntax):</span> <input type="text" id="attachment-location" spellcheck="false"></div>
+					<div style="width: 100%"><span class="settings-label">attachment classification (JSON-syntax):</span> <textarea id="attachment-type" spellcheck="false"></textarea></div>
 					<div style="width: 100%">
-						<span class="settings-label">attachment > hash function to avoid filename duplication:</span>
+						<span class="settings-label">hash function to avoid filename duplication:</span>
 						<input type="radio" id="hash-none" name="hashing" value="none"><label for="hash-none">None</label>
 						<input type="radio" id="hash-md5" name="hashing" value="md5"><label for="hash-md5">MD5</label>
 						<input type="radio" id="hash-sha1" name="hashing" value="sha1"><label for="hash-sha1">SHA-1</label>
@@ -160,7 +163,8 @@
 						<li>
 							<span>viewer</span>
 							<ul class="dropdown">
-								<li id="viewer-view-expand"><span>expand screen</span></li>
+								<li id="viewer-tools-expand"><span>expand screen</span></li>
+								<li id="viewer-tools-settings"><span>settings</span></li>
 							</ul>
 						</li>
 					</ul>
@@ -168,6 +172,11 @@
 			</div>
 			<div class="vpanel-body">
 				<div id="viewer"></div>
+				<div id="viewer-settings" class="dlg">
+					<section>
+						<div style="width: 100%"><span class="settings-label">{{ site.baseurl }} replacement:</span> <input type="text" id="viewer-baseurl" spellcheck="false"></div>
+					</section>
+				</div>
 			</div>
 		</viewer>
 
@@ -245,28 +254,5 @@
 	</helper>
 
 </content>
-
-
-
-
-<overlay style="display: none">
-	<settings class="modal">
-		<section>
-			<sectionlabel>ATTACHMENT SYNTAX</sectionlabel>
-			<subsection>
-				<subsectionlabel>Hash Function to Avoid Filename Duplication:</subsectionlabel>
-				<subsectionvalue>
-					<input type="radio" id="hash-none" name="hashing" value="none"><label for="hash-none">None</label>
-					<input type="radio" id="hash-md5" name="hashing" value="md5"><label for="hash-md5">MD5</label>
-					<input type="radio" id="hash-sha1" name="hashing" value="sha1"><label for="hash-sha1">SHA-1</label>
-					<input type="radio" id="hash-sha224" name="hashing" value="sha224"><label for="hash-sha224">SHA-224</label>
-					<input type="radio" id="hash-sha256" name="hashing" value="sha256"><label for="hash-sha256">SHA-256</label>
-					<input type="radio" id="hash-sha512" name="hashing" value="sha512"><label for="hash-sha512">SHA-512</label>
-				</subsectionvalue>
-			</subsection>
-		</section>
-	</settings>
-</overlay>
-
 </body>
 </html>
