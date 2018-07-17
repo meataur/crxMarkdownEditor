@@ -23,25 +23,8 @@ var prevWorkingTabIdx = 0;
 var srcTab = null;
 var dragImage = null;
 
-// Create mousedown event
-var mousedownEvent = new MouseEvent("mousedown");
-Element.prototype.mousedown = function() { this.dispatchEvent(mousedownEvent); }
-
-// Set function to get ancestor element
-Element.prototype.getAncestorByTagName = function(tagName) {
-  var ancestor = this;
-  tagName = tagName.toLowerCase();
-  while (ancestor.tagName.toLowerCase() !== "body" && ancestor.tagName.toLowerCase() !== tagName)
-    ancestor = ancestor.parentNode;
-  return (ancestor.tagName.toLowerCase() === "body") ? null : ancestor;
-}
-Element.prototype.getAncestorByClassName = function(className) {
-  var ancestor = this;
-  className = className.toLowerCase();
-  while (ancestor.tagName.toLowerCase() !== "body" && !ancestor.classList.contains(className))
-    ancestor = ancestor.parentNode;
-  return (ancestor.tagName.toLowerCase() === "body") ? null : ancestor;
-}
+// Cloud API keys
+var gdriveApiKey = "AIzaSyDVcjhklCvt0NKtN9ithQOSJJfHU-QcAXY";
 
 document.addEventListener('DOMContentLoaded', function() {
   // Set tab title
@@ -604,7 +587,7 @@ function createTab(docDatetime, docTitle) {
       var divClose = document.createElement("div");
       divClose.className = "tab-close";
       divClose.title = "Close tab";
-      divClose.innerHTML = "<svg><use xlink:href=\"images/md.svg#icon-tab-close\"></use></svg>";
+      divClose.innerHTML = "<svg><use xlink:href=\"icons.svg#icon-tab-close\"></use></svg>";
       divClose.onclick = closeTab;
 
       // Attach tab-close button to each tab
@@ -1414,73 +1397,108 @@ function saveAsLocalFile() {
   }
 }
 
+function filetree(parent, access_token, fileid) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "https://www.googleapis.com/drive/v3/files?q='" + fileid + "'+in+parents");
+  xhr.setRequestHeader("Authorization", "Bearer " + access_token)
+  xhr.onload = function() {
+    var ul = document.createElement("ul");
+    ul.id = fileid;
+    var data = JSON.parse(xhr.response);
+    data.files.forEach(function(fileinfo) {
+      if (fileinfo.mimeType === "application/vnd.google-apps.folder") {
+        var li = document.createElement("li");
+        li.style.color = "#a8afbd";
+        li.innerHTML = "<svg class=\"fileicon\"><use xlink:href=\"icons.svg#icon-folder\"></use></svg><span>" + fileinfo.name + "</span>";
+        li.onmouseover = function(e) {
+          e.stopPropagation();
+          this.style.color = "#fff";
+        };
+        li.onmouseout = function(e) {
+          e.stopPropagation();
+          this.style.color = "#a8afbd";
+        }
+        li.onclick = function(e) {
+          e.stopPropagation();
+
+          var subtree = this.getElementsByTagName("ul");
+          if (subtree.length) {
+            this.removeChild(subtree[0]);
+          } else {
+            filetree(this, access_token, fileinfo.id);
+          }
+        };
+        ul.appendChild(li);
+      } else if (fileinfo.mimeType === "application/vnd.google-apps.document") {
+        var li = document.createElement("li");
+        li.style.color = "#a8afbd";
+        li.innerHTML = "<svg class=\"fileicon\"><use xlink:href=\"icons.svg#icon-file\"></use></svg><span>" + fileinfo.name + "</span>";
+        li.onmouseover = function(e) {
+          e.stopPropagation();
+          this.style.color = "#fff";
+        };
+        li.onmouseout = function(e) {
+          e.stopPropagation();
+          this.style.color = "#a8afbd";
+        }
+        li.onclick = function(e) {
+          e.stopPropagation();
+
+          // Get file content
+          var xhr2 = new XMLHttpRequest();
+          xhr2.open("GET", "https://www.googleapis.com/drive/v3/files/" + fileinfo.id + "/export?mimeType=text/plain");
+          xhr2.setRequestHeader("Authorization", "Bearer " + access_token);
+          xhr2.onload = function() {
+            var activeTab = getActiveTab();
+            var parsed = parse(editor.getValue());
+            if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
+              if (!confirm("Changes you made may not be saved.\nAre you sure to open another document?"))
+                return;
+            }
+
+            editor.setValue(xhr2.response);
+            editor.focus();
+            editor.setCursor(0, 0);
+
+            docs[activeTab.index].texts_original = editor.getValue();
+          };
+          xhr2.send();
+
+          // Close dialog
+          closeAllDialogs();
+        };
+        ul.appendChild(li);
+      }
+    });
+
+    if (!ul.hasChildNodes()) {
+      var li = document.createElement("li");
+      li.style.color = "#a8afbd";
+      li.innerHTML = "(empty)";
+      li.onmouseover = function(e) {
+        e.stopPropagation();
+        this.style.color = "#fff";
+      };
+      li.onmouseout = function(e) {
+        e.stopPropagation();
+        this.style.color = "#a8afbd";
+      }
+      ul.appendChild(li);
+    }
+
+    parent.appendChild(ul);
+  }
+  xhr.send();
+}
+
 function importFromGoogleDrive() {
   var dialog = document.getElementById("editor-import-gdrive");
   dialog.style.display = "block";
   var importList = document.getElementById("importlist-gdrive");
-  while (importList.firstChild) {
-    importList.removeChild(importList.firstChild);
-  }
+  importList.removeAllChildren();
 
   chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", "https://www.googleapis.com/drive/v3/files");
-    xhr.setRequestHeader("Authorization", "Bearer " + access_token)
-    xhr.onload = function() {
-      var data = JSON.parse(xhr.response);
-      data.files.forEach(function(fileinfo) {
-        var ext = /(?:\.([^.]+))?$/.exec(fileinfo.name)[1];
-        if (ext) {
-          ext = ext.toLowerCase();
-          if (ext === "md" || ext === "markdown") {
-            var li = document.createElement("li");
-            li.innerHTML = fileinfo.name;
-            li.onclick = function(e) {
-              // Get file content
-              var xhr2 = new XMLHttpRequest();
-              xhr2.open("GET", "https://www.googleapis.com/drive/v3/files/" + fileinfo.id + "/export?mimeType=text/plain");
-              xhr2.onload = function() {
-                console.log(xhr2.response);
-
-                var activeTab = getActiveTab();
-                var parsed = parse(editor.getValue());
-                if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
-                  if (!confirm("Changes you made may not be saved.\nAre you sure to open another document?"))
-                    return;
-                }
-
-                editor.setValue(xhr2.response);
-                editor.focus();
-                editor.setCursor(0, 0);
-
-                docs[activeTab.index].texts_original = editor.getValue();
-              };
-              xhr2.send();
-
-              // Close dialog
-              dialog.style.display = "none";
-            }
-            importList.appendChild(li);
-          }
-        }
-      });
-    };
-    xhr.send();
-
-    // let init = {
-    //   method: 'GET',
-    //   async: true,
-    //   headers: {
-    //     Authorization: 'Bearer ' + token,
-    //     'Content-Type': 'application/json'
-    //   },
-    //   'contentType': 'json'
-    // };
-    // fetch("https://people.googleapis.com/v1/contactGroups/all?maxMembers=20&key=<API_Key_Here>", init)
-    // .then((response) => response.json())
-    // .then(function(data) {
-    //   console.log(data)
-    // });
+    filetree(importList, access_token, "root");
   });
 }
 

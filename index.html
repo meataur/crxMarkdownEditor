@@ -67,6 +67,7 @@
 	<script src="lib/marked-0.4.0/marked.min.js"></script>
 
 	<!-- Main Script -->
+	<script src="util.js"></script>
 	<script src="main.js"></script>
 </head>
 <body>
@@ -74,7 +75,7 @@
 	<nav>
 		<ul id="tabs">
 			<li id="create-tab" class="tab">
-				<svg style="width: 1em; height: 60px; stroke-width: 1px;"><use xlink:href="images/md.svg#icon-plus"></use></svg>
+				<svg style="width: 1em; height: 60px; stroke-width: 1px;"><use xlink:href="icons.svg#icon-plus"></use></svg>
 			</li>
 		</ul>
 	</nav>
@@ -125,10 +126,8 @@
 			<div id="editor-import-gdrive" class="dlg">
 				<section>
 					<item>
-						<label>filelist:</label>
-						<ctrl>
-							<ul id="importlist-gdrive"></ul>
-						</ctrl>
+						<label>google drive:</label>
+						<ctrl id="importlist-gdrive"></ctrl>
 					</item>
 				</section>
 			</div>
@@ -222,8 +221,8 @@
 					<h2>One-Time Installation Steps</h2>
 					<h3>Step 1. Install Jekyll</h3>
 					<div>Download and execute the latest version of Ruby language and Jekyll-Standalone installer:</div>
-					<button type="button" id="btn-download-ruby"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Ruby Installer</button>
-					<button type="button" id="btn-download-jekyll"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll-Standalone v3.7.3</button>
+					<button type="button" id="btn-download-ruby"><svg class="svg-btn"><use xlink:href="icons.svg#icon-download"></use></svg> Ruby Installer</button>
+					<button type="button" id="btn-download-jekyll"><svg class="svg-btn"><use xlink:href="icons.svg#icon-download"></use></svg> Jekyll-Standalone v3.7.3</button>
 					<h3>Step 2. Set Localhost Environment</h3>
 					<ul>
 						<li><strong>Working Directory Path: </strong>
@@ -232,7 +231,7 @@
 					</ul>
 					<h3>Step 3. Install Jekyll Launcher</h3>
 					<div>Download and execute the Jekyll Launcher installer:</div>
-					<button type="button" id="btn-download-jekylllauncher"><svg class="svg-btn"><use xlink:href="images/md.svg#icon-download"></use></svg> Jekyll Launcher</button>
+					<button type="button" id="btn-download-jekylllauncher"><svg class="svg-btn"><use xlink:href="icons.svg#icon-download"></use></svg> Jekyll Launcher</button>
 					<h3>Step 4. Enjoy Jekyll on Localhost</h3>
 				</div>
 			</div>

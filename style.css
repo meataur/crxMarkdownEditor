@@ -160,10 +160,10 @@ div#viewer {
 .dlg section > item.inline-subsect:not(:first-child) { margin-left: 1em; }
 .dlg section > item > label { display: block; padding: 0; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important; }
 .dlg section > item > ctrl { display: block; margin: .5em 0; color: #a8afbd; }
-.dlg section > item > ctrl ul { padding: 0 1.6em; }
-.dlg section > item > ctrl li:hover { color: #fff; }
+.dlg section > item > ctrl ul { margin: 0; padding: 0; list-style: none; }
+.dlg section > item > ctrl ul:not(#root) { padding-left: 1.5em; }
+.dlg section > item > ctrl li { line-height: 1.6em; transition-duration: .3s; }
 .dlg optionlabel { margin: 0 4px 0 1px; color: #a8afbd; vertical-align: middle; }
-/* .dlg section > div { display: inline-block; margin-right: 10px; padding-bottom: 10px; } */
 .dlg select { border-radius: 2px; color: #a8afbd; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #383838; border: none; }
 .dlg textarea {
   width: 100%; height: 10em; padding: .3em;
@@ -176,6 +176,7 @@ div#viewer {
 
 /* File dialog */
 
+.fileicon { display: inline-block; width: 1em; height: 1em; margin-right: .5em; vertical-align: middle; }
 
 
 
