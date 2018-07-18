@@ -119,9 +119,9 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("create-tab").onclick = addNewTab;
 
   document.getElementById('setting-jekyll-port').onkeypress = numberOnly;
-  document.getElementById('btn-download-ruby').onclick = downloadRuby;
-  document.getElementById('btn-download-jekyll').onclick = downloadJekyllStandalone;
-  document.getElementById('btn-download-jekylllauncher').onclick = downloadJekyllServeInstaller;
+  document.getElementById('btn-download-ruby').onclick = getRubyLang;
+  document.getElementById('btn-download-jekyll').onclick = getJekyllStandalone;
+  document.getElementById('btn-download-jekylllauncher').onclick = getJekyllLauncher;
 
   // Setting values onchange handlers
   document.getElementById('select-theme').onchange = selectTheme;
@@ -312,8 +312,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function messageBox(texts, duration) {
   if (typeof(duration) === "undefined")
     duration = texts.length * 60;
-  if (duration >= 3000)
+  if (duration > 3000)
     duration = 3000;
+  if (duration < 1500)
+    duration = 1500;
 
   var msgbox = document.createElement("messagebox");
   msgbox.innerHTML = texts.replace(/\n/g, '<br />');
@@ -895,10 +897,10 @@ function runJekyll() {
         if (lastError) {
           if (lastError.message == "Access to the specified native messaging host is forbidden.") {
             // Do nothing
-            messageBox("Invalid \"allowed_origins\" value in manifest JSON file!\nRe-install JekyllServe.");
+            messageBox("Invalid \"allowed_origins\" value in manifest JSON file!\nRe-install Jekyll Launcher.");
           } else if (lastError.message == "Specified native messaging host not found.") {
             // Not found host application
-            messageBox("Not found host application!\nInstall JekyllServe to be running on port " + localhost_port + ".");
+            messageBox("Not found host application!\nInstall Jekyll Launcher to be running on port " + localhost_port + ".");
           } else if (lastError.message == "Error when communicating with the native messaging host.") {
             // Jekyll is shut down.
           } else {
@@ -938,11 +940,11 @@ function numberOnly(e) {
   }
 }
 
-function downloadRuby() {
+function getRubyLang() {
   chrome.tabs.create({ url: "https://rubyinstaller.org/downloads/" });
 }
 
-function downloadJekyllStandalone() {
+function getJekyllStandalone() {
   chrome.downloads.download({
     url: "https://github.com/ChangUk/jekyll-standalone/archive/master.zip",
     filename: "jekyll-standalone.zip",
@@ -950,7 +952,7 @@ function downloadJekyllStandalone() {
   });
 }
 
-function downloadJekyllServeInstaller() {
+function getJekyllLauncher() {
   var workingDirectory = document.getElementById("setting-jekyll-localpath").value;
   if (!workingDirectory) {
     messageBox("Invalid working directory path!");
@@ -1503,5 +1505,20 @@ function importFromGoogleDrive() {
 }
 
 function saveToGoogleDrive() {
-  messageBox("Not support yet...");
+  // var dialog = document.getElementById("editor-export-gdrive");
+  // dialog.style.display = "block";
+  // var exportList = document.getElementById("exportlist-gdrive");
+  // exportList.removeAllChildren();
+  chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
+    var data = "--mdeditor_create_file\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{ \"name\": \"ccc\", \"mimeType\": \"application/vnd.google-apps.document\", \"parents\": [\"root\"] }\r\n\r\n--mdeditor_create_file\r\nContent-Type: text/plain\r\n\r\nHello\r\n--mdeditor_create_file\r\n";
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart");
+    xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+    xhr.setRequestHeader("Content-Type", "multipart/related; boundary=mdeditor_create_file");
+    xhr.onload = function() {
+      console.log(this.response);
+    };
+    xhr.send(data);
+  });
 }
