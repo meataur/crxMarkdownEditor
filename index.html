@@ -57,6 +57,7 @@
 			display: block; margin: 0 0 10px 0; padding: 0;
 			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important;
 		}
+		.CodeMirror-search-hint { margin-bottom: 0; }
 		.CodeMirror-dialog input { padding: .3em; color: #a8afbd; background: #383838; font-family: consolas; border-radius: 2; }
 	</style>
 
@@ -126,8 +127,25 @@
 			<div id="editor-import-gdrive" class="dlg">
 				<section>
 					<item>
-						<label>google drive:</label>
+						<label>select a google document:</label>
 						<ctrl id="importlist-gdrive" class="file-explorer"></ctrl>
+						<ctrl class="file-explorer-tools">
+							<div id="btn-import-from-gdrive" class="file-explorer-button right">import</div>
+						</ctrl>
+					</item>
+				</section>
+			</div>
+			<div id="editor-export-gdrive" class="dlg">
+				<section>
+					<item>
+						<label>select a folder:</label>
+						<ctrl id="exportlist-gdrive" class="file-explorer"></ctrl>
+						<ctrl class="file-explorer-tools">
+							<div class="flex-container">
+								<input type="text" id="input-export-filename" spellcheck="false" placeholder="Input filename to save">
+								<div id="btn-export-to-gdrive" class="file-explorer-button">save</div>
+							</div>
+						</ctrl>
 					</item>
 				</section>
 			</div>
@@ -253,13 +271,11 @@
 					<ul>
 						<li>Support drag-and-drop to present files attached to markdown document.</li>
 						<li>Support hashing for preventing duplication of resource filenames.</li>
-						<li>Press save button to save editor's content as a file.</li>
-						<li>Enable easy blog-posting through browser setting to ask where to save file before downloading.</li>
-						<li>Jekyll standalone installer is available at <a href="https://github.com/ChangUk/jekyll-standalone" target="_blank">github.com/ChangUk/jekyll-standalone</a>.</li>
 					</ul>
 					<h2>Keyboard Shortcuts</h2>
 					<ul>
-						<li>Save markdown document as file: <kbd>Ctrl</kbd> + <kbd>S</kbd></li>
+						<li>Open markdown document from local system: <kbd>Ctrl</kbd> + <kbd>O</kbd></li>
+						<li>Save markdown document as local file: <kbd>Ctrl</kbd> + <kbd>S</kbd></li>
 						<li>Find text matches: <kbd>Ctrl</kbd> + <kbd>F</kbd></li>
 						<ul>
 							<li>Find next: <kbd>Enter</kbd></li>
@@ -281,5 +297,7 @@
 	</helper>
 
 </content>
+
+<div id="messagebox-wrapper"></div>
 </body>
 </html>

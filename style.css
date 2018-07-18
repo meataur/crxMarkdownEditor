@@ -15,6 +15,10 @@ input[type="radio"] { display: inline-block; height: 1em; line-height: 1em; vert
 svg { display: inline-flex; align-self: center; fill: currentColor; stroke: currentColor; stroke-width: 0; vertical-align: top; }
 .svg-btn { display: inline-block; width: 1.1em; height: 1.1em; }
 
+.flex-container { display: flex; }
+.left { float: left; }
+.right { float: right; }
+
 
 
 /* Body layouts */
@@ -142,6 +146,7 @@ div#viewer {
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden; overflow-y: scroll;
 }
+.no-content { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); user-select: none; }
 
 
 
@@ -160,14 +165,11 @@ div#viewer {
 .dlg section > item.inline-subsect:not(:first-child) { margin-left: 1em; }
 .dlg section > item > label { display: block; padding: 0; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important; }
 .dlg section > item > ctrl { display: block; margin: .5em 0; color: #a8afbd; }
-.dlg section > item > ctrl ul { margin: 0; padding: 0; list-style: none; }
-.dlg section > item > ctrl ul:not(#root) { padding-left: 1.5em; }
-.dlg section > item > ctrl li { line-height: 1.6em; transition-duration: .3s; }
 .dlg optionlabel { margin: 0 4px 0 1px; color: #a8afbd; vertical-align: middle; }
 .dlg select { border-radius: 2px; color: #a8afbd; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #383838; border: none; }
 .dlg textarea {
   width: 100%; height: 10em; padding: .3em;
-  color: #a8afbd; background: #383838; font-family: consolas; line-height: 1.25; border: none; resize: none; overflow: auto; white-space: nowrap;
+  color: #a8afbd; background: #383838; font-family: consolas; line-height: 1.25; border: none; border-radius: 2px; resize: none; overflow: auto; white-space: nowrap;
 }
 .dlg input[type="text"] { width: 100%; color: #a8afbd; background: #383838; font-family: consolas; border: none; }
 .dlg input[type="radio"] { vertical-align: middle; background: #383838; }
@@ -176,8 +178,41 @@ div#viewer {
 
 /* File dialog */
 
-.file-explorer { padding: 1em; background: #383838; }
+.file-explorer { padding: 1em; background: #383838; border-radius: 2px; }
+.file-explorer ul { margin: 0; padding: 0; list-style: none; }
+.file-explorer ul:not(#root) { padding-left: 1.5em; }
+.file-explorer li { padding-top: .5em; }
+.file-explorer > ul > li:first-child { padding-top: 0; }
+.file-explorer li > svg { margin-bottom: 4px; }
+.file-explorer li > span { line-height: 1; }
+.file-explorer li.focused > svg { color: #fff; }
+.file-explorer li.focused > span { color: #fff; }
+.file-explorer li[selected] > svg { color: #fff; }
+.file-explorer li[selected] > span { color: #fff; }
+
 .fileicon { display: inline-block; margin-right: .5em; width: 1em; height: 1em; vertical-align: middle; }
+.file-explorer-tools input { flex: 2; }
+.file-explorer-button {
+  margin-left: .5em; padding: .5em .8em;
+  color: #a8afbd; font-size: .7rem; background: #383838; text-transform: uppercase; border-radius: 2px;
+}
+.file-explorer-button[activated] { color: #fff; background: #005e9c; }
+.file-explorer-button[activated]:hover { background: #0473bc; }
+
+.spinner { position: absolute; top: 0; right: 0; height: 15px; transition: opacity .3s; opacity: 1; }
+.spinner:before { display: inline-block; content: ""; height: 100%; vertical-align: middle; }
+.spinner > div {
+  display: inline-block; width: .5rem; height: .5rem; margin-left: 5px;
+  border-radius: 100%; background: #383838; vertical-align: middle;
+  animation: sk-bouncedelay 1s infinite ease-in-out both;
+}
+.spinner .bounce0 { animation-delay: -0.32s; }
+.spinner .bounce1 { animation-delay: -0.16s; }
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
+}
+.spinner.fadeout { opacity: 0; }
 
 
 
@@ -216,12 +251,16 @@ div#viewer {
 
 /* Utilities */
 
-messagebox {
-  position: absolute; left: 50%; top: 120px; padding: 1em; transform: translateX(-50%);
-  font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .9rem; user-select: none;
-  background-color: #fff; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px;
-  transition: opacity .3s; opacity: 0;
+#messagebox-wrapper {
+  position: absolute; left: 2em; bottom: 2em; min-width: 300px;
   z-index: 2147483647;
+}
+
+messagebox {
+  display: inline-block; margin: .5em; padding: 1em;
+  color: #fff; font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .9rem; user-select: none;
+  background-color: #1e1e1e; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px;
+  transition: opacity .3s; opacity: 0;
 }
 
 kbd {

@@ -195,9 +195,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Helper functions
 
   document.getElementById("editor-tools-import-local").onclick = openLocalFile;
-  document.getElementById("editor-tools-import-gdrive").onclick = importFromGoogleDrive;
+  document.getElementById("editor-tools-import-gdrive").onclick = importFromGdrive;
   document.getElementById("editor-tools-save-local").onclick = saveAsLocalFile;
-  document.getElementById("editor-tools-save-gdrive").onclick = saveToGoogleDrive;
+  document.getElementById("editor-tools-save-gdrive").onclick = saveToGdrive;
   document.getElementById("editor-tools-template").onclick = initTextarea;
   document.getElementById("editor-tools-attachment").onclick = attachments;
   document.getElementById("editor-tools-prettify").onclick = prettify;
@@ -251,13 +251,17 @@ document.addEventListener('DOMContentLoaded', function() {
   document.onkeydown = function(e) {
     if (e.ctrlKey) {
       switch (e.which) {   // Ctrl + S
+      case 79:
+        e.preventDefault();
+        openLocalFile();
+        break;
+      case 81:             // Ctrl + Q (for testing)
+        e.preventDefault();
+        messageBox("test");
+        break;
       case 83:
         e.preventDefault();
         saveAsLocalFile();
-        break;
-      case 88:             // Ctrl + X (for testing)
-        e.preventDefault();
-        importFromGoogleDrive();
         break;
       }
     } else {
@@ -317,9 +321,12 @@ function messageBox(texts, duration) {
   if (duration < 1500)
     duration = 1500;
 
+  var msgboxWrapper = document.getElementById("messagebox-wrapper");
+  var outer = document.createElement("div");
   var msgbox = document.createElement("messagebox");
   msgbox.innerHTML = texts.replace(/\n/g, '<br />');
-  document.body.appendChild(msgbox);
+  outer.appendChild(msgbox);
+  msgboxWrapper.appendChild(outer);
   setTimeout(function() {
     msgbox.style.opacity = 1;
   }, 100);
@@ -1331,7 +1338,17 @@ function preview(parsed) {
     // ifrm.innerHTML += "<link rel='stylesheet' href='preview/font-awesome/4.7.0/css/font-awesome.min.css'>";
     // ifrm.innerHTML += "<script type='text/x-mathjax-config' src='preview/preview.js'></script>";
     // ifrm.innerHTML += "<script type='text/javascript' async src='preview/mathjax/2.7.4/MathJax.js'></script>";
-    viewer.innerHTML = marked(data);
+    var data = marked(data);
+    if (data.length) {
+      viewer.removeAllChildren();
+      viewer.innerHTML = marked(data);
+    } else {
+      viewer.removeAllChildren();
+      var noContent = document.createElement("div");
+      noContent.classList.add("no-content");
+      noContent.innerHTML = "There is nothing displayed on viewer.";
+      viewer.appendChild(noContent);
+    }
   }
 }
 
@@ -1363,12 +1380,10 @@ function saveAsLocalFile() {
     // Get save name from document header
     var filename = "";
     if (docHeader["date"])
-      filename += docHeader["date"].split(" ")[0]+"-";
-    if (docHeader["title"].length == 0) {
-      messageBox("Unable to save as file.\nDocument title is empty.");
-      return;
-    }
-    filename += docHeader["title"].toLowerCase().split(" ").join("-")+".md";
+      filename += docHeader["date"].split(" ")[0] + "-";
+    if (docHeader["title"].length == 0)
+      docHeader["title"] = "Untitled Document";
+    filename += docHeader["title"].toLowerCase().replaceAll(" ", "-") + ".md";
 
     // Create download link element
     chrome.downloads.download({
@@ -1399,51 +1414,82 @@ function saveAsLocalFile() {
   }
 }
 
-function filetree(parent, access_token, fileid) {
+function createSpinner(id) {
+  var spinner = document.createElement("div");
+  spinner.id = id;
+  spinner.classList.add("spinner");
+  for (var i = 0; i < 3; i++) {
+    var bounce = document.createElement("div");
+    bounce.classList.add("bounce" + i);
+    spinner.appendChild(bounce);
+  }
+  return spinner;
+}
+
+function gdriveImportFiletree(parent, access_token, fileid) {
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", "https://www.googleapis.com/drive/v3/files?q='" + fileid + "'+in+parents");
+  xhr.open("GET", "https://www.googleapis.com/drive/v3/files?q='" + fileid + "'+in+parents+and+trashed=false");
   xhr.setRequestHeader("Authorization", "Bearer " + access_token)
   xhr.onload = function() {
+    var spinner = document.getElementById("spinner-gdrive-import");
+    if (spinner) spinner.classList.toggle("fadeout");
+
     var ul = document.createElement("ul");
-    ul.id = fileid;
     var data = JSON.parse(xhr.response);
     data.files.forEach(function(fileinfo) {
       if (fileinfo.mimeType === "application/vnd.google-apps.folder") {
         var li = document.createElement("li");
-        li.style.color = "#a8afbd";
+        li.id = fileinfo.id;
         li.innerHTML = "<svg class=\"fileicon\"><use xlink:href=\"icons.svg#icon-folder\"></use></svg><span>" + fileinfo.name + "</span>";
         li.onmouseover = function(e) {
           e.stopPropagation();
-          this.style.color = "#fff";
-        };
+          this.classList.add("focused");
+        }
         li.onmouseout = function(e) {
           e.stopPropagation();
-          this.style.color = "#a8afbd";
+          this.classList.remove("focused");
         }
-        li.onclick = function(e) {
+        li.ondblclick = function(e) {
           e.stopPropagation();
+
+          // Prevent request duplication
+          if (!spinner.classList.contains("fadeout")) return;
 
           var subtree = this.getElementsByTagName("ul");
           if (subtree.length) {
             this.removeChild(subtree[0]);
           } else {
-            filetree(this, access_token, fileinfo.id);
+            spinner.classList.toggle("fadeout");
+            gdriveImportFiletree(this, access_token, fileinfo.id);
           }
-        };
+        }
         ul.appendChild(li);
       } else if (fileinfo.mimeType === "application/vnd.google-apps.document") {
         var li = document.createElement("li");
-        li.style.color = "#a8afbd";
+        li.id = fileinfo.id;
         li.innerHTML = "<svg class=\"fileicon\"><use xlink:href=\"icons.svg#icon-file\"></use></svg><span>" + fileinfo.name + "</span>";
         li.onmouseover = function(e) {
           e.stopPropagation();
-          this.style.color = "#fff";
-        };
+          this.classList.add("focused");
+        }
         li.onmouseout = function(e) {
           e.stopPropagation();
-          this.style.color = "#a8afbd";
+          this.classList.remove("focused");
         }
         li.onclick = function(e) {
+          e.stopPropagation();
+
+          var importList = document.getElementById("importlist-gdrive");
+          Array.from(importList.getElementsByTagName("li")).forEach(function(li) {
+            li.removeAttribute("selected");
+          });
+          this.setAttribute("selected", "");
+
+          var importBtn = document.getElementById("btn-import-from-gdrive");
+          importBtn.setAttribute("activated", "");
+          importBtn.setAttribute("data", fileinfo.id);
+        }
+        li.ondblclick = function(e) {
           e.stopPropagation();
 
           // Get file content
@@ -1463,62 +1509,219 @@ function filetree(parent, access_token, fileid) {
             editor.setCursor(0, 0);
 
             docs[activeTab.index].texts_original = editor.getValue();
-          };
+          }
           xhr2.send();
 
           // Close dialog
           closeAllDialogs();
-        };
+        }
         ul.appendChild(li);
       }
     });
-
-    if (!ul.hasChildNodes()) {
-      var li = document.createElement("li");
-      li.style.color = "#a8afbd";
-      li.innerHTML = "(empty)";
-      li.onmouseover = function(e) {
-        e.stopPropagation();
-        this.style.color = "#fff";
-      };
-      li.onmouseout = function(e) {
-        e.stopPropagation();
-        this.style.color = "#a8afbd";
-      }
-      ul.appendChild(li);
-    }
 
     parent.appendChild(ul);
   }
   xhr.send();
 }
 
-function importFromGoogleDrive() {
+function importFromGdrive() {
   var dialog = document.getElementById("editor-import-gdrive");
   dialog.style.display = "block";
+
   var importList = document.getElementById("importlist-gdrive");
   importList.removeAllChildren();
 
   chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
-    filetree(importList, access_token, "root");
+    // Create spinner
+    var spinner = createSpinner("spinner-gdrive-import");
+    importList.appendChild(spinner);
+
+    // Create file tree
+    var ul = document.createElement("ul");
+    ul.id = "root";
+    var root = document.createElement("li");
+    root.innerHTML = "<svg class=\"fileicon\"><use xlink:href=\"icons.svg#icon-folder\"></use></svg><span>Root</span>";
+    root.onmouseover = function(e) {
+      e.stopPropagation();
+      this.classList.add("focused");
+    }
+    root.onmouseout = function(e) {
+      e.stopPropagation();
+      this.classList.remove("focused");
+    }
+    ul.appendChild(root);
+    gdriveImportFiletree(root, access_token, "root");
+    importList.appendChild(ul);
+
+    // Set import button event handler
+    var importBtn = document.getElementById("btn-import-from-gdrive");
+    importBtn.removeAttribute("activated");
+    importBtn.onclick = function(e) {
+      if (this.hasAttribute("activated")) {
+        var xhr2 = new XMLHttpRequest();
+        xhr2.open("GET", "https://www.googleapis.com/drive/v3/files/" + this.getAttribute("data") + "/export?mimeType=text/plain");
+        xhr2.setRequestHeader("Authorization", "Bearer " + access_token);
+        xhr2.onload = function() {
+          var activeTab = getActiveTab();
+          var parsed = parse(editor.getValue());
+          if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
+            if (!confirm("Changes you made may not be saved.\nAre you sure to open another document?"))
+              return;
+          }
+
+          editor.setValue(xhr2.response);
+          editor.focus();
+          editor.setCursor(0, 0);
+
+          docs[activeTab.index].texts_original = editor.getValue();
+        }
+        xhr2.send();
+
+        // Close dialog
+        closeAllDialogs();
+      }
+    }
   });
 }
 
-function saveToGoogleDrive() {
-  // var dialog = document.getElementById("editor-export-gdrive");
-  // dialog.style.display = "block";
-  // var exportList = document.getElementById("exportlist-gdrive");
-  // exportList.removeAllChildren();
-  chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
-    var data = "--mdeditor_create_file\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{ \"name\": \"ccc\", \"mimeType\": \"application/vnd.google-apps.document\", \"parents\": [\"root\"] }\r\n\r\n--mdeditor_create_file\r\nContent-Type: text/plain\r\n\r\nHello\r\n--mdeditor_create_file\r\n";
+function gdriveExportFiletree(parent, access_token, fileid) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "https://www.googleapis.com/drive/v3/files?q='" + fileid + "'+in+parents+and+trashed=false");
+  xhr.setRequestHeader("Authorization", "Bearer " + access_token)
+  xhr.onload = function() {
+    var spinner = document.getElementById("spinner-gdrive-export");
+    if (spinner) spinner.classList.toggle("fadeout");
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart");
-    xhr.setRequestHeader("Authorization", "Bearer " + access_token);
-    xhr.setRequestHeader("Content-Type", "multipart/related; boundary=mdeditor_create_file");
-    xhr.onload = function() {
-      console.log(this.response);
-    };
-    xhr.send(data);
+    var ul = document.createElement("ul");
+    var data = JSON.parse(xhr.response);
+    data.files.forEach(function(fileinfo) {
+      if (fileinfo.mimeType === "application/vnd.google-apps.folder") {
+        var li = document.createElement("li");
+        li.id = fileinfo.id;
+        li.innerHTML = "<svg class=\"fileicon\"><use xlink:href=\"icons.svg#icon-folder\"></use></svg><span>" + fileinfo.name + "</span>";
+        li.onmouseover = function(e) {
+          e.stopPropagation();
+          this.classList.add("focused");
+        }
+        li.onmouseout = function(e) {
+          e.stopPropagation();
+          this.classList.remove("focused");
+        }
+        li.onclick = function(e) {
+          e.stopPropagation();
+
+          var exportList = document.getElementById("exportlist-gdrive");
+          Array.from(exportList.getElementsByTagName("li")).forEach(function(li) {
+            li.removeAttribute("selected");
+          });
+          this.setAttribute("selected", "");
+
+          var exportBtn = document.getElementById("btn-export-to-gdrive");
+          exportBtn.setAttribute("activated", "");
+          exportBtn.setAttribute("data", fileinfo.id);
+        };
+        li.ondblclick = function(e) {
+          e.stopPropagation();
+
+          // Prevent request duplication
+          if (!spinner.classList.contains("fadeout")) return;
+
+          var subtree = this.getElementsByTagName("ul");
+          if (subtree.length) {
+            this.removeChild(subtree[0]);
+          } else {
+            spinner.classList.toggle("fadeout");
+            gdriveExportFiletree(this, access_token, fileinfo.id);
+          }
+        }
+        ul.appendChild(li);
+      }
+    });
+
+    parent.appendChild(ul);
+  }
+  xhr.send();
+}
+
+function saveToGdrive() {
+  var dialog = document.getElementById("editor-export-gdrive");
+  dialog.style.display = "block";
+
+  var exportList = document.getElementById("exportlist-gdrive");
+  exportList.removeAllChildren();
+
+  // Filename
+  var inputFilename = document.getElementById("input-export-filename");
+  var activeTab = getActiveTab();
+  if (activeTab) {
+    var docDatetime = activeTab.tab.getElementsByClassName("doc-datetime")[0].innerHTML;
+    var docTitle = activeTab.tab.getElementsByClassName("doc-title")[0].innerHTML;
+    inputFilename.value = docDatetime + "-" + docTitle.replaceAll(" ", "-") + ".md";
+  }
+  inputFilename.focus();
+
+  chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
+    // Create spinner
+    var spinner = createSpinner("spinner-gdrive-export");
+    exportList.appendChild(spinner);
+
+    // Create file tree
+    var ul = document.createElement("ul");
+    ul.id = "root";
+    var root = document.createElement("li");
+    root.id = "root";
+    root.innerHTML = "<svg class=\"fileicon\"><use xlink:href=\"icons.svg#icon-folder\"></use></svg><span>Root</span>";
+    root.onmouseover = function(e) {
+      e.stopPropagation();
+      this.classList.add("focused");
+    }
+    root.onmouseout = function(e) {
+      e.stopPropagation();
+      this.classList.remove("focused");
+    }
+    root.onclick = function(e) {
+      e.stopPropagation();
+
+      var exportList = document.getElementById("exportlist-gdrive");
+      Array.from(exportList.getElementsByTagName("li")).forEach(function(li) {
+        li.removeAttribute("selected");
+      });
+      this.setAttribute("selected", "");
+
+      var exportBtn = document.getElementById("btn-export-to-gdrive");
+      exportBtn.setAttribute("activated", "");
+      exportBtn.setAttribute("data", "root");
+    }
+    root.click();
+    root.ondblclick = function(e) {
+      e.stopPropagation();
+    }
+    ul.appendChild(root);
+    gdriveExportFiletree(root, access_token, "root");
+    exportList.appendChild(ul);
+
+    // Set save button event handler
+    var exportBtn = document.getElementById("btn-export-to-gdrive");
+    exportBtn.onclick = function(e) {
+      if (this.hasAttribute("activated")) {
+        // Sending data
+        var data = "--mdeditor_create_file\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n";
+        data += "{ \"name\": \"" + inputFilename.value + "\", \"mimeType\": \"application/vnd.google-apps.document\", \"parents\": [\"" + this.getAttribute("data") + "\"] }\r\n\r\n";
+        data += "--mdeditor_create_file\r\nContent-Type: text/plain\r\n\r\n";
+        data += editor.getValue() + "\r\n--mdeditor_create_file\r\n";
+
+        var xhr2 = new XMLHttpRequest();
+        xhr2.open("POST", "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart");
+        xhr2.setRequestHeader("Authorization", "Bearer " + access_token);
+        xhr2.setRequestHeader("Content-Type", "multipart/related; boundary=mdeditor_create_file");
+        xhr2.onload = function() {
+          messageBox("Successfully saved.");
+        }
+        xhr2.send(data);
+
+        // Close dialog
+        closeAllDialogs();
+      }
+    }
   });
 }
