@@ -1525,13 +1525,13 @@ function gdriveImportFiletree(parent, access_token, fileid) {
 }
 
 function importFromGdrive() {
-  var dialog = document.getElementById("editor-import-gdrive");
-  dialog.style.display = "block";
-
-  var importList = document.getElementById("importlist-gdrive");
-  importList.removeAllChildren();
-
   chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
+    var dialog = document.getElementById("editor-import-gdrive");
+    dialog.style.display = "block";
+  
+    var importList = document.getElementById("importlist-gdrive");
+    importList.removeAllChildren();
+
     // Create spinner
     var spinner = createSpinner("spinner-gdrive-import");
     importList.appendChild(spinner);
@@ -1644,23 +1644,23 @@ function gdriveExportFiletree(parent, access_token, fileid) {
 }
 
 function saveToGdrive() {
-  var dialog = document.getElementById("editor-export-gdrive");
-  dialog.style.display = "block";
-
-  var exportList = document.getElementById("exportlist-gdrive");
-  exportList.removeAllChildren();
-
-  // Filename
-  var inputFilename = document.getElementById("input-export-filename");
-  var activeTab = getActiveTab();
-  if (activeTab) {
-    var docDatetime = activeTab.tab.getElementsByClassName("doc-datetime")[0].innerHTML;
-    var docTitle = activeTab.tab.getElementsByClassName("doc-title")[0].innerHTML;
-    inputFilename.value = docDatetime + "-" + docTitle.replaceAll(" ", "-") + ".md";
-  }
-  inputFilename.focus();
-
   chrome.identity.getAuthToken({ interactive: true }, function(access_token) {
+    var dialog = document.getElementById("editor-export-gdrive");
+    dialog.style.display = "block";
+  
+    var exportList = document.getElementById("exportlist-gdrive");
+    exportList.removeAllChildren();
+  
+    // Filename
+    var inputFilename = document.getElementById("input-export-filename");
+    var activeTab = getActiveTab();
+    if (activeTab) {
+      var docDatetime = activeTab.tab.getElementsByClassName("doc-datetime")[0].innerHTML;
+      var docTitle = activeTab.tab.getElementsByClassName("doc-title")[0].innerHTML;
+      inputFilename.value = docDatetime + "-" + docTitle.replaceAll(" ", "-") + ".md";
+    }
+    inputFilename.focus();
+
     // Create spinner
     var spinner = createSpinner("spinner-gdrive-export");
     exportList.appendChild(spinner);

@@ -112,10 +112,11 @@ toolbox ul.panelmenu > li.has-dropdown:after {
   border-top: 4px solid; border-right: 4px solid transparent; border-left: 4px solid transparent;
 }
 toolbox ul.dropdown { position: absolute; right: 0; display: none; background: #005e9c; white-space: nowrap; min-width: 150px; z-index: 102; }
-toolbox ul.dropdown.leftward { right: 0; }
-toolbox ul.dropdown.rightward { left: 0; }
+toolbox ul.dropdown.leftward { left: unset; right: 0; }
+toolbox ul.dropdown.rightward { left: 0; right: unset; }
 toolbox ul.dropdown > li { display: block; padding: 0 1.6em; color: #fff; transition-duration: .3s; }
 toolbox ul.dropdown > li:hover { background: #0473bc; }
+toolbox ul.dropdown > li > div { display: inline-flex; height: 100%; align-items: center; }
 
 
 
