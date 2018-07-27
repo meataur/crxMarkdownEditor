@@ -126,7 +126,8 @@
 			</toolbox>
 		</div>
 		<div class="vpanel-body">
-			<textarea spellcheck="false"></textarea>
+			<textarea id="editor-textarea" spellcheck="false"></textarea>
+
 			<div id="editor-import-gdrive" class="dlg">
 				<section>
 					<item>
@@ -145,13 +146,39 @@
 						<ctrl id="exportlist-gdrive" class="file-explorer"></ctrl>
 						<ctrl class="file-explorer-tools">
 							<div class="flex-container">
-								<input type="text" id="input-export-filename" spellcheck="false" placeholder="Input filename to save">
+								<input type="text" id="input-export-gdrive-filename" spellcheck="false" placeholder="Input filename to save">
 								<div id="btn-export-to-gdrive" class="file-explorer-button">save</div>
 							</div>
 						</ctrl>
 					</item>
 				</section>
 			</div>
+			<div id="editor-import-github" class="dlg">
+				<section>
+					<item>
+						<label>select a github document:</label>
+						<ctrl id="importlist-github" class="file-explorer"></ctrl>
+						<ctrl class="file-explorer-tools">
+							<div id="btn-import-from-github" class="file-explorer-button right">import</div>
+						</ctrl>
+					</item>
+				</section>
+			</div>
+			<div id="editor-export-github" class="dlg">
+				<section>
+					<item>
+						<label>select a folder:</label>
+						<ctrl id="exportlist-github" class="file-explorer"></ctrl>
+						<ctrl class="file-explorer-tools">
+							<div class="flex-container">
+								<input type="text" id="input-export-github-filename" spellcheck="false" placeholder="Input filename to save">
+								<div id="btn-export-to-github" class="file-explorer-button">save</div>
+							</div>
+						</ctrl>
+					</item>
+				</section>
+			</div>
+
 			<div id="editor-settings" class="dlg">
 				<section>
 					<item class="inline-subsect">

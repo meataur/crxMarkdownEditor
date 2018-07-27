@@ -1,3 +1,5 @@
+var debug = true;
+
 let IO = {
   Local: {
     open: function() {
@@ -314,7 +316,7 @@ let IO = {
       exportList.removeAllChildren();
     
       // Filename
-      var inputFilename = document.getElementById("input-export-filename");
+      var inputFilename = document.getElementById("input-export-gdrive-filename");
       var activeTab = getActiveTab();
       if (activeTab) {
         var docDatetime = activeTab.tab.getElementsByClassName("doc-datetime")[0].innerHTML;
@@ -322,11 +324,11 @@ let IO = {
         inputFilename.value = docDatetime + "-" + docTitle.replaceAll(" ", "-") + ".md";
       }
       inputFilename.focus();
-  
+
       // Create spinner
       var spinner = createSpinner("spinner-gdrive-export");
       exportList.appendChild(spinner);
-  
+
       // Create file tree
       var ul = document.createElement("ul");
       ul.id = "root";
@@ -389,26 +391,161 @@ let IO = {
 
     return {
       open: function() {
-        _getAuthToken({ interactive: false, callback: function(access_token) {
-          if (chrome.runtime.lastError) {
-            _getAuthToken({ interactive: true, callback: _openCallback })
-          } else {
-            _openCallback(access_token);
-          }
-        }});
+        var options = {
+          interactive: true,
+          callback: _openCallback
+        }
+        _getAuthToken(options);
       },
       save: function() {
-        _getAuthToken({ interactive: false, callback: function(access_token) {
-          if (chrome.runtime.lastError) {
-            _getAuthToken({ interactive: true, callback: _saveCallback })
-          } else {
-            _saveCallback(access_token);
-          }
-        }});
+        var options = {
+          interactive: true,
+          callback: _saveCallback
+        }
+        _getAuthToken(options);
       }
     }
   })(),
   Github: (function() {
+    let _clientId = 'ac52e15a05c1f05e2a14';
+    let _clientSecret = '612056756863407c1241706306ec711c76bb8814';
+    if (debug) {
+      _clientId = "fffdcf84e36ddeb9bce4";
+      _clientSecret = "609f288a1df9763979ac258a5db17d19ee8ee49e";
+    }
+    let _redirectUri = chrome.identity.getRedirectURL("provider_cb");
 
+    let _getAuthToken = function(options, callback) {
+      chrome.identity.launchWebAuthFlow(options, function(redirectUri) {
+        if (!redirectUri) return;
+
+        console.log(redirectUri);
+
+        // Upon success the response is appended to redirectUri, e.g.
+        // https://{app_id}.chromiumapp.org/provider_cb#access_token={value}&refresh_token={value}
+        // or:
+        // https://{app_id}.chromiumapp.org/provider_cb#code={value}
+        var matches = redirectUri.match(new RegExp(_redirectUri + '[#\?](.*)'));
+        if (matches && matches.length > 1) {
+          // Parse redirect URL
+          var redirectUriParams = {};
+          matches[1].split(/&/).forEach(function(pair) {
+            var nameval = pair.split(/=/);
+            redirectUriParams[nameval[0]] = nameval[1];
+          });
+
+          if (redirectUriParams.hasOwnProperty('access_token')) {
+            // Work with access token
+            callback(redirectUriParams.access_token);
+          } else if (redirectUriParams.hasOwnProperty('code')) {
+            // Exchange code for access token
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET',
+                     'https://github.com/login/oauth/access_token?' +
+                     'client_id=' + _clientId +
+                     '&client_secret=' + _clientSecret +
+                     '&redirect_uri=' + redirectUri +
+                     '&scope=user,repo' +
+                     '&code=' + redirectUriParams.code);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.onload = function () {
+              if (this.status === 200) {
+                var response = JSON.parse(this.responseText);
+                if (response.hasOwnProperty('access_token'))
+                  callback(response.access_token);
+              }
+            }
+            xhr.send();
+          }
+        }
+      });
+    }
+    // let _impFiletree = function(parent, access_token, fileid) {
+    //   var xhr = new XMLHttpRequest();
+    //   xhr.open("GET", "https://");
+    //   xhr.setRequestHeader("Authorization", "Bearer " + access_token)
+    //   xhr.onload = function() {
+    //     var spinner = document.getElementById("spinner-gdrive-import");
+    //     if (spinner) spinner.classList.toggle("fadeout");
+    //   }
+    //   xhr.send();
+    // }
+    let _openCallback = function(access_token) {
+      if (access_token) {
+        // Play with access token
+        console.log("access_token: " + access_token);
+
+        // var dialog = document.getElementById("editor-import-github");
+        // dialog.style.display = "block";
+      
+        // var importList = document.getElementById("importlist-github");
+        // importList.removeAllChildren();
+    
+        // // Create spinner
+        // var spinner = createSpinner("spinner-github-import");
+        // importList.appendChild(spinner);
+  
+        // // Create file tree
+        // var ul = document.createElement("ul");
+        // ul.id = "root";
+        // var root = document.createElement("li");
+        // root.innerHTML = "<svg class=\"fileicon\"><use xlink:href=\"icons.svg#icon-folder\"></use></svg><span>Root</span>";
+        // root.onmouseover = function(e) {
+        //   e.stopPropagation();
+        //   this.classList.add("focused");
+        // }
+        // root.onmouseout = function(e) {
+        //   e.stopPropagation();
+        //   this.classList.remove("focused");
+        // }
+        // ul.appendChild(root);
+        // ///////////////////////////////////////_impFiletree(root, access_token, "root");
+        // importList.appendChild(ul);
+
+        // // Set import button event handler
+        // var importBtn = document.getElementById("btn-import-from-github");
+        // importBtn.removeAttribute("activated");
+        // importBtn.onclick = function(e) {
+        //   if (this.hasAttribute("activated")) {
+        //     var xhr2 = new XMLHttpRequest();
+        //     xhr2.open("GET", "https://" + this.getAttribute("data") + "/export?mimeType=text/plain");
+        //     xhr2.setRequestHeader("Authorization", "Bearer " + access_token);
+        //     xhr2.onload = function() {
+        //       var activeTab = getActiveTab();
+        //       var parsed = parse(editor.getValue());
+        //       if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
+        //         if (!confirm("Changes you made may not be saved.\nAre you sure to open another document?"))
+        //           return;
+        //       }
+    
+        //       editor.setValue(xhr2.response);
+        //       editor.focus();
+        //       editor.setCursor(0, 0);
+    
+        //       docs[activeTab.index].texts_original = editor.getValue();
+        //     }
+        //     xhr2.send();
+    
+        //     // Close dialog
+        //     closeAllDialogs();
+        //   }
+        // }
+      }
+    }
+    
+    return {
+      open: function() {
+        var options = {
+          interactive: true,
+          url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
+            '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
+        }
+        _getAuthToken(options, _openCallback);
+      },
+      save: function() {
+
+      }
+    }
   })()
 }

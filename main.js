@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     appVersDivs[i].innerHTML = "v" + manifestData.version;
 
   // Create markdown editor
-  var textarea = document.getElementsByTagName('textarea')[0];
+  var textarea = document.getElementById("editor-textarea");
   editor = CodeMirror.fromTextArea(textarea, {
     mode: 'markdown',
     highlightFormatting: true,
@@ -190,8 +190,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Helper functions
 
   document.getElementById("editor-tools-import-local").onclick = IO.Local.open;
+  document.getElementById("editor-tools-import-github").onclick = IO.Github.open;
   document.getElementById("editor-tools-import-gdrive").onclick = IO.GDrive.open;
   document.getElementById("editor-tools-save-local").onclick = IO.Local.save;
+  document.getElementById("editor-tools-save-github").onclick = IO.Github.save;
   document.getElementById("editor-tools-save-gdrive").onclick = IO.GDrive.save;
   document.getElementById("editor-tools-template").onclick = initTextarea;
   document.getElementById("editor-tools-attachment").onclick = attachments;
@@ -246,23 +248,23 @@ document.addEventListener('DOMContentLoaded', function() {
   // Keyboard shortcut
   document.onkeydown = function(e) {
     if (e.ctrlKey) {
-      switch (e.which) {   // Ctrl + S
-      case 79:
+      switch (e.which) {
+      case 79:                // Ctrl + O
         e.preventDefault();
-        openLocalFile();
+        IO.Local.open();
         break;
-      case 81:             // Ctrl + Q (for testing)
+      case 81:                // Ctrl + Q (for testing)
         e.preventDefault();
         messageBox("test");
         break;
-      case 83:
+      case 83:                // Ctrl + S
         e.preventDefault();
-        saveAsLocalFile();
+        IO.Local.save();
         break;
       }
     } else {
       switch (e.which) {
-      case 27:             // Escape key
+    case 27:                  // Escape key
         e.preventDefault();
         closeAllDialogs();
         break;
@@ -311,31 +313,32 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function messageBox(texts, duration) {
-  // if (typeof(duration) === "undefined")
-  //   duration = texts.length * 60;
-  // if (duration > 3000)
-  //   duration = 3000;
-  // if (duration < 1500)
-  //   duration = 1500;
+  if (typeof(duration) === "undefined")
+    duration = texts.length * 60;
+  if (duration > 3000)
+    duration = 3000;
+  if (duration < 1500)
+    duration = 1500;
 
-  // var msgboxWrapper = document.getElementById("messagebox-wrapper");
-  // var outer = document.createElement("div");
-  // var msgbox = document.createElement("messagebox");
-  // msgbox.innerHTML = texts.replace(/\n/g, '<br />');
-  // outer.appendChild(msgbox);
-  // msgboxWrapper.appendChild(outer);
-  // setTimeout(function() {
-  //   msgbox.style.opacity = 1;
-  // }, 100);
-  // setTimeout(function() {
-  //   msgbox.style.opacity = 0;
-  //   setTimeout(function() {
-  //     msgbox.parentNode.removeChild(msgbox);
-  //   }, 300);
-  // }, duration);
-  chrome.notifications.create(texts, {
-    type: "basic", iconUrl: "images/md32.png", title: "", message: texts, isClickable: true
-  }, function(notificationId) {});
+  var msgboxWrapper = document.getElementById("messagebox-wrapper");
+  var outer = document.createElement("div");
+  var msgbox = document.createElement("messagebox");
+  msgbox.innerHTML = texts.replace(/\n/g, '<br />');
+  outer.appendChild(msgbox);
+  msgboxWrapper.appendChild(outer);
+  setTimeout(function() {
+    msgbox.style.opacity = 1;
+  }, 100);
+  setTimeout(function() {
+    msgbox.style.opacity = 0;
+    setTimeout(function() {
+      msgbox.parentNode.removeChild(msgbox);
+    }, 300);
+  }, duration);
+  
+  // chrome.notifications.create(texts, {
+  //   type: "basic", iconUrl: "images/md32.png", title: "", message: texts, isClickable: true
+  // }, function(notificationId) {});
 }
 
 
