@@ -179,7 +179,7 @@ div#viewer {
 
 /* File dialog */
 
-.file-explorer { padding: 1em; background: #383838; border-radius: 2px; }
+.file-explorer { padding: 1em; max-height: 400px; background: #383838; border-radius: 2px; overflow-y: auto; }
 .file-explorer ul { margin: 0; padding: 0; list-style: none; }
 .file-explorer ul:not(#root) { padding-left: 1.5em; }
 .file-explorer li { padding-top: .5em; }
@@ -199,6 +199,7 @@ div#viewer {
 }
 .file-explorer-button[activated] { color: #fff; background: #005e9c; }
 .file-explorer-button[activated]:hover { background: #0473bc; }
+.file-explorer-button[activated]:active { background: #0369ad;}
 
 .spinner { position: absolute; top: 0; right: 0; height: 15px; transition: opacity .3s; opacity: 1; }
 .spinner:before { display: inline-block; content: ""; height: 100%; vertical-align: middle; }
