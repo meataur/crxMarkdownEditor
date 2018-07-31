@@ -9,7 +9,7 @@ var panelEditor = null;
 var panelHelper = null;
 var panelViewer = null;
 var panelLocalhost = null;
-var panelAbout = null;
+var panelHelp = null;
 var splitter = null;
 var isPanelResizing = false;
 
@@ -87,13 +87,13 @@ document.addEventListener('DOMContentLoaded', function() {
   panelHelper = document.getElementsByTagName("helper")[0];
   panelViewer = document.getElementsByTagName("viewer")[0];
   panelLocalhost = document.getElementsByTagName("localhost")[0];
-  panelAbout = document.getElementsByTagName("about")[0];
+  panelHelp = document.getElementsByTagName("help")[0];
   splitter = document.getElementsByTagName("splitter")[0];
 
   // Panel selection
   document.getElementById('menu-viewer').onclick = openViewer;
   document.getElementById('menu-localhost').onclick = openPanelLocalhost;
-  document.getElementById('menu-about').onclick = openAbout;
+  document.getElementById('menu-help').onclick = openHelp;
   document.getElementById('menu-viewer').click();
 
   // Load previous workspaces
@@ -207,7 +207,12 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("viewer-tools-expand").onclick = expandViewer;
   document.getElementById("viewer-tools-settings").onclick = openViewerSettingsPanel;
 
+  document.getElementById("localhost-tools-jekyll-setup").onclick = setupJekyll;
   document.getElementById("localhost-tools-run-jekyll").onclick = runJekyll;
+  document.getElementById("localhost-tools-open-site").onclick = openJekyllSite;
+
+  document.getElementById("help-tools-md-tutorial").onclick = openMdTutorial;
+  document.getElementById("help-tools-about").onclick = openAboutPage;
 
   // Prevent event propagation on dialogs
   Array.from(document.getElementsByClassName("dlg")).forEach(function(dialog) {
@@ -357,7 +362,7 @@ function loadSettings() {
   chrome.storage.local.get('theme', function(result) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "themes.css");
-    xhr.onloadend = function() {
+    xhr.onload = function() {
       var themeselector = document.getElementById("select-theme");
 
       // Insert theme options
@@ -729,8 +734,19 @@ function closeAllPanels() {
   document.getElementById("menu-viewer").style.color = "unset";
   panelLocalhost.style.display = "none";
   document.getElementById("menu-localhost").style.color = "unset";
-  panelAbout.style.display = "none";
-  document.getElementById("menu-about").style.color = "unset";
+  panelHelp.style.display = "none";
+  document.getElementById("menu-help").style.color = "unset";
+}
+
+function closeAllHelperPages() {
+  Array.from(document.getElementsByClassName("hpage")).forEach(function(hpage) {
+    hpage.style.display = "none";
+  });
+  Array.from(document.getElementsByClassName("panelmenu")).forEach(function(panelMenu) {
+    Array.from(panelMenu.children).forEach(function(panelMenuItem) {
+      panelMenuItem.style.color = "#a8afbd";
+    });
+  });
 }
 
 function openViewer() {
@@ -743,12 +759,14 @@ function openPanelLocalhost() {
   closeAllPanels();
   panelLocalhost.style.display = "block";
   document.getElementById("menu-localhost").style.color = "#fff";
+  setupJekyll();
 }
 
-function openAbout() {
+function openHelp() {
   closeAllPanels();
-  panelAbout.style.display = "block";
-  document.getElementById("menu-about").style.color = "#fff";
+  panelHelp.style.display = "block";
+  document.getElementById("menu-help").style.color = "#fff";
+  openMdTutorial();
 }
 
 
@@ -807,7 +825,7 @@ function createIframe(docTitle) {
 
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "preview.css");
-  xhr.onloadend = function() {
+  xhr.onload = function() {
     ifrm.contentWindow.document.open();
     ifrm.contentWindow.document.write("<html>\n<head>\n<title>" + docTitle + "</title>\n");
     ifrm.contentWindow.document.write("<style>" + xhr.responseText + "</style>\n");
@@ -886,6 +904,13 @@ function openViewerSettingsPanel() {
   document.getElementById("viewer-baseurl").focus();
 }
 
+function setupJekyll() {
+  closeAllHelperPages();
+  document.getElementById("hpage-jekyll-setup").style.display = "block";
+  document.getElementById("localhost-tools-jekyll-setup").style.color = "#fff";
+  document.getElementById("localhost-paneltitle").innerHTML = "localhost setup";
+}
+
 function runJekyll() {
   document.getElementById('localhost-tools-run-jekyll').disabled = true;
   var localhost_port = document.getElementById("setting-jekyll-port").value;
@@ -924,6 +949,34 @@ function runJekyll() {
   });
   xhr.open("GET", "http://localhost:" + localhost_port + "/", true);
   xhr.send();
+}
+
+function openJekyllSite() {
+  var localhost_port = document.getElementById("setting-jekyll-port").value;
+  window.open("http://localhost:" + localhost_port);
+}
+
+function openMdTutorial() {
+  closeAllHelperPages();
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "tutorial.md");
+  xhr.onload = function (e) {
+    var data = marked(this.response);
+    document.getElementById("hpage-md-tutorial").innerHTML = data;
+  }
+  xhr.send();
+
+  document.getElementById("hpage-md-tutorial").style.display = "block";
+  document.getElementById("help-tools-md-tutorial").style.color = "#fff";
+  document.getElementById("help-paneltitle").innerHTML = "markdown tutorial";
+}
+
+function openAboutPage() {
+  closeAllHelperPages();
+  document.getElementById("hpage-about").style.display = "block";
+  document.getElementById("help-tools-about").style.color = "#fff";
+  document.getElementById("help-paneltitle").innerHTML = "about";
 }
 
 
@@ -1304,14 +1357,6 @@ function preview(parsed) {
     
     // Show preview panel
     var viewer = document.getElementById("viewer");
-    // ifrm.innerHTML += "<meta charset='utf-8'>";
-    // ifrm.innerHTML += "<meta http-equiv='X-UA-Compatible' content='IE=edge'>";
-    // ifrm.innerHTML += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
-    // ifrm.innerHTML += "<link rel='stylesheet' href='preview/preview.css'>";
-    // ifrm.innerHTML += "<script type='text/javascript' src='preview/jquery/3.3.1/jquery.min.js'></script>";
-    // ifrm.innerHTML += "<link rel='stylesheet' href='preview/font-awesome/4.7.0/css/font-awesome.min.css'>";
-    // ifrm.innerHTML += "<script type='text/x-mathjax-config' src='preview/preview.js'></script>";
-    // ifrm.innerHTML += "<script type='text/javascript' async src='preview/mathjax/2.7.4/MathJax.js'></script>";
     var data = marked(data);
     if (data.length) {
       viewer.removeAllChildren();

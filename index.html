@@ -83,7 +83,7 @@
 	</nav>
 	<menu>
 		<ul id="menu">
-			<li id="menu-about" class="menuitem">about</li>
+			<li id="menu-help" class="menuitem">help</li>
 			<li id="menu-localhost" class="menuitem">jekyll</li>
 			<li id="menu-viewer" class="menuitem">viewer</li>
 		</ul>
@@ -220,7 +220,7 @@
 	<helper>
 		<viewer>
 			<div class="vpanel-header">
-				<span>viewer</span>
+				<span id="viewer-paneltitle">viewer</span>
 				<toolbox>
 					<ul class="panelmenu">
 						<li>
@@ -256,16 +256,18 @@
 
 		<localhost>
 			<div class="vpanel-header">
-				<span>jekyll on localhost</span>
+				<span id="localhost-paneltitle"></span>
 				<toolbox>
 					<ul class="panelmenu">
+						<li id="localhost-tools-jekyll-setup"><span>setup</span></li>
 						<li id="localhost-tools-run-jekyll"><span>run jekyll</span></li>
+						<li id="localhost-tools-open-site"><span>open site</span></li>
 					</ul>
 				</toolbox>
 			</div>
 			<div class="vpanel-body">
-				<div id="localhost" class="hpage">
-					<h1>Jekyll on Localhost</h1>
+				<div id="hpage-jekyll-setup" class="hpage">
+					<h1>Setup Jekyll on Localhost</h1>
 					<h2>One-Time Installation Steps</h2>
 					<h3>Step 1. Install Jekyll</h3>
 					<div>Download and execute the latest version of Ruby language and Jekyll-Standalone installer:</div>
@@ -285,16 +287,19 @@
 			</div>
 		</localhost>
 
-		<about>
+		<help>
 			<div class="vpanel-header">
-				<span>about</span>
+				<span id="help-paneltitle"></span>
 				<toolbox>
 					<ul class="panelmenu">
+						<li id="help-tools-md-tutorial"><span>markdown</span></li>
+						<li id="help-tools-about"><span>about</span></li>
 					</ul>
 				</toolbox>
 			</div>
 			<div class="vpanel-body">
-				<div id="appinfo" class="hpage">
+				<div id="hpage-md-tutorial" class="hpage"></div>
+				<div id="hpage-about" class="hpage">
 					<h1><span class="appname"></span> <span class="appvers"></span></h1>
 					<div>Made by ChangUk (<a href="https://changuk.github.io" target="_blank">changuk.github.io</a>)</div>
 					<h2>Features and Tips</h2>
@@ -306,11 +311,12 @@
 					<ul>
 						<li>Open markdown document from local system: <kbd>Ctrl</kbd> + <kbd>O</kbd></li>
 						<li>Save markdown document as local file: <kbd>Ctrl</kbd> + <kbd>S</kbd></li>
-						<li>Find text matches: <kbd>Ctrl</kbd> + <kbd>F</kbd></li>
-						<ul>
-							<li>Find next: <kbd>Enter</kbd></li>
-							<li>Find previous: <kbd>Shift</kbd> + <kbd>Enter</kbd></li>
-						</ul>
+						<li>Find text matches: <kbd>Ctrl</kbd> + <kbd>F</kbd>
+							<ul>
+								<li>Find next: <kbd>Enter</kbd></li>
+								<li>Find previous: <kbd>Shift</kbd> + <kbd>Enter</kbd></li>
+							</ul>
+						</li>
 						<li>Replace all: <kbd>Ctrl</kbd> + <kbd>H</kbd></li>
 						<li>Jump to line: <kbd>Alt</kbd> + <kbd>G</kbd></li>
 					</ul>
@@ -323,7 +329,7 @@
 					</ul>
 				</div>
 			</div>
-		</about>
+		</help>
 	</helper>
 
 </content>

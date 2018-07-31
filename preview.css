@@ -1,9 +1,6 @@
 #viewer {
-    margin: 0;
-    padding: 1em;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    text-align: justify;
-    word-wrap: break-word;
+  margin: 0; padding: 1.6em;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: justify; word-wrap: break-word;
 }
 
 #viewer h1, h2, h3, h4, h5, h6, p, blockquote, pre, dl { margin-bottom: 1em; }
@@ -23,14 +20,14 @@
 #viewer figure { margin: 1.6em 0; }
 #viewer figure > img { display: block; }
 #viewer tablecaption, figcaption {
-    display: block; margin-bottom: 1.6em * 2;
-    color: #aaa; font-size: 0.875rem; text-align: center;
+  display: block; margin-bottom: 1.6em * 2;
+  color: #aaa; font-size: 0.875rem; text-align: center;
 }
 #viewer tablecaption, figcaption > strong { user-select: none; margin-right: .5em; }
 
 #viewer ul, ol { margin: 1em 0 1em 1.6em; }
 #viewer li { margin-bottom: .4em; }
-#viewer li > ul, li > ol { margin-top: 1em; margin-right: 0; margin-bottom: 1em; }
+#viewer li > ul, li > ol { margin: .5em 0 .5em 1.6em; }
 
 #viewer p { margin: .6em 0; }
 
@@ -38,20 +35,20 @@
 #viewer a:hover { color: #111; text-decoration: underline; }
 
 #viewer blockquote {
-    margin: 1.6em 0; padding: 1em 1.6em;
-    border-left: 0.7em solid #eaeaea;
-    background-color: #f7f7f7;
+  margin: 1.6em 0; padding: 1em 1.6em;
+  border-left: 0.7em solid #eaeaea;
+  background-color: #f7f7f7;
 }
 
 #viewer code {
-    margin: 0;
-    padding: .2em .4em;
-    background: rgba(27,31,35,.05);
-    border-radius: 3px;
-    display: inline-block;
-    line-height: 1.2;
-    font-family: consolas;
-    font-size: .9rem;
+  margin: 0;
+  padding: .2em .4em;
+  background: rgba(27,31,35,.05);
+  border-radius: 3px;
+  display: inline-block;
+  line-height: 1.2;
+  font-family: consolas;
+  font-size: .9rem;
 }
 
 #viewer pre { margin: 1em 0; padding: 1em; font-family: consolas; overflow-x: auto; background: #1d1f21 !important; color: #c5c8c6 }
@@ -64,58 +61,50 @@
 #viewer .highlight pre { tab-size: 4; }
 
 #viewer table {
-    margin: 1.6em 0;
-    width: 100%;
-    text-align: left;
-    color: #3f3f3f;
-    border-collapse: collapse;
-    border: 1px solid #e8e8e8;
+  margin: 1.6em 0;
+  width: 100%;
+  text-align: left;
+  color: #3f3f3f;
+  border-collapse: collapse;
+  border: 1px solid #e8e8e8;
 }
 #viewer table tr:nth-child(even) {
-    background-color: 1px solid #e8e8e8;
+  background-color: 1px solid #e8e8e8;
 }
 #viewer table th, td {
-    padding: .5em .8em;
+  padding: .5em .8em;
 }
 #viewer table th {
-    background-color: #f0f0f0;
-    border: 1px solid #dedede;
-    border-bottom-width: 2px;
+  background-color: #f0f0f0;
+  border: 1px solid #dedede;
+  border-bottom-width: 2px;
 }
 #viewer table td {
-    border: 1px solid #e8e8e8;
+  border: 1px solid #e8e8e8;
 }
 
 #viewer hr {
-    border-top: none;
-    border-bottom: 1px solid #ddd;
-    width: 100%;
-    margin: 3em 0;
+  border-top: none;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
+  margin: 3em 0;
 }
 
 #viewer kbd {
-    margin: 0 .1em;
-    padding: 0 .6em;
-    border: 1px solid rgba(63,63,63,.25);
-    box-shadow: 0 1px 0 rgba(63,63,63,.25);
-    font-family: consolas;
-    font-size: .9rem;
-    background-color: #fff;
-    color: #333;
-    border-radius: 3px;
-    display: inline-block;
-    white-space: nowrap;
-    user-select: none;
+  display: inline-block; margin: 0; padding: 0 .4em;
+  border: 1px solid rgba(63,63,63,.25); border-radius: 3px; box-shadow: 0 1px 0 rgba(63,63,63,.25);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fff; color: #333; font-size: .875rem; white-space: nowrap; user-select: none;
 }
 #viewer kbd:hover { background-color: #f7f7f7; }
 #viewer kbd:active { box-shadow: none; transform: translateY(1px); }
 
 #viewer a.footnote:before {
-    content: '';
-    display: inline-block;
-    position: relative;
-    height: 120px;
-    margin-top: -120px;
+  content: '';
+  display: inline-block;
+  position: relative;
+  height: 120px;
+  margin-top: -120px;
 }
 
 #viewer textarea { font-family: consolas; }
