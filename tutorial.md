@@ -56,7 +56,7 @@ In HTML, the tag `<br />` is used to break line. When you do want to insert a `<
 
 #### Demo
 
-	Line bre  ↵
+	Line bre↵
 	ak here.
 
 Line bre  
@@ -70,13 +70,29 @@ Markdown supports Atx-style headers(1-6 levels).
 
 #### Demo
 
-	## Header Level 2
-	### Header Level 3
-	#### Header Level 4
+	#·Header Level 1
+	##·Header Level 2
+	###·Header Level 3
+	####·Header Level 4
 
+# Header Level 1
 ## Header Level 2
 ### Header Level 3
 #### Header Level 4
+
+#### Demo: Misuse
+
+Compare the above with the below:
+
+	#Header Level 1
+	##Header Level 2
+	###Header Level 3
+	####Header Level 4
+	
+#Header Level 1
+##Header Level 2
+###Header Level 3
+####Header Level 4
 
 ---
 
@@ -87,6 +103,16 @@ Markdown supports Atx-style headers(1-6 levels).
 	**Strong** and *Italic*
 
 **Strong** and *Italic*
+
+---
+
+### Strike Through
+
+#### Demo
+
+	a ~~strikethrough~~ element
+
+a ~~strikethrough~~ element
 
 ---
 
@@ -123,10 +149,10 @@ Markdown supports ordered and unordered lists.
 	- Red
 	- Green
 	- Blue
-
+	
 	1. Red
-	  - Nested Red 1
-	  - Nested Red 2
+	··- Nested Red 1
+	··- Nested Red 2
 	2. Green
 	3. Blue
 
@@ -176,28 +202,23 @@ I use [google](https://google.com/) and [naver](https://naver.com/) for informat
 
 	I use [google][1] and [naver][2] for information retrieval.
 
-	  [1]: https://google.com/ "Google"
-	  [2]: https://naver.com/ "Naver"
+	[1]: https://google.com/ "Google"
+	[2]: https://naver.com/ "Naver"
 
 I use [google][1] and [naver][2] for information retrieval.
 
-  [1]: https://google.com/ "Google"
-  [2]: https://naver.com/ "Naver"
+[1]: https://google.com/ "Google"
+[2]: https://naver.com/ "Naver"
+  
+	I use [google][] and [naver][] for information retrieval.
 
----
-
-### Footnotes
-
-#### Demo
-
-	This is footnote here[^something]. See the end of this document.
+	[google]: https://google.com/ "Google"
+	[naver]: https://naver.com/ "Naver"
 	
-	  [^something]: footnote description
+I use [google][] and [naver][] for information retrieval.
 
-This is footnote one[^one] and another[^another]. See the end of this document.
-
-  [^one]: footnote description #1
-  [^another]: footnote description #2
+[google]: https://google.com/ "Google"
+[naver]: https://naver.com/ "Naver"
 
 ---
 
@@ -207,9 +228,11 @@ Markdown uses an image syntax that is intended to resemble the syntax for links.
 
 #### Demo
 
-	![Hyperlinks](http://localhost:4000/assets/img/96f6c3260d1b3f5247630e53209cc5074b65f4145503c97c4aad43b25f34987e.png){:width="250px"}
+	![alt texts](https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png =272x*)
+	![](https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png =272x80 "Optional title")
 
-![Hyperlinks](http://localhost:4000/assets/img/96f6c3260d1b3f5247630e53209cc5074b65f4145503c97c4aad43b25f34987e.png){:width="250px"}
+![alt texts](https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png =272x*)
+![](https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png =272x80 "Optional title")
 
 ---
 
@@ -247,13 +270,33 @@ You can specify column alignment with one or two colons.
 
 ---
 
+### Code Block
+
+#### Demo
+
+	⇥#include <stdio.h>
+	⇥int main() {
+	⇥⇥printf("Hello world!\n");
+	⇥⇥return 0;
+	⇥}
+
+The tab spacing is replaced with 4 spaces:
+
+	#include <stdio.h>
+	int main() {
+		printf("Hello world!\n");
+		return 0;
+	}
+
+---
+
 ### Code Highlighting
 
 #### Demo
 
 	This is a sample code from `sample.cpp`.
 	
-	``` cpp
+	```cpp
 	#include <stdio.h>
 	int main() {
 		printf("Hello world!\n");
@@ -263,7 +306,7 @@ You can specify column alignment with one or two colons.
 
 This is a sample code from `sample.cpp`.
 
-``` cpp
+```cpp
 #include <stdio.h>
 int main() {
 	printf("Hello world!\n");
@@ -273,19 +316,15 @@ int main() {
 
 ---
 
-### Math Equations
-
-You can render LaTeX mathematical expressions using MathJax.
+### Task Lists
 
 #### Demo
 
-	The Gamma function satisfying $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$ is via the Euler integral:
-
-	$$\Gamma(z) = \int_0^\infty t^{z-1}e^{-t}dt$$
-
-The Gamma function satisfying $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$ is via the Euler integral:
-
-$$\Gamma(z) = \int_0^\infty t^{z-1}e^{-t}dt$$
+	- [x] This task is done
+	- [ ] This is still pending
+	
+- [x] This task is done
+- [ ] This is still pending
 
 ---
 
@@ -296,17 +335,21 @@ For more HTML symbols, see [https://www.toptal.com/designers/htmlarrows/](https:
 #### Demo
 
 	<kbd>⎋ Esc</kbd>
+	
 	<kbd>&rarrb; Tab</kbd> <kbd>↹ Tab</kbd> <kbd>&crarr; Enter</kbd> <kbd>&larrhk; Enter</kbd>
+	
 	<kbd>⌥ Alt</kbd> <kbd>&Hat; Ctrl</kbd> <kbd>⇧ Shift</kbd> <kbd>⇪ CapsLock</kbd> <kbd>⌘ Cmd</kbd>
+	
 	<kbd>&larr; Backspace</kbd> <kbd>⌫ Backspace</kbd> <kbd>␣ Spacebar</kbd>
+	
 	<kbd>&rarr; Right</kbd>
 
-<kbd>⎋ Esc</kbd>  
-<kbd>&rarrb; Tab</kbd> <kbd>↹ Tab</kbd> <kbd>&crarr; Enter</kbd> <kbd>&larrhk; Enter</kbd>  
-<kbd>⌥ Alt</kbd> <kbd>&Hat; Ctrl</kbd> <kbd>⇧ Shift</kbd> <kbd>⇪ CapsLock</kbd> <kbd>⌘ Cmd</kbd>  
-<kbd>&larr; Backspace</kbd> <kbd>⌫ Backspace</kbd> <kbd>␣ Spacebar</kbd>  
+<kbd>⎋ Esc</kbd>
+
+<kbd>&rarrb; Tab</kbd> <kbd>↹ Tab</kbd> <kbd>&crarr; Enter</kbd> <kbd>&larrhk; Enter</kbd>
+
+<kbd>⌥ Alt</kbd> <kbd>&Hat; Ctrl</kbd> <kbd>⇧ Shift</kbd> <kbd>⇪ CapsLock</kbd> <kbd>⌘ Cmd</kbd>
+
+<kbd>&larr; Backspace</kbd> <kbd>⌫ Backspace</kbd> <kbd>␣ Spacebar</kbd>
+
 <kbd>&rarr; Right</kbd>
-
----
-
-## Footnotes

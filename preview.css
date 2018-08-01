@@ -16,13 +16,10 @@
 
 #viewer div { margin: 1em 0; }
 
-#viewer img { display: block; max-width: 100%; margin: auto; padding: 1.6em 0; cursor: pointer; }
+#viewer img { display: block; max-width: 100%; margin: 1.6em auto; }
 #viewer figure { margin: 1.6em 0; }
 #viewer figure > img { display: block; }
-#viewer tablecaption, figcaption {
-  display: block; margin-bottom: 1.6em * 2;
-  color: #aaa; font-size: 0.875rem; text-align: center;
-}
+#viewer tablecaption, figcaption { display: block; margin-bottom: 1.6em * 2; color: #aaa; font-size: 0.875rem; text-align: center; }
 #viewer tablecaption, figcaption > strong { user-select: none; margin-right: .5em; }
 
 #viewer ul, ol { margin: 1em 0 1em 1.6em; }
@@ -87,7 +84,7 @@
   border-top: none;
   border-bottom: 1px solid #ddd;
   width: 100%;
-  margin: 3em 0;
+  margin: 5em 0;
 }
 
 #viewer kbd {

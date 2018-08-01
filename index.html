@@ -43,7 +43,7 @@
 
 	<!-- CodeMirror stylesheet customization -->
 	<style type="text/css">
-		.CodeMirror { width: 100%; height: calc(100vh - 105px); font-family: 'consolas'; color: black; direction: ltr; cursor: text; font-weight: 300; }
+		.CodeMirror { width: 100%; height: calc(100vh - 90px); font-family: 'consolas'; color: black; direction: ltr; cursor: text; font-weight: 300; }
 		.cm-s-default .cm-trailing-space-a:before,
 		.cm-s-default .cm-trailing-space-b:before { position: absolute; content: "\00B7"; color: #777; }
 		.cm-s-default .cm-trailing-space-new-line:before { position: absolute; content: "\21B5"; color: #777; }
@@ -64,8 +64,8 @@
 	<!-- JSZip -->
 	<script src="lib/jszip-3.1.5/jszip.min.js"></script>
 
-	<!-- Marked -->
-	<script src="lib/marked-0.4.0/marked.min.js"></script>
+	<!-- Showdown.js -->
+	<script src="lib/showdown-1.8.6/showdown.min.js"></script>
 
 	<!-- Main Script -->
 	<script src="util.js"></script>
@@ -97,27 +97,27 @@
 					<li>
 						<span>import from</span>
 						<ul class="dropdown">
-							<li id="editor-tools-import-local"><div><span>local system</span></div></li>
-							<li id="editor-tools-import-github"><div><span>github</span></div></li>
-							<li id="editor-tools-import-gdrive"><div><span>google drive</span></div></li>
+							<li id="editor-tools-import-local"><svg><use xlink:href="icons.svg#icon-laptop"></use></svg><div><span>local system</span></div></li>
+							<li id="editor-tools-import-github"><svg><use xlink:href="icons.svg#icon-github"></use></svg><div><span>github</span></div></li>
+							<li id="editor-tools-import-gdrive"><svg><use xlink:href="icons.svg#icon-gdrive"></use></svg><div><span>google drive</span></div></li>
 						</ul>
 					</li>
 					<li>
 						<span>save to</span>
 						<ul class="dropdown">
-							<li id="editor-tools-save-local"><div><span>local system</span></div></li>
-							<li id="editor-tools-save-github"><div><span>github</span></div></li>
-							<li id="editor-tools-save-gdrive"><div><span>google drive</span></div></li>
+							<li id="editor-tools-save-local"><svg><use xlink:href="icons.svg#icon-laptop"></use></svg><div><span>local system</span></div></li>
+							<li id="editor-tools-save-github"><svg><use xlink:href="icons.svg#icon-github"></use></svg><div><span>github</span></div></li>
+							<li id="editor-tools-save-gdrive"><svg><use xlink:href="icons.svg#icon-gdrive"></use></svg><div><span>google drive</span></div></li>
 						</ul>
 					</li>
 					<li>
 						<span>editor</span>
 						<ul class="dropdown">
-							<li id="editor-tools-template"><div><span>make new</span></div></li>
-							<li id="editor-tools-attachment"><div><span>attachment</span></div></li>
-							<li id="editor-tools-prettify"><div><span>prettify</span></div></li>
-							<li id="editor-tools-updtdatetime"><div><span>update datetime</span></div></li>
-							<li id="editor-tools-settings"><div><span>settings</span></div></li>
+							<li id="editor-tools-template"><svg><use xlink:href="icons.svg#icon-file"></use></svg><div><span>make new</span></div></li>
+							<li id="editor-tools-attachment"><svg><use xlink:href="icons.svg#icon-attachment"></use></svg><div><span>attachment</span></div></li>
+							<li id="editor-tools-prettify"><svg><use xlink:href="icons.svg#icon-formatting"></use></svg><div><span>prettify</span></div></li>
+							<li id="editor-tools-updtdatetime"><svg><use xlink:href="icons.svg#icon-datetime"></use></svg><div><span>update datetime</span></div></li>
+							<li id="editor-tools-settings"><svg><use xlink:href="icons.svg#icon-settings"></use></svg><div><span>settings</span></div></li>
 						</ul>
 					</li>
 				</ul>
@@ -129,7 +129,7 @@
 			<div id="editor-import-gdrive" class="dlg">
 				<section>
 					<item>
-						<label>select a google document:</label>
+						<div>select a google document:</div>
 						<ctrl id="importlist-gdrive" class="file-explorer"></ctrl>
 						<ctrl class="file-explorer-tools">
 							<div id="btn-import-from-gdrive" class="file-explorer-button right">import</div>
@@ -140,7 +140,7 @@
 			<div id="editor-export-gdrive" class="dlg">
 				<section>
 					<item>
-						<label>select a folder:</label>
+						<div>select a folder:</div>
 						<ctrl id="exportlist-gdrive" class="file-explorer"></ctrl>
 						<ctrl class="file-explorer-tools">
 							<div class="flex-container">
@@ -154,7 +154,7 @@
 			<div id="editor-import-github" class="dlg">
 				<section>
 					<item>
-						<label>select a github document:</label>
+						<div>select a github document:</div>
 						<ctrl id="importlist-github" class="file-explorer"></ctrl>
 						<ctrl class="file-explorer-tools">
 							<div id="btn-import-from-github" class="file-explorer-button right">import</div>
@@ -165,7 +165,7 @@
 			<div id="editor-export-github" class="dlg">
 				<section>
 					<item>
-						<label>select a folder:</label>
+						<div>select a folder:</div>
 						<ctrl id="exportlist-github" class="file-explorer"></ctrl>
 						<ctrl class="file-explorer-tools">
 							<div class="flex-container">
@@ -180,32 +180,32 @@
 			<div id="editor-settings" class="dlg">
 				<section>
 					<item class="inline-subsect">
-						<label>theme:</label>
+						<div>theme:</div>
 						<ctrl><select id="select-theme"><option>default</option></select></ctrl>
 					</item>
 					<item class="inline-subsect">
-						<label>font size:</label>
+						<div>font size:</div>
 						<ctrl><select id="select-fontsize"></select></ctrl>
 					</item>
 				</section>
 				<section>
 					<item>
-						<label>attachment location (liquid-syntax):</label>
+						<div>attachment location (liquid-syntax):</div>
 						<ctrl><input type="text" id="attachment-location" spellcheck="false"></ctrl>
 					</item>
 					<item>
-						<label>attachment classification (JSON-syntax):</label>
+						<div>attachment classification (JSON-syntax):</div>
 						<ctrl><textarea id="attachment-type" spellcheck="false"></textarea></ctrl>
 					</item>
 					<item>
-						<label>hash function to avoid filename duplication:</label>
+						<div>hash function to avoid filename duplication:</div>
 						<ctrl>
-							<input type="radio" id="hash-none" name="hashing" value="none"><optionlabel for="hash-none">None</optionlabel>
-							<input type="radio" id="hash-md5" name="hashing" value="md5"><optionlabel for="hash-md5">MD5</optionlabel>
-							<input type="radio" id="hash-sha1" name="hashing" value="sha1"><optionlabel for="hash-sha1">SHA-1</optionlabel>
-							<input type="radio" id="hash-sha224" name="hashing" value="sha224"><optionlabel for="hash-sha224">SHA-224</optionlabel>
-							<input type="radio" id="hash-sha256" name="hashing" value="sha256"><optionlabel for="hash-sha256">SHA-256</optionlabel>
-							<input type="radio" id="hash-sha512" name="hashing" value="sha512"><optionlabel for="hash-sha512">SHA-512</optionlabel>
+							<div class="option-radio"><input type="radio" id="hash-none" name="hashing" value="none"><label for="hash-none">None</label></div>
+							<div class="option-radio"><input type="radio" id="hash-md5" name="hashing" value="md5"><label for="hash-md5">MD5</label></div>
+							<div class="option-radio"><input type="radio" id="hash-sha1" name="hashing" value="sha1"><label for="hash-sha1">SHA-1</label></div>
+							<div class="option-radio"><input type="radio" id="hash-sha224" name="hashing" value="sha224"><label for="hash-sha224">SHA-224</label></div>
+							<div class="option-radio"><input type="radio" id="hash-sha256" name="hashing" value="sha256"><label for="hash-sha256">SHA-256</label></div>
+							<div class="option-radio"><input type="radio" id="hash-sha512" name="hashing" value="sha512"><label for="hash-sha512">SHA-512</label></div>
 						</ctrl>
 					</item>
 				</section>
@@ -224,16 +224,16 @@
 						<li>
 							<span>export as</span>
 							<ul class="dropdown">
-								<li id="viewer-tools-export-html"><div><span>html</span></div></li>
-								<li id="viewer-tools-export-pdf"><div><span>pdf</span></div></li>
-								<li id="viewer-tools-print"><div><span>print</span></div></li>
+								<li id="viewer-tools-export-html"><svg><use xlink:href="icons.svg#icon-html"></use></svg><div><span>html</span></div></li>
+								<li id="viewer-tools-export-pdf"><svg><use xlink:href="icons.svg#icon-pdf"></use></svg><div><span>pdf</span></div></li>
+								<li id="viewer-tools-print"><svg><use xlink:href="icons.svg#icon-print"></use></svg><div><span>print</span></div></li>
 							</ul>
 						</li>
 						<li>
 							<span>viewer</span>
 							<ul class="dropdown">
-								<li id="viewer-tools-expand"><div><span>expand screen</span></div></li>
-								<li id="viewer-tools-settings"><div><span>settings</span></div></li>
+								<li id="viewer-tools-expand"><svg><use xlink:href="icons.svg#icon-expand"></use></svg><div><span>expand screen</span></div></li>
+								<li id="viewer-tools-settings"><svg><use xlink:href="icons.svg#icon-settings"></use></svg><div><span>settings</span></div></li>
 							</ul>
 						</li>
 					</ul>
@@ -244,7 +244,7 @@
 				<div id="viewer-settings" class="dlg">
 					<section>
 						<item>
-							<label>replace for {{ site.baseurl }}:</label>
+							<div>replace for {{ site.baseurl }}:</div>
 							<ctrl><input type="text" id="viewer-baseurl" spellcheck="false"></ctrl>
 						</item>
 					</section>
@@ -290,7 +290,7 @@
 				<span id="help-panel-title"></span>
 				<toolbox>
 					<ul class="panel-menu">
-						<li id="help-tools-md-tutorial"><span>markdown</span></li>
+						<li id="help-tools-md-tutorial"><span>tutorial</span></li>
 						<li id="help-tools-about"><span>about</span></li>
 					</ul>
 				</toolbox>
@@ -304,6 +304,7 @@
 					<ul>
 						<li>Support drag-and-drop to present files attached to markdown document.</li>
 						<li>Support hashing for preventing duplication of resource filenames.</li>
+						<li>Support import/export to cloud storage such as Google Drive or Github.</li>
 					</ul>
 					<h2>Keyboard Shortcuts</h2>
 					<ul>
@@ -321,7 +322,7 @@
 					<h2>Dependents</h2>
 					<ul>
 						<li><a href="https://codemirror.net/" target="_blank">CodeMirror</a></li>
-						<li><a href="https://marked.js.org" target="_blank">Marked.js</a></li>
+						<li><a href="http://showdownjs.com/" target="_blank">Showdown.js</a></li>
 						<li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
 						<li><a href="https://stuk.github.io/jszip/" target="_blank">JSZip.js</a></li>
 					</ul>

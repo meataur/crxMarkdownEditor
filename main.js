@@ -3,6 +3,7 @@ var manifestData = chrome.runtime.getManifest();
 
 // CodeMirro editor variable
 var editor = null;
+var converter = null;
 
 // Vertical panels
 var panelEditor = null;
@@ -72,6 +73,18 @@ document.addEventListener('DOMContentLoaded', function() {
       // Automatic preview rendering
       preview(parsed);
     }
+  });
+
+  // Create showdown object
+  converter = new showdown.Converter({
+    disableForced4SpacesIndentedSublists: false,
+    tables: true,
+    simpleLineBreaks: true,
+    requireSpaceBeforeHeadingText: true,
+    strikethrough: true,
+    tasklists: true,
+    ghCompatibleHeaderId: true,
+    parseImgDimensions: true
   });
 
   // Content panels and its splitter
@@ -292,7 +305,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // The 'window.onresize' callback function is called after printing.
   window.onresize = function(e) {
+    if (panelEditor.style.display == "none" || splitter.style.display == "none" || panelWrapperHelper.style.display == "none")
+      return;
+
     resizeTabWidths();
 
     var wrapper = document.getElementsByTagName("content")[0];
@@ -848,11 +865,16 @@ function saveAsHtml() {
       saveAs: true
     }, function(downloadId) {
       chrome.downloads.onChanged.addListener(function(e) {
-        if (e.id == downloadId && e.state && e.state.current === "complete") {
-          messageBox("Download Complete!");
+        if (e.id == downloadId && e.state) {
+          if (e.state.current === "complete") {
+            messageBox("Download complete.");
+            document.body.removeChild(ifrm);
+          } else if (e.state.current === "interrupted") {
+            messageBox("Download canceled.");
+            document.body.removeChild(ifrm);
+          }
         }
-        document.body.removeChild(ifrm);
-      })
+      });
     });
   }, 500);
 }
@@ -872,20 +894,21 @@ function printPreview() {
 }
 
 function expandViewer() {
-  var headerHeight = 45;
   var panelHeaderHeight = 45;
   
   if (this.hasAttribute("expanded")) {
     this.removeAttribute("expanded");
+    this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-expand\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "expand screen";
-    document.getElementsByTagName("header")[0].style.display = "block";
-    document.getElementsByTagName("content")[0].style.height = "calc(100vh - " + headerHeight + "px)";
-    document.getElementById("viewer").getAncestorByClassName("panel-body").style.height = "calc(100vh - " + headerHeight + panelHeaderHeight + "px)";
-    panelEditor.style.display = "block";
-    splitter.style.display = "block";
-    panelWrapperHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
+    document.getElementsByTagName("header")[0].removeAttribute("style");
+    document.getElementsByTagName("content")[0].removeAttribute("style");
+    document.getElementById("viewer").getAncestorByClassName("panel-body").removeAttribute("style");
+    panelEditor.removeAttribute("style");
+    splitter.removeAttribute("style");
+    panelWrapperHelper.removeAttribute("style");
   } else {
     this.setAttribute("expanded", "");
+    this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-converge\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "back to editor";
     document.getElementsByTagName("header")[0].style.display = "none";
     document.getElementsByTagName("content")[0].style.height = "calc(100vh)";
@@ -960,7 +983,7 @@ function openMdTutorial() {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "tutorial.md");
   xhr.onload = function (e) {
-    var data = marked(this.response);
+    var data = converter.makeHtml(this.response);
     document.getElementById("hpage-md-tutorial").innerHTML = data;
   }
   xhr.send();
@@ -1355,10 +1378,10 @@ function preview(parsed) {
     
     // Show preview panel
     var viewer = document.getElementById("viewer");
-    var data = marked(data);
+    var data = converter.makeHtml(data);
     if (data.length) {
       viewer.removeAllChildren();
-      viewer.innerHTML = marked(data);
+      viewer.innerHTML = data;
     } else {
       viewer.removeAllChildren();
       var noContent = document.createElement("div");
