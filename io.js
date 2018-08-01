@@ -37,9 +37,7 @@ let IO = {
         var parsed = parse(data);
         var docDatetime = (parsed.header.date && parsed.header.date.length) ? parsed.header.date : getCurDatetimeString();
         var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
-
-        // Get save name from document meta-data
-        var filename = docDatetime.split(" ")[0] + "-" + docTitle.toLowerCase().replaceAll(" ", "-") + ".md";
+        var filename = docDatetime.split(" ")[0] + "-" + docTitle.replaceAll(" ", "-").toLowerCase() + ".md";
 
         // Create download link element
         chrome.downloads.download({
@@ -306,12 +304,10 @@ let IO = {
 
         // Filename
         var inputFilename = document.getElementById("input-export-gdrive-filename");
-        var activeTab = getActiveTab();
-        if (activeTab) {
-          var docDatetime = activeTab.tab.getElementsByClassName("doc-datetime")[0].innerHTML;
-          var docTitle = activeTab.tab.getElementsByClassName("doc-title")[0].innerHTML;
-          inputFilename.value = docDatetime + "-" + docTitle.replaceAll(" ", "-") + ".md";
-        }
+        var parsed = parse(editor.getValue());
+        var docDatetime = (parsed.header.date && parsed.header.date.length) ? parsed.header.date : getCurDatetimeString();
+        var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
+        inputFilename.value = docDatetime.split(" ")[0] + "-" + docTitle.replaceAll(" ", "-").toLowerCase() + ".md";
         inputFilename.focus();
 
         // Create spinner
@@ -381,6 +377,7 @@ let IO = {
 
     return {
       open: function () {
+        messageBox("Loading files of Google drive...");
         var options = {
           interactive: true,
           callback: _openCallback
@@ -388,6 +385,7 @@ let IO = {
         _getAuthToken(options);
       },
       save: function () {
+        messageBox("Loading directories of Google drive...");
         var options = {
           interactive: true,
           callback: _saveCallback
@@ -722,12 +720,10 @@ let IO = {
 
             // Filename
             var inputFilename = document.getElementById("input-export-github-filename");
-            var activeTab = getActiveTab();
-            if (activeTab) {
-              var docDatetime = activeTab.tab.getElementsByClassName("doc-datetime")[0].innerHTML;
-              var docTitle = activeTab.tab.getElementsByClassName("doc-title")[0].innerHTML;
-              inputFilename.value = docDatetime + "-" + docTitle.replaceAll(" ", "-") + ".md";
-            }
+            var parsed = parse(editor.getValue());
+            var docDatetime = (parsed.header.date && parsed.header.date.length) ? parsed.header.date : getCurDatetimeString();
+            var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
+            inputFilename.value = docDatetime.split(" ")[0] + "-" + docTitle.replaceAll(" ", "-").toLowerCase() + ".md";
             inputFilename.focus();
 
             // Create spinner
@@ -857,6 +853,7 @@ let IO = {
 
     return {
       open: function () {
+        messageBox("Loading Github repository list...");
         var options = {
           interactive: true,
           url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
@@ -865,6 +862,7 @@ let IO = {
         _getAuthToken(options, _openCallback);
       },
       save: function () {
+        messageBox("Loading Github repository list...");
         var options = {
           interactive: true,
           url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +

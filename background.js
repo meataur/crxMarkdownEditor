@@ -26,7 +26,6 @@ chrome.browserAction.onClicked.addListener(function(tab) {
                   if (tabs[i].hasAttribute("active")) {
                     // Update active document data
                     docs[i] = {
-                      last_modified: docs[i].last_modified,
                       texts_original: docs[i].texts_original,
                       texts: editor_texts,
                       scrollbar: editor_scrollbar,

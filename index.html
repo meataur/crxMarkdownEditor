@@ -76,9 +76,7 @@
 <header>
 	<nav>
 		<ul id="tabs">
-			<li id="create-tab" class="tab">
-				<svg style="width: 1em; height: 60px; stroke-width: 1px;"><use xlink:href="icons.svg#icon-plus"></use></svg>
-			</li>
+			<li id="create-tab" class="tab"><svg><use xlink:href="icons.svg#icon-plus"></use></svg></li>
 		</ul>
 	</nav>
 	<menu>
@@ -91,11 +89,11 @@
 </header>
 
 <content>
-	<editor>
-		<div class="vpanel-header">
+	<editor class="panel">
+		<div class="panel-header">
 			<span>Editor</span>
 			<toolbox>
-				<ul class="panelmenu">
+				<ul class="panel-menu">
 					<li>
 						<span>import from</span>
 						<ul class="dropdown">
@@ -125,7 +123,7 @@
 				</ul>
 			</toolbox>
 		</div>
-		<div class="vpanel-body">
+		<div class="panel-body">
 			<textarea id="editor-textarea" spellcheck="false"></textarea>
 
 			<div id="editor-import-gdrive" class="dlg">
@@ -218,11 +216,11 @@
 	<splitter></splitter>
 
 	<helper>
-		<viewer>
-			<div class="vpanel-header">
-				<span id="viewer-paneltitle">viewer</span>
+		<viewer class="panel">
+			<div class="panel-header">
+				<span id="viewer-panel-title">viewer</span>
 				<toolbox>
-					<ul class="panelmenu">
+					<ul class="panel-menu">
 						<li>
 							<span>export as</span>
 							<ul class="dropdown">
@@ -241,12 +239,12 @@
 					</ul>
 				</toolbox>
 			</div>
-			<div class="vpanel-body">
+			<div class="panel-body">
 				<div id="viewer"></div>
 				<div id="viewer-settings" class="dlg">
 					<section>
 						<item>
-							<label>{{ site.baseurl }} replacement:</label>
+							<label>replace for {{ site.baseurl }}:</label>
 							<ctrl><input type="text" id="viewer-baseurl" spellcheck="false"></ctrl>
 						</item>
 					</section>
@@ -254,18 +252,18 @@
 			</div>
 		</viewer>
 
-		<localhost>
-			<div class="vpanel-header">
-				<span id="localhost-paneltitle"></span>
+		<localhost class="panel">
+			<div class="panel-header">
+				<span id="localhost-panel-title"></span>
 				<toolbox>
-					<ul class="panelmenu">
+					<ul class="panel-menu">
 						<li id="localhost-tools-jekyll-setup"><span>setup</span></li>
 						<li id="localhost-tools-run-jekyll"><span>run jekyll</span></li>
 						<li id="localhost-tools-open-site"><span>open site</span></li>
 					</ul>
 				</toolbox>
 			</div>
-			<div class="vpanel-body">
+			<div class="panel-body">
 				<div id="hpage-jekyll-setup" class="hpage">
 					<h1>Setup Jekyll on Localhost</h1>
 					<h2>One-Time Installation Steps</h2>
@@ -287,17 +285,17 @@
 			</div>
 		</localhost>
 
-		<help>
-			<div class="vpanel-header">
-				<span id="help-paneltitle"></span>
+		<help class="panel">
+			<div class="panel-header">
+				<span id="help-panel-title"></span>
 				<toolbox>
-					<ul class="panelmenu">
+					<ul class="panel-menu">
 						<li id="help-tools-md-tutorial"><span>markdown</span></li>
 						<li id="help-tools-about"><span>about</span></li>
 					</ul>
 				</toolbox>
 			</div>
-			<div class="vpanel-body">
+			<div class="panel-body">
 				<div id="hpage-md-tutorial" class="hpage"></div>
 				<div id="hpage-about" class="hpage">
 					<h1><span class="appname"></span> <span class="appvers"></span></h1>

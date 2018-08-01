@@ -49,7 +49,7 @@ body {
 /* Header */
 
 header {
-  display: block; position: relative; height: 60px;
+  display: block; position: relative; height: 45px;
   background: #383838; user-select: none;
 }
 header:after { content: ""; display: table; clear: both; }
@@ -57,10 +57,9 @@ header:after { content: ""; display: table; clear: both; }
 nav { display: block; float: left; }
 ul#tabs { list-style: none; }
 li.tab {
-  position: relative; padding: 20px 20px 0; height: 60px;
+  position: relative; padding: 0 20px; height: 45px; float: left;
   color: #a8afbd;
   transition-duration: .3s;
-  float: left;
   border-right: solid 1px #1e1e1e;
 }
 li.tab:last-child { padding-top: 0; width: unset; font-size: .75rem; }
@@ -68,18 +67,18 @@ li.tab:hover { background: #424242; }
 li.tab:active { color: #fff; }
 li.tab[active] { color: #fff; background: #1e1e1e; }
 li.tab div { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-li.tab .doc-datetime { margin-top: 1px; margin-bottom: -1px; font-size: .65rem; line-height: 1; }
-li.tab .doc-title { font-size: .85rem; line-height: 1.4; }
+li.tab .doc-title { height: 45px; font-size: .85rem; line-height: 45px; }
 li.tab .tab-close { position: absolute; width: 1em; height: 1em; top: 7px; right: 7px; color: #424242; transition-duration: .3s; }
 li.tab .tab-close:hover { color: #a8afbd; }
 li.tab .tab-close:active { color: #fff; }
 li.tab .tab-close > svg { width: 1em; height: 1em; }
+li.tab#create-tab > svg { width: 1em; height: 45px; stroke-width: 1px; }
 
 menu { display: block; float: right; color: #a8afbd; }
 ul#menu { list-style: none; }
 li.menuitem {
-  position: relative; margin: 0; padding: 0 1.6em; height: 60px; float: right;
-  font-size: .75rem; text-transform: uppercase; line-height: 60px;
+  position: relative; margin: 0; padding: 0 1.6em; height: 45px; float: right;
+  font-size: .75rem; text-transform: uppercase; line-height: 45px;
   transition-duration: .3s;
 }
 li.menuitem:hover { background: #424242; }
@@ -89,33 +88,34 @@ li.menuitem:active { color: #fff; }
 
 /* Content */
 
-content { display: block; position: relative; height: calc(100vh - 60px); }
+content { display: block; position: relative; height: calc(100vh - 45px); }
 
 
 
 /* Panel header */
 
-.vpanel-header {
+.panel-header {
   display: block; padding-left: 20px; height: 45px;
   background: #1e1e1e; user-select: none;
 }
-.vpanel-header:after { content: ""; display: table; clear: both; }
-.vpanel-header > span {
+.panel-header:after { content: ""; display: table; clear: both; }
+.panel-header > span {
   display: block; height: 45px; line-height: 45px; float: left;
   color: #585858; font-size: .6rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;
 }
-.vpanel-header > toolbox { display: block; float: right; height: 45px; line-height: 45px; }
+.panel-header > toolbox { display: block; float: right; height: 45px; line-height: 45px; }
 
 toolbox ul { list-style: none; font-size: 0; line-height: 1; }
 toolbox ul > li {
   position: relative; display: inline-block; margin: 0; padding: 0 1.6em; height: 45px;
   color: #a8afbd; font-size: .7rem; text-transform: uppercase; line-height: 45px;
 }
-toolbox ul.panelmenu > li { transition: color .3s; }
-toolbox ul.panelmenu > li.selected { color: #fff; background: #005e9c; }
-toolbox ul.panelmenu > li.highlight { color: #fff; }
-toolbox ul.panelmenu > li:not(.has-dropdown):active { background: #005e9c; }
-toolbox ul.panelmenu > li.has-dropdown:after {
+toolbox ul.panel-menu > li { transition: color .3s; }
+toolbox ul.panel-menu > li.selected { color: #fff; }
+toolbox ul.panel-menu > li.has-dropdown.selected { background: #005e9c; }
+toolbox ul.panel-menu > li.highlight { color: #fff; }
+toolbox ul.panel-menu > li:not(.has-dropdown):active { background: #005e9c; }
+toolbox ul.panel-menu > li.has-dropdown:after {
   content: "";
   position: relative; top: -1px; display: inline-block; margin-left: 6px; width: 0; height: 0;
   vertical-align: middle;
@@ -132,7 +132,7 @@ toolbox ul.dropdown > li > div { display: inline-flex; height: 100%; align-items
 
 /* Panel body */
 
-.vpanel-body { position: relative; height: calc(100vh - 105px); overflow-x: hidden; overflow-y: auto; }
+.panel-body { position: relative; height: calc(100vh - 105px); overflow-x: hidden; overflow-y: auto; }
 
 editor { position: relative; float: left; width: calc(50% - 4px); user-select: none; }
 editor textarea { display: block; width: 100%; border: none; resize: vertical; font-family: 'consolas'; }

@@ -6,14 +6,14 @@ var editor = null;
 
 // Vertical panels
 var panelEditor = null;
-var panelHelper = null;
+var panelWrapperHelper = null;
 var panelViewer = null;
 var panelLocalhost = null;
 var panelHelp = null;
 var splitter = null;
 var isPanelResizing = false;
 
-// The variable storing current workspaces
+// The open documents
 var docs = [];
 
 // Tab-related variables
@@ -61,21 +61,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var parsed = parse(editor.getValue());
     var activeTab = getActiveTab();
     if (activeTab) {
-      // Active tab index
-      var tab = activeTab.tab;
-      var i = activeTab.index;
-
       // Update document title of tab
+      var tab = activeTab.tab;
       var docTitle = tab.getElementsByClassName("doc-title")[0];
       docTitle.innerHTML = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
 
-      // Update last modified datetime of tab
-      var docDatetime = tab.getElementsByClassName("doc-datetime")[0];
-      docs[i].last_modified = (parsed.header.date && parsed.header.date.length) ? parsed.header.date : getCurDatetimeString();
-      docDatetime.innerHTML = docs[i].last_modified.split(' ')[0];
-
       // Set mouse over title
-      tab.title = docDatetime.innerHTML + "\n" + docTitle.innerHTML;
+      tab.title = docTitle.innerHTML;
 
       // Automatic preview rendering
       preview(parsed);
@@ -84,16 +76,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Content panels and its splitter
   panelEditor = document.getElementsByTagName("editor")[0];
-  panelHelper = document.getElementsByTagName("helper")[0];
+  panelWrapperHelper = document.getElementsByTagName("helper")[0];
   panelViewer = document.getElementsByTagName("viewer")[0];
   panelLocalhost = document.getElementsByTagName("localhost")[0];
   panelHelp = document.getElementsByTagName("help")[0];
   splitter = document.getElementsByTagName("splitter")[0];
 
   // Panel selection
-  document.getElementById('menu-viewer').onclick = openViewer;
+  document.getElementById('menu-viewer').onclick = openPanelViewer;
   document.getElementById('menu-localhost').onclick = openPanelLocalhost;
-  document.getElementById('menu-help').onclick = openHelp;
+  document.getElementById('menu-help').onclick = openPanelHelp;
   document.getElementById('menu-viewer').click();
 
   // Load previous workspaces
@@ -122,16 +114,16 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('select-theme').onchange = selectTheme;
   document.getElementById('select-fontsize').onchange = selectFontsize;
   document.getElementById("setting-jekyll-localpath").onchange = function(e) {
-    chrome.storage.local.set({ settingJekyllLocalpath: document.getElementById("setting-jekyll-localpath").value.replace(/\\+$/, '') });
+    chrome.storage.local.set({ settingJekyllLocalpath: this.value.replace(/\\+$/, '') });
     messageBox("Auto Save");
   }
   document.getElementById("setting-jekyll-port").onchange = function(e) {
-    chrome.storage.local.set({ settingJekyllPort: document.getElementById("setting-jekyll-port").value.replace(/\\+$/, '') });
+    chrome.storage.local.set({ settingJekyllPort: this.value.replace(/\\+$/, '') });
     messageBox("Auto Save");
   }
 
   // Set menu event handler of content panels
-  Array.from(document.getElementsByClassName("panelmenu")).forEach(function(panelMenu) {
+  Array.from(document.getElementsByClassName("panel-menu")).forEach(function(panelMenu) {
     Array.from(panelMenu.children).forEach(function(panelMenuItem) {
       var dropdown = panelMenuItem.getElementsByClassName("dropdown")[0];
       if (dropdown) {
@@ -145,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
           dropdownItem.addEventListener("mousedown", function(e) { e.stopPropagation(); });
           dropdownItem.addEventListener("click", function(e) {
             collapseAllDropdowns();
-            deselectAllPanelmenuItems();
+            deselectAllTempPanelMenuItems();
             closeAllDialogs();
           });
         });
@@ -164,10 +156,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (this.classList.contains("selected")) {
           // Deselect all panel menu items
-          deselectAllPanelmenuItems();
+          deselectAllTempPanelMenuItems();
         } else {
           // Deselect all panel menu items
-          deselectAllPanelmenuItems();
+          deselectAllTempPanelMenuItems();
 
           // If a dropdown menu exists
           if (dropdown) {
@@ -205,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("viewer-tools-export-pdf").onclick = saveAsPdf;
   document.getElementById("viewer-tools-print").onclick = printPreview;
   document.getElementById("viewer-tools-expand").onclick = expandViewer;
-  document.getElementById("viewer-tools-settings").onclick = openViewerSettingsPanel;
+  document.getElementById("viewer-tools-settings").onclick = openPanelViewerSettingsPanel;
 
   document.getElementById("localhost-tools-jekyll-setup").onclick = setupJekyll;
   document.getElementById("localhost-tools-run-jekyll").onclick = runJekyll;
@@ -227,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   splitter.ondblclick = function(e) {
     panelEditor.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
-    panelHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
+    panelWrapperHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
   };
   document.onmousemove = function(e) {
     if (!isPanelResizing) return;
@@ -238,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var ratio = offset / wrapper.clientWidth * 100;
     panelEditor.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
-    panelHelper.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
+    panelWrapperHelper.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
   };
   document.onmouseup = function(e) {
     // Escape from panel resizing mode
@@ -246,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
   };
   document.onmousedown = function(e) {
     collapseAllDropdowns();
-    deselectAllPanelmenuItems();
+    deselectAllTempPanelMenuItems();
     closeAllDialogs();
   };
   
@@ -287,7 +279,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (tabs[i].hasAttribute("active")) {
         // Update active document data
         docs[i] = {
-          last_modified: docs[i].last_modified,
           texts_original: docs[i].texts_original,
           texts: editor.getValue(),
           scrollbar: editor.getScrollInfo(),
@@ -308,11 +299,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (panelEditor.clientWidth <= 400) {
       var ratio = 400 / wrapper.clientWidth * 100;
       panelEditor.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
-      panelHelper.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
-    } else if (panelHelper.clientWidth <= 400) {
+      panelWrapperHelper.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
+    } else if (panelWrapperHelper.clientWidth <= 400) {
       var ratio = 400 / wrapper.clientWidth * 100;
       panelEditor.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
-      panelHelper.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
+      panelWrapperHelper.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
     }
   };
 });
@@ -469,11 +460,10 @@ function loadPrevWorks() {
         docs.forEach(function(doc) {
           // Parse document text data
           var parsed = parse(doc.texts);
-          var docDatetime = doc.last_modified.split(' ')[0];
           var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
 
           // Create tab
-          var tab = createTab(docDatetime, docTitle);
+          var tab = createTab(docTitle);
           if (doc.active) activeTab = tab;
           
           // Add tab
@@ -508,11 +498,7 @@ function getActiveTab() {
   return null;
 }
 
-function createTab(docDatetime, docTitle) {
-  var divDatetime = document.createElement("div");
-  divDatetime.className = "doc-datetime";
-  divDatetime.innerHTML = docDatetime;
-
+function createTab(docTitle) {
   var divTitle = document.createElement("div");
   divTitle.className = "doc-title";
   divTitle.innerHTML = docTitle;
@@ -520,8 +506,7 @@ function createTab(docDatetime, docTitle) {
   var li = document.createElement("li");
   li.className = "tab";
   li.style.width = 0;
-  li.title = docDatetime + "\n" + docTitle;
-  li.appendChild(divDatetime);
+  li.title = docTitle;
   li.appendChild(divTitle);
   li.setAttribute("draggable", "true");
   li.addEventListener("dragstart", function(e) {
@@ -628,12 +613,11 @@ function addNewTab() {
     document.getElementById("create-tab").style.display = "none";
 
   // Create new tab
-  var newtab = createTab(getCurDatetimeString().split(' ')[0], "Untitled Document");
+  var newtab = createTab("Untitled Document");
   ul.insertBefore(newtab, ul.children[ul.children.length - 1]);
 
   // Add empty document to list
   docs.push({
-    last_modified: "",
     texts_original: "",
     texts: "",
     scrollbar: { left: 0, top: 0 },
@@ -729,7 +713,7 @@ function resizeTabWidths() {
  * Panels
  */
 
-function closeAllPanels() {
+function closeAllHelperPanels() {
   panelViewer.style.display = "none";
   document.getElementById("menu-viewer").style.color = "unset";
   panelLocalhost.style.display = "none";
@@ -738,32 +722,32 @@ function closeAllPanels() {
   document.getElementById("menu-help").style.color = "unset";
 }
 
-function closeAllHelperPages() {
-  Array.from(document.getElementsByClassName("hpage")).forEach(function(hpage) {
+function closeAllHelperPanelPages() {
+  Array.from(panelWrapperHelper.getElementsByClassName("hpage")).forEach(function(hpage) {
     hpage.style.display = "none";
   });
-  Array.from(document.getElementsByClassName("panelmenu")).forEach(function(panelMenu) {
+  Array.from(panelWrapperHelper.getElementsByClassName("panel-menu")).forEach(function(panelMenu) {
     Array.from(panelMenu.children).forEach(function(panelMenuItem) {
-      panelMenuItem.style.color = "#a8afbd";
+      panelMenuItem.classList.remove("selected");
     });
   });
 }
 
-function openViewer() {
-  closeAllPanels();
+function openPanelViewer() {
+  closeAllHelperPanels();
   panelViewer.style.display = "block";
   document.getElementById("menu-viewer").style.color = "#fff";
 }
 
 function openPanelLocalhost() {
-  closeAllPanels();
+  closeAllHelperPanels();
   panelLocalhost.style.display = "block";
   document.getElementById("menu-localhost").style.color = "#fff";
   setupJekyll();
 }
 
-function openHelp() {
-  closeAllPanels();
+function openPanelHelp() {
+  closeAllHelperPanels();
   panelHelp.style.display = "block";
   document.getElementById("menu-help").style.color = "#fff";
   openMdTutorial();
@@ -780,7 +764,7 @@ function adjustDropdownPosition(el) {
   if (dropdown.style.display === "none")
     return;
   
-  var containerWidth = parseInt(window.getComputedStyle(el.getAncestorByClassName("vpanel-header")).width);
+  var containerWidth = parseInt(window.getComputedStyle(el.getAncestorByClassName("panel-header")).width);
   var thisLeft = parseInt(el.offsetLeft);
   var dropdownWidth = parseInt(window.getComputedStyle(dropdown).width);
 
@@ -799,9 +783,20 @@ function collapseAllDropdowns() {
   });
 }
 
-function deselectAllPanelmenuItems() {
-  Array.from(document.getElementsByClassName("selected")).forEach(function(selected) {
-    selected.classList.remove("selected");
+function deselectAllPanelMenuItems() {
+  Array.from(document.getElementsByClassName("panel-menu")).forEach(function(panelMenu) {
+    Array.from(panelMenu.children).forEach(function(panelMenuItem) {
+      panelMenuItem.classList.remove("selected");
+    });
+  });
+}
+
+function deselectAllTempPanelMenuItems() {
+  Array.from(document.getElementsByClassName("panel-menu")).forEach(function(panelMenu) {
+    Array.from(panelMenu.children).forEach(function(panelMenuItem) {
+      if (panelMenuItem.classList.contains("has-dropdown"))
+        panelMenuItem.classList.remove("selected");
+    });
   });
 }
 
@@ -877,38 +872,41 @@ function printPreview() {
 }
 
 function expandViewer() {
+  var headerHeight = 45;
+  var panelHeaderHeight = 45;
+  
   if (this.hasAttribute("expanded")) {
     this.removeAttribute("expanded");
     this.getElementsByTagName("span")[0].innerHTML = "expand screen";
     document.getElementsByTagName("header")[0].style.display = "block";
-    document.getElementsByTagName("content")[0].style.height = "calc(100vh - 60px)";
-    document.getElementById("viewer").getAncestorByClassName("vpanel-body").style.height = "calc(100vh - 105px)";
+    document.getElementsByTagName("content")[0].style.height = "calc(100vh - " + headerHeight + "px)";
+    document.getElementById("viewer").getAncestorByClassName("panel-body").style.height = "calc(100vh - " + headerHeight + panelHeaderHeight + "px)";
     panelEditor.style.display = "block";
     splitter.style.display = "block";
-    panelHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
+    panelWrapperHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
   } else {
     this.setAttribute("expanded", "");
     this.getElementsByTagName("span")[0].innerHTML = "back to editor";
     document.getElementsByTagName("header")[0].style.display = "none";
     document.getElementsByTagName("content")[0].style.height = "calc(100vh)";
-    document.getElementById("viewer").getAncestorByClassName("vpanel-body").style.height = "calc(100vh - 45px)";
+    document.getElementById("viewer").getAncestorByClassName("panel-body").style.height = "calc(100vh - " + panelHeaderHeight + "px)";
     panelEditor.style.display = "none";
     splitter.style.display = "none";
-    panelHelper.style.width = "100%";
+    panelWrapperHelper.style.width = "100%";
   }
 }
 
-function openViewerSettingsPanel() {
+function openPanelViewerSettingsPanel() {
   var div = document.getElementById("viewer-settings");
   div.style.display = "block";
   document.getElementById("viewer-baseurl").focus();
 }
 
 function setupJekyll() {
-  closeAllHelperPages();
+  closeAllHelperPanelPages();
   document.getElementById("hpage-jekyll-setup").style.display = "block";
-  document.getElementById("localhost-tools-jekyll-setup").style.color = "#fff";
-  document.getElementById("localhost-paneltitle").innerHTML = "localhost setup";
+  document.getElementById("localhost-tools-jekyll-setup").classList.add("selected");
+  document.getElementById("localhost-panel-title").innerHTML = "localhost setup";
 }
 
 function runJekyll() {
@@ -957,7 +955,7 @@ function openJekyllSite() {
 }
 
 function openMdTutorial() {
-  closeAllHelperPages();
+  closeAllHelperPanelPages();
 
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "tutorial.md");
@@ -968,15 +966,15 @@ function openMdTutorial() {
   xhr.send();
 
   document.getElementById("hpage-md-tutorial").style.display = "block";
-  document.getElementById("help-tools-md-tutorial").style.color = "#fff";
-  document.getElementById("help-paneltitle").innerHTML = "markdown tutorial";
+  document.getElementById("help-tools-md-tutorial").classList.add("selected");
+  document.getElementById("help-panel-title").innerHTML = "markdown tutorial";
 }
 
 function openAboutPage() {
-  closeAllHelperPages();
+  closeAllHelperPanelPages();
   document.getElementById("hpage-about").style.display = "block";
-  document.getElementById("help-tools-about").style.color = "#fff";
-  document.getElementById("help-paneltitle").innerHTML = "about";
+  document.getElementById("help-tools-about").classList.add("selected");
+  document.getElementById("help-panel-title").innerHTML = "about";
 }
 
 
