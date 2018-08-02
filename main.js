@@ -1391,15 +1391,3 @@ function preview(parsed) {
     }
   }
 }
-
-function createSpinner(id) {
-  var spinner = document.createElement("div");
-  spinner.id = id;
-  spinner.classList.add("spinner");
-  for (var i = 0; i < 3; i++) {
-    var bounce = document.createElement("div");
-    bounce.classList.add("bounce" + i);
-    spinner.appendChild(bounce);
-  }
-  return spinner;
-}

@@ -42,3 +42,17 @@ String.prototype.trimRight = function(str) {
   if (str === "undefined") str = "\\s";
   return this.replace(new RegExp(str + "+$"), "");
 }
+
+
+
+/**
+ * Utility functions
+ */
+
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  while (true) {
+    if ((new Date().getTime() - start) >= milliseconds)
+      break;
+  }
+}

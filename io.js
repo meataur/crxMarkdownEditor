@@ -1,5 +1,42 @@
 var debug = true;
 
+let Spinner = (function () {
+  let _create = function (id) {
+    var spinner = document.createElement("div");
+    spinner.id = id;
+    spinner.classList.add("spinner");
+    for (var i = 1; i < 9; i++) {
+      var circle = document.createElement("div");
+      circle.classList.add("circle" + i);
+      circle.classList.add("circle");
+      spinner.appendChild(circle);
+    }
+    spinner.setAttribute("start", new Date().getTime());
+    return spinner;
+  }
+  return {
+    exists: function (id) {
+      var spinner = document.getElementById(id);
+      return spinner ? true : false;
+    },
+    show: function (parent, id) {
+      if (!this.exists(id)) { parent.appendChild(_create(id)); }
+    },
+    hide: function (id) {
+      var spinner = document.getElementById(id);
+      if (spinner) {
+        var start = Number(spinner.getAttribute("start"));
+        while (true) {
+          if ((new Date().getTime() - start) >= 800) {
+            spinner.parentNode.removeChild(spinner);
+            break;
+          }
+        }
+      }
+    }
+  }
+})();
+
 let IO = {
   Local: {
     open: function () {
@@ -84,11 +121,13 @@ let IO = {
       data ? xhr.send(data) : xhr.send();
     }
     let _impFiletree = function (parent, access_token, fileid) {
-      _xhrWithToken("GET", "https://www.googleapis.com/drive/v3/files?q='" + fileid + "'+in+parents+and+trashed=false", access_token, function () {
-        if (this.status == 200) {
-          var spinner = document.getElementById("spinner-gdrive-import");
-          if (spinner) spinner.classList.toggle("fadeout");
+      var importList = document.getElementById("importlist-gdrive");
+      Spinner.show(importList, "spinner-gdrive-import");
 
+      _xhrWithToken("GET", "https://www.googleapis.com/drive/v3/files?q='" + fileid + "'+in+parents+and+trashed=false", access_token, function () {
+        Spinner.hide("spinner-gdrive-import");
+
+        if (this.status == 200) {
           var ul = document.createElement("ul");
           var data = JSON.parse(this.response);
           data.files.forEach(function (fileinfo) {
@@ -108,13 +147,12 @@ let IO = {
                 e.stopPropagation();
 
                 // Prevent request duplication
-                if (!spinner.classList.contains("fadeout")) return;
+                if (Spinner.exists("spinner-gdrive-import")) return;
 
                 var subtree = this.getElementsByTagName("ul");
                 if (subtree.length) {
                   this.removeChild(subtree[0]);
                 } else {
-                  spinner.classList.toggle("fadeout");
                   _impFiletree(this, access_token, this.getAttribute("data"));
                 }
               }
@@ -137,7 +175,6 @@ let IO = {
               li.onclick = function (e) {
                 e.stopPropagation();
 
-                var importList = document.getElementById("importlist-gdrive");
                 Array.from(importList.getElementsByTagName("li")).forEach(function (li) {
                   li.removeAttribute("selected");
                 });
@@ -150,43 +187,27 @@ let IO = {
               li.ondblclick = function (e) {
                 e.stopPropagation();
 
-                // Get file content
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", "https://www.googleapis.com/drive/v3/files/" + fileinfo.id + "/export?mimeType=text/plain");
-                xhr.setRequestHeader("Authorization", "Bearer " + access_token);
-                xhr.onload = function () {
-                  var activeTab = getActiveTab();
-                  var parsed = parse(editor.getValue());
-                  if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
-                    if (!confirm("Changes you made may not be saved.\nAre you sure to open another document?"))
-                      return;
-                  }
-
-                  editor.setValue(xhr.response);
-                  editor.focus();
-                  editor.setCursor(0, 0);
-
-                  docs[activeTab.index].texts_original = editor.getValue();
-                }
-                xhr.send();
-
-                // Close dialog
-                closeAllDialogs();
+                Spinner.show(importList, "spinner-gdrive-import");
+                _xhrWithToken("GET", "https://www.googleapis.com/drive/v3/files/" + fileinfo.id + "/export?mimeType=text/plain", access_token, _cbReadFile);
               }
               ul.appendChild(li);
             }
           });
 
           parent.appendChild(ul);
+        } else {
+          messageBox("Unable to load files of Google Drive: Error code(" + this.status + ")");
         }
       });
     }
     let _expFiletree = function (parent, access_token, fileid) {
-      _xhrWithToken("GET", "https://www.googleapis.com/drive/v3/files?q='" + fileid + "'+in+parents+and+trashed=false", access_token, function () {
-        if (this.status == 200) {
-          var spinner = document.getElementById("spinner-gdrive-export");
-          if (spinner) spinner.classList.toggle("fadeout");
+      var exportList = document.getElementById("exportlist-gdrive");
+      Spinner.show(exportList, "spinner-gdrive-export");
 
+      _xhrWithToken("GET", "https://www.googleapis.com/drive/v3/files?q='" + fileid + "'+in+parents+and+trashed=false", access_token, function () {
+        Spinner.hide("spinner-gdrive-export");
+
+        if (this.status == 200) {
           var ul = document.createElement("ul");
           var data = JSON.parse(this.response);
           data.files.forEach(function (fileinfo) {
@@ -205,7 +226,6 @@ let IO = {
               li.onclick = function (e) {
                 e.stopPropagation();
 
-                var exportList = document.getElementById("exportlist-gdrive");
                 Array.from(exportList.getElementsByTagName("li")).forEach(function (li) {
                   li.removeAttribute("selected");
                 });
@@ -219,13 +239,12 @@ let IO = {
                 e.stopPropagation();
 
                 // Prevent request duplication
-                if (!spinner.classList.contains("fadeout")) return;
+                if (Spinner.exists("spinner-gdrive-export")) return;
 
                 var subtree = this.getElementsByTagName("ul");
                 if (subtree.length) {
                   this.removeChild(subtree[0]);
                 } else {
-                  spinner.classList.toggle("fadeout");
                   _expFiletree(this, access_token, this.getAttribute("data"));
                 }
               }
@@ -234,8 +253,32 @@ let IO = {
           });
 
           parent.appendChild(ul);
+        } else {
+          messageBox("Unable to load files of Google Drive: Error code(" + this.status + ")");
         }
       });
+    }
+    let _cbReadFile = function () {
+      Spinner.hide("spinner-gdrive-import");
+
+      if (this.status == 200) {
+        var activeTab = getActiveTab();
+        var parsed = parse(editor.getValue());
+        if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
+          if (!confirm("Changes you made may not be saved.\nAre you sure to open another document?"))
+            return;
+        }
+
+        editor.setValue(this.response);
+        editor.focus();
+        editor.setCursor(0, 0);
+
+        docs[activeTab.index].texts_original = editor.getValue();
+
+        closeAllDialogs();
+      } else {
+        messageBox("Unable to import google document: Error code(" + this.status + ")");
+      }
     }
     let _openCallback = function (access_token) {
       if (access_token) {
@@ -244,10 +287,6 @@ let IO = {
 
         var importList = document.getElementById("importlist-gdrive");
         importList.removeAllChildren();
-
-        // Create spinner
-        var spinner = createSpinner("spinner-gdrive-import");
-        importList.appendChild(spinner);
 
         // Create file tree
         var ul = document.createElement("ul");
@@ -263,35 +302,22 @@ let IO = {
           this.classList.remove("focused");
         }
         ul.appendChild(root);
-        _impFiletree(root, access_token, "root");
         importList.appendChild(ul);
+
+        // Navigate subtree
+        _impFiletree(root, access_token, "root");
 
         // Set import button event handler
         var importBtn = document.getElementById("btn-import-from-gdrive");
         importBtn.removeAttribute("activated");
         importBtn.onclick = function (e) {
           if (this.hasAttribute("activated")) {
-            _xhrWithToken("GET", "https://www.googleapis.com/drive/v3/files/" + this.getAttribute("data") + "/export?mimeType=text/plain", access_token, function () {
-              if (this.status == 200) {
-                var activeTab = getActiveTab();
-                var parsed = parse(editor.getValue());
-                if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
-                  if (!confirm("Changes you made may not be saved.\nAre you sure to open another document?"))
-                    return;
-                }
-
-                editor.setValue(this.response);
-                editor.focus();
-                editor.setCursor(0, 0);
-
-                docs[activeTab.index].texts_original = editor.getValue();
-              }
-            });
-
-            // Close dialog
-            closeAllDialogs();
+            Spinner.show(importList, "spinner-gdrive-import");
+            _xhrWithToken("GET", "https://www.googleapis.com/drive/v3/files/" + this.getAttribute("data") + "/export?mimeType=text/plain", access_token, _cbReadFile);
           }
         }
+      } else {
+        messageBox("Unexpected error occured: Empty token.");
       }
     }
     let _saveCallback = function (access_token) {
@@ -310,10 +336,6 @@ let IO = {
         inputFilename.value = docDatetime.split(" ")[0] + "-" + docTitle.replaceAll(" ", "-").toLowerCase() + ".md";
         inputFilename.focus();
 
-        // Create spinner
-        var spinner = createSpinner("spinner-gdrive-export");
-        exportList.appendChild(spinner);
-
         // Create file tree
         var ul = document.createElement("ul");
         ul.className = "filetree";
@@ -331,7 +353,6 @@ let IO = {
         root.onclick = function (e) {
           e.stopPropagation();
 
-          var exportList = document.getElementById("exportlist-gdrive");
           Array.from(exportList.getElementsByTagName("li")).forEach(function (li) {
             li.removeAttribute("selected");
           });
@@ -342,17 +363,18 @@ let IO = {
           exportBtn.setAttribute("data", "root");
         }
         root.click();
-        root.ondblclick = function (e) {
-          e.stopPropagation();
-        }
         ul.appendChild(root);
-        _expFiletree(root, access_token, "root");
         exportList.appendChild(ul);
+
+        // Navigate subtree
+        _expFiletree(root, access_token, "root");
 
         // Set save button event handler
         var exportBtn = document.getElementById("btn-export-to-gdrive");
         exportBtn.onclick = function (e) {
           if (this.hasAttribute("activated")) {
+            Spinner.show(importList, "spinner-gdrive-export");
+
             // Sending data
             var data = "--mdeditor_create_file\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n";
             data += "{ \"name\": \"" + inputFilename.value + "\", \"mimeType\": \"application/vnd.google-apps.document\", \"parents\": [\"" + this.getAttribute("data") + "\"] }\r\n\r\n";
@@ -364,33 +386,47 @@ let IO = {
             xhr.setRequestHeader("Authorization", "Bearer " + access_token);
             xhr.setRequestHeader("Content-Type", "multipart/related; boundary=mdeditor_create_file");
             xhr.onload = function () {
-              messageBox("Successfully saved.");
+              Spinner.hide("spinner-gdrive-export");
+
+              if (this.status == 200) {
+                messageBox("Successfully saved.");
+                closeAllDialogs();
+              } else {
+                messageBox("Unable to save google document: Error code(" + this.status + ")");
+              }
             }
             xhr.send(data);
-
-            // Close dialog
-            closeAllDialogs();
           }
         }
+      } else {
+        messageBox("Unexpected error occured: Empty token.");
       }
     }
 
     return {
       open: function () {
-        messageBox("Loading files of Google drive...");
-        var options = {
-          interactive: true,
-          callback: _openCallback
+        if (navigator.onLine) {
+          messageBox("Loading files of Google drive...");
+          var options = {
+            interactive: true,
+            callback: _openCallback
+          }
+          _getAuthToken(options);
+        } else {
+          messageBox("There is no Internet connection.");
         }
-        _getAuthToken(options);
       },
       save: function () {
-        messageBox("Loading directories of Google drive...");
-        var options = {
-          interactive: true,
-          callback: _saveCallback
+        if (navigator.onLine) {
+          messageBox("Loading directories of Google drive...");
+          var options = {
+            interactive: true,
+            callback: _saveCallback
+          }
+          _getAuthToken(options);
+        } else {
+          messageBox("There is no Internet connection.");
         }
-        _getAuthToken(options);
       }
     }
   })(),
@@ -460,11 +496,13 @@ let IO = {
       _xhrWithToken("GET", "https://api.github.com/user", access_token, callback);
     }
     let _impFiletree = function (parent, access_token, url) {
-      _xhrWithToken("GET", url, access_token, function () {
-        if (this.status == 200) {
-          var spinner = document.getElementById("spinner-github-import");
-          if (spinner) spinner.classList.toggle("fadeout");
+      var importList = document.getElementById("importlist-github");
+      Spinner.show(importList, "spinner-github-import");
 
+      _xhrWithToken("GET", url, access_token, function () {
+        Spinner.hide("spinner-github-import");
+
+        if (this.status == 200) {
           var ul = document.createElement("ul");
           var data = JSON.parse(this.response);
           data.forEach(function (fileinfo) {
@@ -484,13 +522,12 @@ let IO = {
                 e.stopPropagation();
 
                 // Prevent request duplication
-                if (!spinner.classList.contains("fadeout")) return;
+                if (Spinner.exists("spinner-github-import")) return;
 
                 var subtree = this.getElementsByTagName("ul");
                 if (subtree.length) {
                   this.removeChild(subtree[0]);
                 } else {
-                  spinner.classList.toggle("fadeout");
                   _impFiletree(this, access_token, this.getAttribute("data"));
                 }
               }
@@ -530,11 +567,8 @@ let IO = {
               li.ondblclick = function (e) {
                 e.stopPropagation();
 
-                // Get file content
+                Spinner.show(importList, "spinner-github-import");
                 _xhrWithToken("GET", this.getAttribute("data"), access_token, _cbReadFile);
-
-                // Close dialog
-                closeAllDialogs();
               }
               ul.appendChild(li);
             }
@@ -544,11 +578,13 @@ let IO = {
       });
     }
     let _expFiletree = function (parent, access_token, url) {
-      _xhrWithToken("GET", url, access_token, function () {
-        if (this.status == 200) {
-          var spinner = document.getElementById("spinner-github-export");
-          if (spinner) spinner.classList.toggle("fadeout");
+      var exportList = document.getElementById("exportlist-github");
+      Spinner.show(exportList, "spinner-github-export");
 
+      _xhrWithToken("GET", url, access_token, function () {
+        Spinner.hide("spinner-github-export");
+
+        if (this.status == 200) {
           var ul = document.createElement("ul");
           var data = JSON.parse(this.response);
           data.forEach(function (fileinfo) {
@@ -567,7 +603,6 @@ let IO = {
               li.onclick = function (e) {
                 e.stopPropagation();
 
-                var exportList = document.getElementById("exportlist-github");
                 Array.from(exportList.getElementsByTagName("li")).forEach(function (li) {
                   li.removeAttribute("selected");
                 });
@@ -581,13 +616,12 @@ let IO = {
                 e.stopPropagation();
 
                 // Prevent request duplication
-                if (!spinner.classList.contains("fadeout")) return;
+                if (Spinner.exists("spinner-github-export")) return;
 
                 var subtree = this.getElementsByTagName("ul");
                 if (subtree.length) {
                   this.removeChild(subtree[0]);
                 } else {
-                  spinner.classList.toggle("fadeout");
                   _expFiletree(this, access_token, this.getAttribute("data"));
                 }
               }
@@ -595,10 +629,14 @@ let IO = {
             }
           });
           parent.appendChild(ul);
+        } else {
+          messageBox("Unable to load Github file list: Error code(" + this.status + ")");
         }
       });
     }
     let _cbReadFile = function () {
+      Spinner.hide(importList, "spinner-github-import");
+
       if (this.status == 200) {
         var activeTab = getActiveTab();
         var parsed = parse(editor.getValue());
@@ -608,7 +646,6 @@ let IO = {
         }
 
         var data = JSON.parse(this.response);
-        console.log(this.response);
         if (data.encoding === "base64") {
           editor.setValue(decodeURIComponent(Array.prototype.map.call(atob(data.content), function (c) {
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
@@ -620,23 +657,27 @@ let IO = {
         editor.setCursor(0, 0);
 
         docs[activeTab.index].texts_original = editor.getValue();
+
+        closeAllDialogs();
+      } else {
+        messageBox("Unable to import from Github: Error code(" + this.status + ")");
       }
     }
     let _openCallback = function (access_token) {
       if (access_token) {
+        var importList = document.getElementById("importlist-github");
+        Spinner.show(importList, "spinner-github-import");
+
         _getUserInfo(access_token, function () {
+          Spinner.hide("spinner-github-import");
+
           if (this.status == 200) {
             var user = JSON.parse(this.response);
 
             var dialog = document.getElementById("editor-import-github");
             dialog.style.display = "block";
 
-            var importList = document.getElementById("importlist-github");
             importList.removeAllChildren();
-
-            // Create spinner
-            var spinner = createSpinner("spinner-github-import");
-            importList.appendChild(spinner);
 
             // Create root node
             var ul = document.createElement("ul");
@@ -654,12 +695,12 @@ let IO = {
             ul.appendChild(root);
             importList.appendChild(ul);
 
-            // Repository list
+            // Load repositories
+            Spinner.show(importList, "spinner-github-import");
             _xhrWithToken("GET", user.repos_url, access_token, function () {
-              if (this.status === 200) {
-                var spinner = document.getElementById("spinner-github-import");
-                if (spinner) spinner.classList.toggle("fadeout");
+              Spinner.hide("spinner-github-import");
 
+              if (this.status === 200) {
                 var reposList = document.createElement("ul");
                 var repos = JSON.parse(this.response);
                 repos.forEach(function (repo) {
@@ -681,13 +722,14 @@ let IO = {
                     if (subtree.length) {
                       this.removeChild(subtree[0]);
                     } else {
-                      spinner.classList.toggle("fadeout");
                       _impFiletree(this, access_token, repo.url + "/contents");
                     }
                   }
                   reposList.appendChild(li);
                 });
                 root.appendChild(reposList);
+              } else {
+                messageBox("Unable to load Github repositories: Error code(" + this.status + ")");
               }
             });
 
@@ -696,26 +738,30 @@ let IO = {
             importBtn.removeAttribute("activated");
             importBtn.onclick = function (e) {
               if (this.hasAttribute("activated")) {
+                Spinner.show(importList, "spinner-github-import");
                 _xhrWithToken("GET", this.getAttribute("data"), access_token, _cbReadFile);
-
-                // Close dialog
-                closeAllDialogs();
               }
             }
           }
         });
+      } else {
+        messageBox("Unexpected error occured: Empty token.");
       }
     }
     let _saveCallback = function (access_token) {
       if (access_token) {
+        var exportList = document.getElementById("exportlist-github");
+        Spinner.show(exportList, "spinner-github-export");
+
         _getUserInfo(access_token, function () {
+          Spinner.hide("spinner-github-export");
+
           if (this.status == 200) {
             var user = JSON.parse(this.response);
 
             var dialog = document.getElementById("editor-export-github");
             dialog.style.display = "block";
 
-            var exportList = document.getElementById("exportlist-github");
             exportList.removeAllChildren();
 
             // Filename
@@ -725,10 +771,6 @@ let IO = {
             var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
             inputFilename.value = docDatetime.split(" ")[0] + "-" + docTitle.replaceAll(" ", "-").toLowerCase() + ".md";
             inputFilename.focus();
-
-            // Create spinner
-            var spinner = createSpinner("spinner-github-export");
-            exportList.appendChild(spinner);
 
             // Create root node
             var ul = document.createElement("ul");
@@ -743,18 +785,15 @@ let IO = {
               e.stopPropagation();
               this.classList.remove("focused");
             }
-            root.ondblclick = function (e) {
-              e.stopPropagation();
-            }
             ul.appendChild(root);
             exportList.appendChild(ul);
 
-            // Repository list
+            // Load repositories
+            Spinner.show(exportList, "spinner-github-export");
             _xhrWithToken("GET", user.repos_url, access_token, function () {
-              if (this.status === 200) {
-                var spinner = document.getElementById("spinner-github-export");
-                if (spinner) spinner.classList.toggle("fadeout");
+              Spinner.hide("spinner-github-export");
 
+              if (this.status === 200) {
                 var reposList = document.createElement("ul");
                 var repos = JSON.parse(this.response);
                 repos.forEach(function (repo) {
@@ -772,7 +811,6 @@ let IO = {
                   li.onclick = function (e) {
                     e.stopPropagation();
 
-                    var exportList = document.getElementById("exportlist-github");
                     Array.from(exportList.getElementsByTagName("li")).forEach(function (li) {
                       li.removeAttribute("selected");
                     });
@@ -786,19 +824,20 @@ let IO = {
                     e.stopPropagation();
 
                     // Prevent request duplication
-                    if (!spinner.classList.contains("fadeout")) return;
+                    if (Spinner.exists("spinner-github-export")) return;
 
                     var subtree = this.getElementsByTagName("ul");
                     if (subtree.length) {
                       this.removeChild(subtree[0]);
                     } else {
-                      spinner.classList.toggle("fadeout");
                       _expFiletree(this, access_token, repo.url + "/contents");
                     }
                   }
                   reposList.appendChild(li);
                 });
                 root.appendChild(reposList);
+              } else {
+                messageBox("Unable to load Github repositories: Error code(" + this.status + ")");
               }
             });
 
@@ -806,6 +845,8 @@ let IO = {
             var exportBtn = document.getElementById("btn-export-to-github");
             exportBtn.onclick = function (e) {
               if (this.hasAttribute("activated")) {
+                Spinner.show(exportList, "spinner-github-export");
+
                 var data = {
                   message: "commit from MDEditor",
                   content: btoa(unescape(encodeURIComponent(editor.getValue())))
@@ -819,56 +860,69 @@ let IO = {
                     if (confirm("The file already exists.\nDo you want to overwrite it?")) {
                       data.sha = JSON.parse(this.response).sha;
                       _xhrWithToken("PUT", requestUrl, access_token, function () {
+                        Spinner.hide("spinner-github-export");
+
                         if (this.status == 200) {
                           messageBox("Successfully updated.");
+                          closeAllDialogs();
                         } else {
                           messageBox("Failed to update file.");
-                          console.log(this.response);
                         }
                       }, JSON.stringify(data));
                     }
                   } else if (this.status == 404) {
                     _xhrWithToken("PUT", requestUrl, access_token, function () {
+                      Spinner.hide("spinner-github-export");
+
                       if (this.status == 201) {
                         messageBox("Successfully saved.");
+                        closeAllDialogs();
                       } else {
-                        messageBox("Failed to save file.");
-                        console.log(this.response);
+                        messageBox("Failed to save file. Error code(201)");
                       }
                     }, JSON.stringify(data));
                   } else {
-                    messageBox("Unexpected error occured.");
-                    console.log(this.response);
+                    Spinner.hide("spinner-github-export");
+                    messageBox("Unexpected error occured: Error code(" + this.status + ")");
                   }
                 });
-
-                // Close dialog
-                closeAllDialogs();
               }
             }
+          } else {
+            messageBox("Unable to get user information: Error code(" + this.status + ")");
           }
         });
+      } else {
+        messageBox("Unexpected error occured: Empty token.");
       }
     }
 
     return {
       open: function () {
-        messageBox("Loading Github repository list...");
-        var options = {
-          interactive: true,
-          url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
-            '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
+        if (navigator.onLine) {
+          messageBox("Loading Github repository list...");
+          var options = {
+            interactive: true,
+            url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
+              '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
+          }
+          _getAuthToken(options, _openCallback);
+        } else {
+          messageBox("There is no Internet connection.");
         }
-        _getAuthToken(options, _openCallback);
       },
       save: function () {
-        messageBox("Loading Github repository list...");
-        var options = {
-          interactive: true,
-          url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
-            '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
+        if (navigator.onLine) {
+          messageBox("Loading Github repository list...");
+          var options = {
+            interactive: true,
+            url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
+              '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
+          }
+          _getAuthToken(options, _saveCallback);
+        } else {
+          messageBox("There is no Internet connection.");
         }
-        _getAuthToken(options, _saveCallback);
       }
     }
   })()
