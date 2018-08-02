@@ -16,8 +16,7 @@ let Spinner = (function () {
   }
   return {
     exists: function (id) {
-      var spinner = document.getElementById(id);
-      return spinner ? true : false;
+      return document.getElementById(id) ? true : false;
     },
     show: function (parent, id) {
       if (!this.exists(id)) { parent.appendChild(_create(id)); }
@@ -406,11 +405,11 @@ let IO = {
     return {
       open: function () {
         if (navigator.onLine) {
-          messageBox("Loading files of Google drive...");
           var options = {
             interactive: true,
             callback: _openCallback
           }
+          messageBox("Connecting to Google Drive...");
           _getAuthToken(options);
         } else {
           messageBox("There is no Internet connection.");
@@ -418,11 +417,11 @@ let IO = {
       },
       save: function () {
         if (navigator.onLine) {
-          messageBox("Loading directories of Google drive...");
           var options = {
             interactive: true,
             callback: _saveCallback
           }
+          messageBox("Connecting to Google Drive...");
           _getAuthToken(options);
         } else {
           messageBox("There is no Internet connection.");
@@ -554,7 +553,6 @@ let IO = {
               li.onclick = function (e) {
                 e.stopPropagation();
 
-                var importList = document.getElementById("importlist-github");
                 Array.from(importList.getElementsByTagName("li")).forEach(function (li) {
                   li.removeAttribute("selected");
                 });
@@ -635,7 +633,7 @@ let IO = {
       });
     }
     let _cbReadFile = function () {
-      Spinner.hide(importList, "spinner-github-import");
+      Spinner.hide("spinner-github-import");
 
       if (this.status == 200) {
         var activeTab = getActiveTab();
@@ -665,18 +663,14 @@ let IO = {
     }
     let _openCallback = function (access_token) {
       if (access_token) {
-        var importList = document.getElementById("importlist-github");
-        Spinner.show(importList, "spinner-github-import");
-
         _getUserInfo(access_token, function () {
-          Spinner.hide("spinner-github-import");
-
           if (this.status == 200) {
             var user = JSON.parse(this.response);
 
             var dialog = document.getElementById("editor-import-github");
             dialog.style.display = "block";
 
+            var importList = document.getElementById("importlist-github");
             importList.removeAllChildren();
 
             // Create root node
@@ -742,6 +736,8 @@ let IO = {
                 _xhrWithToken("GET", this.getAttribute("data"), access_token, _cbReadFile);
               }
             }
+          } else {
+            messageBox("Unable to get user information: Error code(" + this.status + ")");
           }
         });
       } else {
@@ -750,18 +746,14 @@ let IO = {
     }
     let _saveCallback = function (access_token) {
       if (access_token) {
-        var exportList = document.getElementById("exportlist-github");
-        Spinner.show(exportList, "spinner-github-export");
-
         _getUserInfo(access_token, function () {
-          Spinner.hide("spinner-github-export");
-
           if (this.status == 200) {
             var user = JSON.parse(this.response);
 
             var dialog = document.getElementById("editor-export-github");
             dialog.style.display = "block";
 
+            var exportList = document.getElementById("exportlist-github");
             exportList.removeAllChildren();
 
             // Filename
@@ -900,12 +892,12 @@ let IO = {
     return {
       open: function () {
         if (navigator.onLine) {
-          messageBox("Loading Github repository list...");
           var options = {
             interactive: true,
             url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
               '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
           }
+          messageBox("Connecting to Github...");
           _getAuthToken(options, _openCallback);
         } else {
           messageBox("There is no Internet connection.");
@@ -913,12 +905,12 @@ let IO = {
       },
       save: function () {
         if (navigator.onLine) {
-          messageBox("Loading Github repository list...");
           var options = {
             interactive: true,
             url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
               '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
           }
+          messageBox("Connecting to Github...");
           _getAuthToken(options, _saveCallback);
         } else {
           messageBox("There is no Internet connection.");

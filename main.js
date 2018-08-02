@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
     parseImgDimensions: true
   });
 
-  // Content panels and its splitter
+  // Panels and splitter
   panelEditor = document.getElementsByTagName("editor")[0];
   panelWrapperHelper = document.getElementsByTagName("helper")[0];
   panelViewer = document.getElementsByTagName("viewer")[0];
