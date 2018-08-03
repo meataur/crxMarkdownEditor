@@ -145,12 +145,6 @@ splitter:active:after { background: #ffffff80; }
 
 helper { position: relative; width: calc(50% - 4px); height: 100%; float: left; }
 viewer, localhost, help { display: none; }
-div#viewer {
-  display: block; width: 100%; height: 100%;
-  font-size: .9rem; line-height: 1.6; background: #fff; transform: rotate(-0.0000000001deg); text-shadow: 0 0 1px rgba(0,0,0,.3);
-  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden; overflow-y: scroll;
-}
 .no-content { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); user-select: none; }
 
 
@@ -184,7 +178,7 @@ div#viewer {
 
 /* File dialog */
 
-.file-explorer { padding: 1em; max-height: 380px; background: #383838; border-radius: 2px; overflow-y: auto; }
+.file-explorer { padding: 1em; max-height: 380px; background: #383838; border-radius: 2px; overflow: auto; }
 .file-explorer ul { margin: 0; padding: 0; list-style: none; }
 .file-explorer ul:not(.filetree) { padding-left: 1.5em; }
 .file-explorer li { padding-top: .5em; white-space: nowrap; }
@@ -236,14 +230,23 @@ div#viewer {
 
 .hpage {
   display: block; padding: 1.6em; width: 100%; height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: justify; word-wrap: break-word;
   font-size: .9rem; line-height: 1.6; background: #f7f7f7;
-  transform: rotate(-0.0000000001deg);
-  text-shadow: 0 0 1px rgba(0,0,0,.3);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  transform: rotate(-0.0000000001deg); text-shadow: 0 0 1px rgba(0,0,0,.3); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden; overflow-y: scroll;
   user-select: none;
 }
+
+.hpage h1, h2, h3, h4, h5, h6, strong { font-weight: 500; }
+.hpage h1 { margin-top: 0; }
+.hpage h1 + div { margin-top: 1em; }
+.hpage h2 { margin-top: 1.6em; }
+.hpage h2 + h3, h2 + div { margin-top: 1em; }
+.hpage h3 { margin-top: 1.4em; }
+.hpage h3 + h4, h3 + div { margin-top: 1em; }
+.hpage h4 { margin-top: 1.2em; }
+.hpage h4 + h5, h4 + div { margin-top: 1em; }
+
 .hpage div { margin: .5em 0; }
 
 .hpage img { display: block; max-width: 100%; margin: 1.6em auto; }
@@ -256,18 +259,23 @@ div#viewer {
 .hpage li { margin-bottom: .4em; }
 .hpage li > ul, li > ol { margin: .5em 0 .5em 1.6em; }
 
-.hpage h1, h2, h3, h4, h5, h6, strong { font-weight: 500; }
-.hpage h1 { margin-top: 0; }
-.hpage h1 + div { margin-top: 0; }
-.hpage h2 { margin-top: 1.6em; }
-.hpage h2 + h3, h2 + div { margin-top: 0; }
-.hpage h3 { margin-top: 1.4em; }
-.hpage h3 + h4, h3 + div { margin-top: 0; }
-.hpage h4 { margin-top: 1.2em; }
-.hpage h4 + h5, h4 + div { margin-top: 0; }
-
 .hpage button { padding: .2em .4em; }
 .hpage button > svg { vertical-align: top; }
+
+.hpage p { margin: .6em 0; }
+
+.hpage a { color: #0473bc; text-decoration: none; }
+.hpage a:hover { color: #111; text-decoration: underline; }
+
+.hpage blockquote { margin: 1.6em 0; padding: 1.6em; border-left: 0.7em solid #eaeaea; background-color: #f7f7f7; }
+.hpage blockquote p:first-child { margin-top: 0; }
+.hpage blockquote p:last-child { margin-bottom: 0; }
+
+.hpage code {
+  display: inline-block; margin: 0; padding: .2em .4em;
+  background: rgba(27,31,35,.05); border-radius: 3px;
+  font-family: consolas; font-size: .9rem; line-height: 1.2;
+}
 
 .hpage pre { margin: 1em 0; padding: 1em; font-family: consolas; overflow-x: auto; background: #1d1f21 !important; color: #c5c8c6; user-select: text; }
 .hpage pre > code { border: 0; padding: 0; background: none; }
@@ -276,23 +284,25 @@ div#viewer {
 .hpage pre > code table td > pre { padding: 0 1em; }
 
 .hpage table { margin: 1.6em 0; width: 100%; text-align: left; color: #3f3f3f; border-collapse: collapse; border: 1px solid #e8e8e8; }
-.hpage table tr:nth-child(even) { background-color: 1px solid #e8e8e8; }
+.hpage table tr:nth-child(odd) { background: #fff; }
+.hpage table tr:nth-child(even) { background: #f7f7f7; }
 .hpage table th, td { padding: .5em .8em; }
 .hpage table th { background-color: #f0f0f0; border: 1px solid #dedede; border-bottom-width: 2px; }
 .hpage table td { border: 1px solid #e8e8e8; }
 
-.hpage hr { margin: 5em 0; width: 100%; border-top: none; border-bottom: 1px solid #ddd; }
+.hpage hr { margin: 3em 0; width: 100%; border-top: none; border-bottom: 1px solid #ddd; }
 
 .hpage kbd {
   display: inline-block; margin: 0; padding: 0 .4em;
   border: 1px solid rgba(63,63,63,.25); border-radius: 3px; box-shadow: 0 1px 0 rgba(63,63,63,.25);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #fff; color: #333; font-size: .87rem; white-space: nowrap; user-select: none;
+  background-color: #fff; color: #333; font-size: .875rem; white-space: nowrap; user-select: none;
 }
 .hpage kbd:hover { background-color: #f7f7f7; }
 .hpage kbd:active { box-shadow: none; transform: translateY(1px); }
 
-#setting-jekyll-localpath { width: 100%; overflow: hidden; }
+.hpage textarea { font-family: consolas; }
+.hpage input[type="text"].expand { width: 100%; overflow: hidden; }
 
 
 
@@ -304,7 +314,7 @@ div#viewer {
 }
 
 messagebox {
-  display: inline-block; margin: .5em; padding: 1em;
+  display: inline-block; margin: .5em; padding: 1em 1.6em;
   color: #fff; font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .9rem; user-select: none;
   background-color: #1e1e1e; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px;
   transition: opacity .3s; opacity: 0;

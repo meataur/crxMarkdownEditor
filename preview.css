@@ -1,18 +1,20 @@
 #viewer {
-  margin: 0; padding: 1.6em;
+  display: block; padding: 1.6em; width: 100%; height: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: justify; word-wrap: break-word;
+  font-size: .9rem; line-height: 1.6; background: #fff;
+  transform: rotate(-0.0000000001deg); text-shadow: 0 0 1px rgba(0,0,0,.3); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; overflow-y: scroll;
 }
 
-#viewer h1, h2, h3, h4, h5, h6, p, blockquote, pre, dl { margin-bottom: 1em; }
-#viewer h1, h2, h3, h4, h5, h6 { font-weight: 500; }
-
-#viewer h1 + h2 { margin-top: 0; }
-#viewer h2 { margin-top: 2.5em; }
-#viewer h2 + h3, h2 + div { margin-top: 0; }
-#viewer h3 { margin-top: 2.1em; }
-#viewer h3 + h4, h3 + div { margin-top: 0; }
-#viewer h4 { margin-top: 1.9em; }
-#viewer h4 + h5, h4 + div { margin-top: 0; }
+#viewer h1, h2, h3, h4, h5, h6, strong { font-weight: 500; }
+#viewer h1 { margin-top: 0; }
+#viewer h1 + div { margin-top: 1em; }
+#viewer h2 { margin-top: 1.6em; }
+#viewer h2 + h3, h2 + div { margin-top: 1em; }
+#viewer h3 { margin-top: 1.4em; }
+#viewer h3 + h4, h3 + div { margin-top: 1em; }
+#viewer h4 { margin-top: 1.2em; }
+#viewer h4 + h5, h4 + div { margin-top: 1em; }
 
 #viewer div { margin: 1em 0; }
 
@@ -26,26 +28,22 @@
 #viewer li { margin-bottom: .4em; }
 #viewer li > ul, li > ol { margin: .5em 0 .5em 1.6em; }
 
+#viewer button { padding: .2em .4em; }
+#viewer button > svg { vertical-align: top; }
+
 #viewer p { margin: .6em 0; }
 
-#viewer a { color: #3c8fc8; text-decoration: none; }
+#viewer a { color: #0473bc; text-decoration: none; }
 #viewer a:hover { color: #111; text-decoration: underline; }
 
-#viewer blockquote {
-  margin: 1.6em 0; padding: 1em 1.6em;
-  border-left: 0.7em solid #eaeaea;
-  background-color: #f7f7f7;
-}
+#viewer blockquote { margin: 1.6em 0; padding: 1.6em; border-left: 0.7em solid #eaeaea; background-color: #f7f7f7; }
+#viewer blockquote p:first-child { margin-top: 0; }
+#viewer blockquote p:last-child { margin-bottom: 0; }
 
 #viewer code {
-  margin: 0;
-  padding: .2em .4em;
-  background: rgba(27,31,35,.05);
-  border-radius: 3px;
-  display: inline-block;
-  line-height: 1.2;
-  font-family: consolas;
-  font-size: .9rem;
+  display: inline-block; margin: 0; padding: .2em .4em;
+  background: rgba(27,31,35,.05); border-radius: 3px;
+  font-family: consolas; font-size: .9rem; line-height: 1.2;
 }
 
 #viewer pre { margin: 1em 0; padding: 1em; font-family: consolas; overflow-x: auto; background: #1d1f21 !important; color: #c5c8c6 }
@@ -57,35 +55,14 @@
 #viewer pre.highlight, figure.highlight { border: 1px solid #e8e8e8; }
 #viewer .highlight pre { tab-size: 4; }
 
-#viewer table {
-  margin: 1.6em 0;
-  width: 100%;
-  text-align: left;
-  color: #3f3f3f;
-  border-collapse: collapse;
-  border: 1px solid #e8e8e8;
-}
-#viewer table tr:nth-child(even) {
-  background-color: 1px solid #e8e8e8;
-}
-#viewer table th, td {
-  padding: .5em .8em;
-}
-#viewer table th {
-  background-color: #f0f0f0;
-  border: 1px solid #dedede;
-  border-bottom-width: 2px;
-}
-#viewer table td {
-  border: 1px solid #e8e8e8;
-}
+#viewer table { margin: 1.6em 0; width: 100%; text-align: left; color: #3f3f3f; border-collapse: collapse; border: 1px solid #e8e8e8; }
+#viewer table tr:nth-child(odd) { background: #fff; }
+#viewer table tr:nth-child(even) { background: #f7f7f7; }
+#viewer table th, td { padding: .5em .8em; }
+#viewer table th { background: #f0f0f0; border: 1px solid #dedede; border-bottom-width: 2px; }
+#viewer table td { border: 1px solid #e8e8e8; }
 
-#viewer hr {
-  border-top: none;
-  border-bottom: 1px solid #ddd;
-  width: 100%;
-  margin: 5em 0;
-}
+#viewer hr { margin: 3em 0; width: 100%; border-top: none; border-bottom: 1px solid #ddd; }
 
 #viewer kbd {
   display: inline-block; margin: 0; padding: 0 .4em;
@@ -95,13 +72,5 @@
 }
 #viewer kbd:hover { background-color: #f7f7f7; }
 #viewer kbd:active { box-shadow: none; transform: translateY(1px); }
-
-#viewer a.footnote:before {
-  content: '';
-  display: inline-block;
-  position: relative;
-  height: 120px;
-  margin-top: -120px;
-}
 
 #viewer textarea { font-family: consolas; }

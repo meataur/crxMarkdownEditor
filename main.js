@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Create showdown object
   converter = new showdown.Converter({
-    disableForced4SpacesIndentedSublists: false,
+    disableForced4SpacesIndentedSublists: true,
     tables: true,
     simpleLineBreaks: true,
     requireSpaceBeforeHeadingText: true,
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById("localhost-tools-jekyll-setup").onclick = setupJekyll;
   document.getElementById("localhost-tools-run-jekyll").onclick = runJekyll;
-  document.getElementById("localhost-tools-open-site").onclick = openJekyllSite;
+  document.getElementById("localhost-tools-visit-site").onclick = visitJekyllSite;
 
   document.getElementById("help-tools-md-tutorial").onclick = openMdTutorial;
   document.getElementById("help-tools-about").onclick = openAboutPage;
@@ -641,21 +641,18 @@ function setupJekyll() {
 }
 
 function runJekyll() {
-  document.getElementById('localhost-tools-run-jekyll').disabled = true;
-  var localhost_port = document.getElementById("setting-jekyll-port").value;
-  if (!localhost_port) {
+  var port = document.getElementById("setting-jekyll-port").value;
+  if (!port) {
     messageBox("Invalid localhost port!");
-    document.getElementById('localhost-tools-run-jekyll').disabled = false;
     return;
   }
 
   var xhr = new XMLHttpRequest();
-  xhr.addEventListener("load", function() {
-    messageBox("Jekyll is now running on port " + localhost_port + ".");
-    document.getElementById('localhost-tools-run-jekyll').disabled = false;
-  });
-  xhr.addEventListener("error", function() {
-    chrome.runtime.sendNativeMessage("jekyllserve" + localhost_port, { text: "" }, function(response) {
+  xhr.onload = function() {
+    messageBox("Jekyll is now running on port " + port + ".");
+  }
+  xhr.onerror = function() {
+    chrome.runtime.sendNativeMessage("jekyllserve" + port, { text: "" }, function(response) {
       if (!response) {
         var lastError = chrome.runtime.lastError;
         if (lastError) {
@@ -664,7 +661,7 @@ function runJekyll() {
             messageBox("Invalid \"allowed_origins\" value in manifest JSON file!\nRe-install Jekyll Launcher.");
           } else if (lastError.message == "Specified native messaging host not found.") {
             // Not found host application
-            messageBox("Not found host application!\nInstall Jekyll Launcher to be running on port " + localhost_port + ".");
+            messageBox("Not found host application!\nInstall Jekyll Launcher to be running on port " + port + ".");
           } else if (lastError.message == "Error when communicating with the native messaging host.") {
             // Jekyll is shut down.
           } else {
@@ -673,16 +670,28 @@ function runJekyll() {
           }
         }
       }
-      document.getElementById('localhost-tools-run-jekyll').disabled = false;
     });
-  });
-  xhr.open("GET", "http://localhost:" + localhost_port + "/", true);
+  }
+  xhr.open("GET", "http://localhost:" + port + "/", true);
   xhr.send();
 }
 
-function openJekyllSite() {
-  var localhost_port = document.getElementById("setting-jekyll-port").value;
-  window.open("http://localhost:" + localhost_port);
+function visitJekyllSite() {
+  var port = document.getElementById("setting-jekyll-port").value;
+  if (!port) {
+    messageBox("Invalid localhost port!");
+    return;
+  }
+
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function() {
+    window.open("http://localhost:" + port);
+  }
+  xhr.onerror = function() {
+    messageBox("The Jekyll site is not responding.\nCheck if Jekyll is running properly.");
+  }
+  xhr.open("GET", "http://localhost:" + port + "/", true);
+  xhr.send();
 }
 
 function openMdTutorial() {
