@@ -115,6 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  editor
+
   // Set buttons event handler
   document.getElementById("create-tab").onclick = Tab.addNew;
 
@@ -281,6 +283,28 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   };
+
+  // Scrollbar synchronization
+  var editorScroll = document.getElementsByClassName("CodeMirror-scroll")[0];
+  var viewerScroll = document.getElementById("viewer");
+  var editorScrollSync = false;
+  var viewerScrollSync = false;
+  editorScroll.addEventListener("scroll", function() {
+    if (!editorScrollSync) {
+      viewerScrollSync = true;
+      var posRatio = editorScroll.scrollTop / editorScroll.scrollHeight;
+      viewerScroll.scrollTop = viewerScroll.scrollHeight * posRatio;
+    }
+    editorScrollSync = false;
+  });
+  viewerScroll.addEventListener("scroll", function() {
+    if (!viewerScrollSync) {
+      editorScrollSync = true;
+      var posRatio = viewerScroll.scrollTop / viewerScroll.scrollHeight;
+      editorScroll.scrollTop = editorScroll.scrollHeight * posRatio;
+    }
+    viewerScrollSync = false;
+  });
 
   // Save the last state of workspace
   window.onbeforeunload = function(e) {
@@ -1094,6 +1118,7 @@ function preview(parsed) {
 
     // Set site's base url to localhost
     var baseurl = document.getElementById("viewer-baseurl").value;
+    
     data = data.replace(/{{ site.baseurl }}/gi, baseurl);
     
     // Show preview panel

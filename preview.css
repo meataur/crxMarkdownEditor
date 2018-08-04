@@ -15,6 +15,7 @@
 #viewer h3 + h4, h3 + div { margin-top: 1em; }
 #viewer h4 { margin-top: 1.2em; }
 #viewer h4 + h5, h4 + div { margin-top: 1em; }
+#viewer > *:first-child { margin-top: 0; }
 
 #viewer div { margin: 1em 0; }
 

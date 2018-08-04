@@ -122,7 +122,7 @@ let Tab = {
   },
   addNew: function () {
     var ul = document.getElementById("tabs");
-    if (ul.children.length >= 10)
+    if (ul.children.length >= 8)
       document.getElementById("create-tab").style.display = "none";
 
     // Create new tab
@@ -173,8 +173,10 @@ let Tab = {
     if (nTabs == 1) {
       initTextarea();
       return;
-    } else if (nTabs == 10) {
-      document.getElementById("create-tab").style.display = "block";
+    } else if (nTabs == 8) {
+      setTimeout(function() {
+        document.getElementById("create-tab").style.display = "block";
+      }, 300);
     }
 
     if (activeTab) {

@@ -246,6 +246,7 @@ viewer, localhost, help { display: none; }
 .hpage h3 + h4, h3 + div { margin-top: 1em; }
 .hpage h4 { margin-top: 1.2em; }
 .hpage h4 + h5, h4 + div { margin-top: 1em; }
+.hpage > *:first-child { margin-top: 0; }
 
 .hpage div { margin: .5em 0; }
 
@@ -309,13 +310,13 @@ viewer, localhost, help { display: none; }
 /* Utilities */
 
 #messagebox-wrapper {
-  position: absolute; left: 2em; bottom: 2em; min-width: 300px;
+  position: absolute; left: 2em; bottom: 2em; min-width: 200px; max-width: calc(400px - 4em);
   z-index: 2147483647;
 }
 
 messagebox {
   display: inline-block; margin: .5em; padding: 1em 1.6em;
-  color: #fff; font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .9rem; user-select: none;
-  background-color: #1e1e1e; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px;
+  color: #fff; font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .9rem; user-select: none; word-break: break-all;
+  background: #1e1e1e; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px;
   transition: opacity .3s; opacity: 0;
 }

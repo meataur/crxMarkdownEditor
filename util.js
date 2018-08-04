@@ -43,6 +43,10 @@ String.prototype.trimRight = function(str) {
   return this.replace(new RegExp(str + "+$"), "");
 }
 
+String.prototype.contains = function(substr) {
+  return this.indexOf(substr) !== -1;
+}
+
 
 
 /**

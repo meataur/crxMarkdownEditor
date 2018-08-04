@@ -168,6 +168,11 @@ IO.GDrive = (function () {
     }
   }
   let _openCallback = function (access_token) {
+    if (chrome.runtime.lastError) {
+      messageBox(chrome.runtime.lastError.message); 
+      return;
+    }
+    
     if (access_token) {
       var dialog = document.getElementById("editor-import-gdrive");
       dialog.style.display = "block";
@@ -205,11 +210,14 @@ IO.GDrive = (function () {
           _xhrWithToken("GET", "https://www.googleapis.com/drive/v3/files/" + this.getAttribute("data") + "/export?mimeType=text/plain", access_token, _cbReadFile);
         }
       }
-    } else {
-      messageBox("Unexpected error occured: Empty token.");
     }
   }
   let _saveCallback = function (access_token) {
+    if (chrome.runtime.lastError) {
+      messageBox(chrome.runtime.lastError.message); 
+      return;
+    }
+    
     if (access_token) {
       var dialog = document.getElementById("editor-export-gdrive");
       dialog.style.display = "block";
@@ -287,8 +295,6 @@ IO.GDrive = (function () {
           xhr.send(data);
         }
       }
-    } else {
-      messageBox("Unexpected error occured: Empty token.");
     }
   }
 

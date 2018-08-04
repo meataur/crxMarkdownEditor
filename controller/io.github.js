@@ -11,7 +11,10 @@ IO.Github = (function () {
 
   let _getAuthToken = function (options, callback) {
     chrome.identity.launchWebAuthFlow(options, function (redirectUri) {
-      if (!redirectUri) return;
+      if (chrome.runtime.lastError) {
+        messageBox(chrome.runtime.lastError.message); 
+        return;
+      }
 
       // Upon success the response is appended to redirectUri, e.g.
       // https://{app_id}.chromiumapp.org/provider_cb#access_token={value}&refresh_token={value}
