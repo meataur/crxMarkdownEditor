@@ -964,7 +964,7 @@ function attachments() {
   input.click();
 }
 
-var Working = Object.freeze({ "READY": {}, "HEADER": {}, "BODY": {} });
+var Working = Object.freeze({ "READY": {}, "METADATA": {}, "BODY": {} });
 
 function parse(data) {
   var parsed = {}
@@ -978,7 +978,7 @@ function parse(data) {
 
   data = data.replace(/\r/gi, "");
   var lines = data.split("\n");
-  for (var i in lines) {
+  for (var i = 0; i < lines.length; i++) {
     // Current line texts
     var curLine = lines[i];
 
@@ -989,9 +989,12 @@ function parse(data) {
         continue;
 
       if (curLine.startsWith("---")) {    // At the beginning of post header
-        curState = Working.HEADER;
+        curState = Working.METADATA;
+      } else {
+        curState = Working.BODY;
+        i--;
       }
-    } else if (curState == Working.HEADER) {
+    } else if (curState == Working.METADATA) {
       curLine = curLine.trim();
       if (!curLine.length)
         continue;
