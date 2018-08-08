@@ -74,6 +74,7 @@
 	<script src="controller/io.gdrive.js"></script>
 	<script src="controller/io.github.js"></script>
 	<script src="controller/tab.js"></script>
+	<script src="controller/settings.js"></script>
 	<script src="main.js"></script>
 </head>
 <body>
@@ -185,24 +186,24 @@
 				<section>
 					<item class="inline-subsect">
 						<div>theme:</div>
-						<ctrl><select id="select-theme"><option>default</option></select></ctrl>
+						<ctrl><select id="editor-settings-theme"><option>default</option></select></ctrl>
 					</item>
 					<item class="inline-subsect">
 						<div>font size:</div>
-						<ctrl><select id="select-fontsize"></select></ctrl>
+						<ctrl><select id="editor-settings-fontsize"></select></ctrl>
 					</item>
 				</section>
 				<section>
 					<item>
 						<div>attachment location (liquid-syntax):</div>
-						<ctrl><input type="text" id="attachment-location" spellcheck="false"></ctrl>
+						<ctrl><input type="text" id="attachment-settings-location" spellcheck="false"></ctrl>
 					</item>
 					<item>
 						<div>attachment classification (JSON-syntax):</div>
-						<ctrl><textarea id="attachment-type" spellcheck="false"></textarea></ctrl>
+						<ctrl><textarea id="attachment-settings-types" spellcheck="false"></textarea></ctrl>
 					</item>
 					<item>
-						<div>hash function to avoid filename duplication:</div>
+						<div>hash function to prevent attachment filename duplicates:</div>
 						<ctrl>
 							<div class="option-radio"><input type="radio" id="hash-none" name="hashing" value="none"><label for="hash-none">None</label></div>
 							<div class="option-radio"><input type="radio" id="hash-md5" name="hashing" value="md5"><label for="hash-md5">MD5</label></div>
@@ -249,7 +250,7 @@
 					<section>
 						<item>
 							<div>base url:</div>
-							<ctrl><input type="text" id="viewer-baseurl" spellcheck="false"></ctrl>
+							<ctrl><input type="text" id="viewer-settings-baseurl" spellcheck="false"></ctrl>
 						</item>
 					</section>
 				</div>
@@ -278,8 +279,8 @@
 					<h3>Step 2. Set Localhost Environment</h3>
 					<ul>
 						<li><strong>Working Directory Path: </strong><br />
-						<input type="text" class="expand" id="setting-jekyll-localpath" spellcheck="false"></li>
-						<li><strong>Port: </strong><input type="text" id="setting-jekyll-port" spellcheck="false" maxlength="5" size="5"></li>
+						<input type="text" class="expand" id="jekyll-settings-localpath" spellcheck="false"></li>
+						<li><strong>Port: </strong><input type="text" id="jekyll-settings-port" spellcheck="false" maxlength="5" size="5"></li>
 					</ul>
 					<h3>Step 3. Install Jekyll Launcher</h3>
 					<div>Download and execute the Jekyll Launcher installer:</div>

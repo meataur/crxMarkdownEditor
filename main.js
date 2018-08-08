@@ -87,6 +87,12 @@ document.addEventListener('DOMContentLoaded', function() {
     parseImgDimensions: true
   });
 
+  // Load previous workspaces and setting values
+  if (!Settings.loadAll()) {
+    messageBox("Unabled to load setting values.");
+  }
+  loadPrevWorks();
+
   // Panels and splitter
   panelEditor = document.getElementsByTagName("editor")[0];
   panelWrapperHelper = document.getElementsByTagName("helper")[0];
@@ -101,41 +107,17 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('menu-help').onclick = openPanelHelp;
   document.getElementById('menu-viewer').click();
 
-  // Load previous workspaces
-  loadSettings();
-  loadPrevWorks();
-
-  // Check real-time JSON format
-  document.getElementById('attachment-type').addEventListener('keyup', function() {
-    try {
-      JSON.parse(this.value);
-      this.style["background"] = "#383838";
-    } catch(e) {
-      this.style["background"] = "rgb(238,97,80)";
-    }
-  });
-
-  editor
-
   // Set buttons event handler
   document.getElementById("create-tab").onclick = Tab.addNew;
-
-  document.getElementById('setting-jekyll-port').onkeypress = numberOnly;
   document.getElementById('btn-download-ruby').onclick = getRubyLang;
   document.getElementById('btn-download-jekyll').onclick = getJekyllStandalone;
   document.getElementById('btn-download-jekylllauncher').onclick = getJekyllLauncher;
 
-  // Setting values onchange handlers
-  document.getElementById('select-theme').onchange = selectTheme;
-  document.getElementById('select-fontsize').onchange = selectFontsize;
-  document.getElementById("setting-jekyll-localpath").onchange = function(e) {
-    chrome.storage.local.set({ settingJekyllLocalpath: this.value.replace(/\\+$/, '') });
-    messageBox("Auto Save");
-  }
-  document.getElementById("setting-jekyll-port").onchange = function(e) {
-    chrome.storage.local.set({ settingJekyllPort: this.value.replace(/\\+$/, '') });
-    messageBox("Auto Save");
-  }
+  // Setting values key-pressing event handlers
+  document.getElementById("editor-settings-theme").onchange = selectTheme;
+  document.getElementById("editor-settings-fontsize").onchange = selectFontsize;
+  document.getElementById("attachment-settings-types").onkeyup = checkJSONFormat;
+  document.getElementById("jekyll-settings-port").onkeypress = numberOnly;
 
   // Set menu event handler of content panels
   Array.from(document.getElementsByClassName("panel-menu")).forEach(function(panelMenu) {
@@ -308,7 +290,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Save the last state of workspace
   window.onbeforeunload = function(e) {
-    saveSettings();
+    // Save setting values
+    //chrome.runtime.sendMessage({ cmd: "saveAll" });
+    Settings.saveAll();
 
     // Save active workspace
     var tabs = document.getElementsByClassName("tab");
@@ -346,7 +330,7 @@ document.addEventListener('DOMContentLoaded', function() {
       panelEditor.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
       panelWrapperHelper.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
     }
-  };
+  }
 });
 
 function messageBox(texts, duration) {
@@ -379,111 +363,6 @@ function messageBox(texts, duration) {
 /**
  * Workspaces
  */
-
-function loadSettings() {
-  chrome.storage.local.get('settingJekyllLocalpath', function(result) {
-    document.getElementById("setting-jekyll-localpath").value = result.settingJekyllLocalpath ? result.settingJekyllLocalpath : "";
-  });
-  chrome.storage.local.get("settingJekyllPort", function(result) {
-    document.getElementById("setting-jekyll-port").value = result.settingJekyllPort ? result.settingJekyllPort : 4000;
-  });
-  chrome.storage.local.get('theme', function(result) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", "themes.css");
-    xhr.onload = function() {
-      var themeselector = document.getElementById("select-theme");
-
-      // Insert theme options
-      var lines = xhr.responseText.match(/[^\r\n]+/g);
-      lines.forEach(function(line) {
-        var cssPath = line.match(/".*?"/g)[0].replace(/"/gi,"");
-        var option = document.createElement("option");
-        option.innerHTML = cssPath.replace(/^.*[\\\/]/, "").replace(/\.[^/.]+$/, "");
-        themeselector.appendChild(option);
-      });
-
-      // Select editor's theme
-      themeselector.value = result.theme ? result.theme : "default";
-      selectTheme();
-    }
-    xhr.send();
-  });
-  chrome.storage.local.get('fontsize', function(result) {
-    var fontsizeselector = document.getElementById("select-fontsize");
-
-    // Insert font-size options
-    var fontsizes = [10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 28, 32];
-    fontsizes.forEach(function(fontsize) {
-      var option = document.createElement("option");
-      option.innerHTML = fontsize;
-      fontsizeselector.appendChild(option);
-    });
-
-    // Select editor's font size
-    fontsizeselector.value = result.fontsize ? result.fontsize : "13";
-    selectFontsize();
-  });
-  chrome.storage.local.get('attachment_location', function(result) {
-    if (result.attachment_location) {
-      document.getElementById('attachment-location').value = result.attachment_location;
-    } else {
-      document.getElementById('attachment-location').value = "{{ site.baseurl }}/assets";
-    }
-  });
-  chrome.storage.local.get('attachment_type', function(result) {
-    if (result.attachment_type) {
-      document.getElementById('attachment-type').value = result.attachment_type;
-      document.getElementById('attachment-type').style["background"] = "#383838";
-    } else {
-      document.getElementById('attachment-type').value = '{\n  "img": ["png","jpg","jpeg","gif","bmp"],\n  "pdf": ["pdf"],\n  "doc": ["doc","docx","ppt","pptx","xls","xlsx","hwp","txt","html","htm"]\n}';
-      document.getElementById('attachment-type').style["background"] = "#383838";
-    }
-  });
-  chrome.storage.local.get('hashing', function(result) {
-    if (result.hashing) {
-      var hashing = document.querySelector('input[value="' + result.hashing + '"]')
-      hashing.checked = true;
-    } else {
-      var hashing = document.querySelector('input[value="sha256"]')
-      hashing.checked = true;
-    }
-  });
-  chrome.storage.local.get('viewer_baseurl', function(result) {
-    if (result.viewer_baseurl) {
-      document.getElementById('viewer-baseurl').value = result.viewer_baseurl;
-      document.getElementById('viewer-baseurl').style["background"] = "#383838";
-    } else {
-      document.getElementById('viewer-baseurl').value = 'http://localhost:4000';
-      document.getElementById('viewer-baseurl').style["background"] = "#383838";
-    }
-  });
-}
-
-function saveSettings() {
-  var themeselector = document.getElementById("select-theme");
-  var fontsizeselector = document.getElementById("select-fontsize");
-  
-  chrome.storage.local.set({
-    'theme': themeselector.options[themeselector.selectedIndex].textContent,
-    'fontsize': fontsizeselector.options[fontsizeselector.selectedIndex].textContent,
-    'attachment_location': document.getElementById('attachment-location').value.replace(/\/+$/, ''),
-    'hashing': document.querySelector('input[name="hashing"]:checked').value,
-    'viewer_baseurl': document.getElementById('viewer-baseurl').value
-  });
-
-  try {
-    // JSON parsing test
-    JSON.parse(document.getElementById('attachment-type').value);
-
-    chrome.storage.local.set({
-      'attachment_type': document.getElementById('attachment-type').value
-    });
-
-    return true;
-  } catch(e) {
-    return false;
-  }
-}
 
 function loadPrevWorks() {
   // Load previous workspace
@@ -654,7 +533,7 @@ function expandViewer() {
 function openPanelViewerSettingsPanel() {
   var div = document.getElementById("viewer-settings");
   div.style.display = "block";
-  document.getElementById("viewer-baseurl").focus();
+  document.getElementById("viewer-settings-baseurl").focus();
 }
 
 function setupJekyll() {
@@ -665,7 +544,7 @@ function setupJekyll() {
 }
 
 function runJekyll() {
-  var port = document.getElementById("setting-jekyll-port").value;
+  var port = document.getElementById("jekyll-settings-port").value;
   if (!port) {
     messageBox("Invalid localhost port!");
     return;
@@ -701,7 +580,7 @@ function runJekyll() {
 }
 
 function visitJekyllSite() {
-  var port = document.getElementById("setting-jekyll-port").value;
+  var port = document.getElementById("jekyll-settings-port").value;
   if (!port) {
     messageBox("Invalid localhost port!");
     return;
@@ -750,7 +629,16 @@ function openAboutPage() {
 function openEditorSettingsPanel() {
   var div = document.getElementById("editor-settings");
   div.style.display = "block";
-  document.getElementById("select-theme").focus();
+  document.getElementById("editor-settings-theme").focus();
+}
+
+function checkJSONFormat() {
+  try {
+    JSON.parse(this.value);
+    this.style["background"] = "#383838";
+  } catch(e) {
+    this.style["background"] = "rgb(238,97,80)";
+  }
 }
 
 function numberOnly(e) {
@@ -778,13 +666,13 @@ function getJekyllStandalone() {
 }
 
 function getJekyllLauncher() {
-  var workingDirectory = document.getElementById("setting-jekyll-localpath").value;
+  var workingDirectory = document.getElementById("jekyll-settings-localpath").value;
   if (!workingDirectory) {
     messageBox("Invalid working directory path!");
     return;
   }
 
-  var localhostPort = document.getElementById("setting-jekyll-port").value;
+  var localhostPort = document.getElementById("jekyll-settings-port").value;
   if (!localhostPort) {
     messageBox("Invalid localhost port!");
     return;
@@ -879,13 +767,13 @@ EXIT /b
 }
 
 function selectTheme() {
-  var selector = document.getElementById("select-theme");
+  var selector = document.getElementById("editor-settings-theme");
   var theme = selector.options[selector.selectedIndex].textContent;
   editor.setOption("theme", theme);
 }
 
 function selectFontsize() {
-  var selector = document.getElementById("select-fontsize");
+  var selector = document.getElementById("editor-settings-fontsize");
   var fontsize = selector.options[selector.selectedIndex].textContent;
   var editorObj = document.getElementsByClassName('CodeMirror')[0];
   editorObj.style["font-size"] = fontsize + "px";
@@ -942,8 +830,8 @@ function attachments() {
         return function(evt) {
           var fname = file.name;
           var fext = fname.toLowerCase().split(".").pop();
-          var storage = document.getElementById('attachment-location').value.replace(/\/+$/, '');
-          var type = document.getElementById('attachment-type').value;
+          var storage = document.getElementById('attachment-settings-location').value.replace(/\/+$/, '');
+          var type = document.getElementById('attachment-settings-types').value;
           var hashing = document.querySelector('input[name="hashing"]:checked').value;
 
           // Set sub-directory path
@@ -1038,23 +926,10 @@ function parse(data) {
       if (!curLine.length && !prevLine.length)
         continue;
 
-      if (curLine.startsWith("#")) {
-        var heading = curLine.replace(/^#+/g, '').trim();
-        if (heading.length) {
-          var level = (curLine.match(/#/g) || []).length;
-          // TODO: make headings hierarchy
-        }
-        parsed.body["texts"] += curLine + "\n\n";
-        prevLine = "";
-      } else {
-        parsed.body["texts"] += curLine + "\n";
-        prevLine = curLine;
-      }
+      parsed.body["texts"] += curLine + "\n";
+      prevLine = curLine;
     }
   }
-
-  // Remove succeeding newlines
-  parsed.body["texts"] = parsed.body["texts"].replace(/\n+$/g, '\n');
 
   return parsed;
 }
@@ -1117,7 +992,7 @@ function preview(parsed) {
       data += parsed.body.texts;
 
     // Set site's base url to localhost
-    var baseurl = document.getElementById("viewer-baseurl").value;
+    var baseurl = document.getElementById("viewer-settings-baseurl").value;
     
     data = data.replace(/{{ site.baseurl }}/gi, baseurl);
     

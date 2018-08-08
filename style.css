@@ -138,7 +138,7 @@ toolbox ul.dropdown > li > svg { position: absolute; top: 50%; margin: 0 .7em 0 
 editor { position: relative; float: left; width: calc(50% - 4px); user-select: none; }
 editor textarea { display: block; width: 100%; border: none; resize: vertical; font-family: 'consolas'; }
 
-splitter { position: relative; width: 8px; height: 100%; float: left; background: #1e1e1e; cursor: ew-resize; border-top: solid 45px #1e1e1e; }
+splitter { position: relative; width: 8px; height: 100%; float: left; background: #1e1e1e; cursor: ew-resize; border-top: solid 45px #1e1e1e; user-select: none; }
 splitter:after { content: ""; position: absolute; width: 8px; height: 100%; left: 0; z-index: 100; transition-duration: .3s; }
 splitter:hover:after { background: #ffffff4d}
 splitter:active:after { background: #ffffff80; }
