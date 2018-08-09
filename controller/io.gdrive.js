@@ -159,8 +159,11 @@ IO.GDrive = (function () {
       editor.focus();
       editor.setCursor(0, 0);
 
-      var activeTab = Tab.getActive();
-      docs[activeTab.index].texts_original = editor.getValue();
+      var selectedTab = Tab.get();
+      selectedTab.info.metadata.type = "gdrive";
+      selectedTab.info.metadata.id = "";
+      selectedTab.info.originalTexts = editor.getValue();
+      Tab.set(selectedTab.index, selectedTab.info);
 
       closeAllDialogs();
     } else {
@@ -270,7 +273,17 @@ IO.GDrive = (function () {
       var exportBtn = document.getElementById("btn-export-to-gdrive");
       exportBtn.onclick = function (e) {
         if (this.hasAttribute("activated")) {
-          IO.Spinner.show(importList, "spinner-gdrive-export");
+          var selectedTab = Tab.get();
+          selectedTab.info.metadata.type = "gdrive";
+          selectedTab.info.metadata.id = "";
+          selectedTab.info.metadata.title = inputFilename.value;
+          selectedTab.info.texts = editor.getValue();
+          selectedTab.info.originalTexts = editor.getValue();
+          selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+          selectedTab.info.editor.cursor = editor.getCursor();
+          selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+
+          IO.Spinner.show(exportList, "spinner-gdrive-export");
 
           // Sending data
           var data = "--mdeditor_create_file\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n";
@@ -283,6 +296,9 @@ IO.GDrive = (function () {
           xhr.setRequestHeader("Authorization", "Bearer " + access_token);
           xhr.setRequestHeader("Content-Type", "multipart/related; boundary=mdeditor_create_file");
           xhr.onload = function () {
+            // Save tab data
+            Tab.set(selectedTab.index, selectedTab.info);
+
             IO.Spinner.hide("spinner-gdrive-export");
 
             if (this.status == 200) {

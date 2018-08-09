@@ -14,16 +14,7 @@ var panelHelp = null;
 var splitter = null;
 var isPanelResizing = false;
 
-// The open documents
-var docs = [];
-
-// Tab-related variables
-var isNewTabCreated = false;
-var prevWorkingTabIdx = 0;
-var srcTab = null;
-var dragImage = null;
-
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   // Set tab title
   document.title = manifestData.name;
 
@@ -53,24 +44,21 @@ document.addEventListener('DOMContentLoaded', function() {
       "Ctrl-H": "replaceAll",
       "Ctrl-G": "jumpToLine",
       "Shift-Ctrl-H": "replace",
-      "Shift-Ctrl-G": function() { return false; },
-      "Shift-Ctrl-R": function() { return false; },
-      "Alt-G": function() { return false; }
+      "Shift-Ctrl-G": function () {
+        return false;
+      },
+      "Shift-Ctrl-R": function () {
+        return false;
+      },
+      "Alt-G": function () {
+        return false;
+      }
     }
   });
-  editor.on("change", function(evt) {
-    var parsed = parse(editor.getValue());
-    var activeTab = Tab.getActive();
-    if (activeTab) {
-      // Update document title of tab
-      var tab = activeTab.tab;
-      var docTitle = tab.getElementsByClassName("doc-title")[0];
-      docTitle.innerHTML = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
-
-      // Set mouse over title
-      tab.title = docTitle.innerHTML;
-
-      // Automatic preview rendering
+  editor.on("change", function (e) {
+    var selectedTab = Tab.get();
+    if (selectedTab) {
+      var parsed = parse(editor.getValue());
       preview(parsed);
     }
   });
@@ -120,19 +108,26 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("jekyll-settings-port").onkeypress = numberOnly;
 
   // Set menu event handler of content panels
-  Array.from(document.getElementsByClassName("panel-menu")).forEach(function(panelMenu) {
-    Array.from(panelMenu.children).forEach(function(panelMenuItem) {
+  Array.from(document.getElementsByClassName("panel-menu")).forEach(function (panelMenu) {
+    Array.from(panelMenu.children).forEach(function (panelMenuItem) {
       var dropdown = panelMenuItem.getElementsByClassName("dropdown")[0];
       if (dropdown) {
         // Add caret to panel item
         panelMenuItem.classList.add("has-dropdown");
-        
+
         // Set dropdown menu item's event handler
-        Array.from(dropdown.children).forEach(function(dropdownItem) {
-          dropdownItem.addEventListener("mouseover", function(e) { this.classList.add("highlight"); e.stopPropagation(); });
-          dropdownItem.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
-          dropdownItem.addEventListener("mousedown", function(e) { e.stopPropagation(); });
-          dropdownItem.addEventListener("click", function(e) {
+        Array.from(dropdown.children).forEach(function (dropdownItem) {
+          dropdownItem.addEventListener("mouseover", function (e) {
+            this.classList.add("highlight");
+            e.stopPropagation();
+          });
+          dropdownItem.addEventListener("mouseout", function (e) {
+            this.classList.remove("highlight");
+          });
+          dropdownItem.addEventListener("mousedown", function (e) {
+            e.stopPropagation();
+          });
+          dropdownItem.addEventListener("click", function (e) {
             collapseAllDropdowns();
             deselectAllTempPanelMenuItems();
             closeAllDialogs();
@@ -140,9 +135,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
       }
 
-      panelMenuItem.addEventListener("mouseover", function(e) { this.classList.add("highlight"); });
-      panelMenuItem.addEventListener("mouseout", function(e) { this.classList.remove("highlight"); });
-      panelMenuItem.addEventListener("mousedown", function(e) {
+      panelMenuItem.addEventListener("mouseover", function (e) {
+        this.classList.add("highlight");
+      });
+      panelMenuItem.addEventListener("mouseout", function (e) {
+        this.classList.remove("highlight");
+      });
+      panelMenuItem.addEventListener("mousedown", function (e) {
         if (e.which !== 1) {
           e.preventDefault();
           return;
@@ -204,21 +203,21 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById("help-tools-about").onclick = openAboutPage;
 
   // Prevent event propagation on dialogs
-  Array.from(document.getElementsByClassName("dlg")).forEach(function(dialog) {
-    dialog.addEventListener("mousedown", function(e) {
+  Array.from(document.getElementsByClassName("dlg")).forEach(function (dialog) {
+    dialog.addEventListener("mousedown", function (e) {
       e.stopPropagation();
     });
   });
 
   // Enable panel splitter dragging
-  splitter.onmousedown = function(e) {
+  splitter.onmousedown = function (e) {
     isPanelResizing = true;
   };
-  splitter.ondblclick = function(e) {
+  splitter.ondblclick = function (e) {
     panelEditor.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
     panelWrapperHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
   };
-  document.onmousemove = function(e) {
+  document.onmousemove = function (e) {
     if (!isPanelResizing) return;
 
     var wrapper = document.getElementsByTagName("content")[0];
@@ -229,39 +228,39 @@ document.addEventListener('DOMContentLoaded', function() {
     panelEditor.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
     panelWrapperHelper.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
   };
-  document.onmouseup = function(e) {
+  document.onmouseup = function (e) {
     // Escape from panel resizing mode
     isPanelResizing = false;
   };
-  document.onmousedown = function(e) {
+  document.onmousedown = function (e) {
     collapseAllDropdowns();
     deselectAllTempPanelMenuItems();
     closeAllDialogs();
   };
-  
+
   // Keyboard shortcut
-  document.onkeydown = function(e) {
+  document.onkeydown = function (e) {
     if (e.ctrlKey) {
       switch (e.which) {
-      case 79:                // Ctrl + O
-        e.preventDefault();
-        IO.Local.open();
-        break;
-      case 81:                // Ctrl + Q (for testing)
-        e.preventDefault();
-        messageBox("test");
-        break;
-      case 83:                // Ctrl + S
-        e.preventDefault();
-        IO.Local.save();
-        break;
+        case 79: // Ctrl + O
+          e.preventDefault();
+          IO.Local.open();
+          break;
+        case 81: // Ctrl + Q (for testing)
+          e.preventDefault();
+          messageBox("test");
+          break;
+        case 83: // Ctrl + S
+          e.preventDefault();
+          IO.Local.save();
+          break;
       }
     } else {
       switch (e.which) {
-    case 27:                  // Escape key
-        e.preventDefault();
-        closeAllDialogs();
-        break;
+        case 27: // Escape key
+          e.preventDefault();
+          closeAllDialogs();
+          break;
       }
     }
   };
@@ -271,7 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var viewerScroll = document.getElementById("viewer");
   var editorScrollSync = false;
   var viewerScrollSync = false;
-  editorScroll.addEventListener("scroll", function() {
+  editorScroll.addEventListener("scroll", function () {
     if (!editorScrollSync) {
       viewerScrollSync = true;
       var posRatio = editorScroll.scrollTop / editorScroll.scrollHeight;
@@ -279,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     editorScrollSync = false;
   });
-  viewerScroll.addEventListener("scroll", function() {
+  viewerScroll.addEventListener("scroll", function () {
     if (!viewerScrollSync) {
       editorScrollSync = true;
       var posRatio = viewerScroll.scrollTop / viewerScroll.scrollHeight;
@@ -289,32 +288,22 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Save the last state of workspace
-  window.onbeforeunload = function(e) {
+  window.onbeforeunload = function (e) {
     // Save setting values
-    //chrome.runtime.sendMessage({ cmd: "saveAll" });
     Settings.saveAll();
 
-    // Save active workspace
-    var tabs = document.getElementsByClassName("tab");
-    for (var i = 0; i < tabs.length - 1; i++) {
-      if (tabs[i].hasAttribute("active")) {
-        // Update active document data
-        docs[i] = {
-          texts_original: docs[i].texts_original,
-          texts: editor.getValue(),
-          scrollbar: editor.getScrollInfo(),
-          cursor: editor.getCursor(),
-          viewer_scroll: document.getElementById("viewer").scrollTop,
-          active: true
-        };
-        chrome.storage.local.set({ documents: docs });
-        break;
-      }
-    }
+    // Save open documents
+    var selectedTab = Tab.get();
+    selectedTab.info.texts = editor.getValue();
+    selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+    selectedTab.info.editor.cursor = editor.getCursor();
+    selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+    Tab.set(selectedTab.index, selectedTab.info);
+    Tab.backup();
   }
 
   // The 'window.onresize' callback function is called after printing.
-  window.onresize = function(e) {
+  window.onresize = function (e) {
     if (panelEditor.style.display == "none" || splitter.style.display == "none" || panelWrapperHelper.style.display == "none")
       return;
 
@@ -334,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function messageBox(texts, duration) {
-  if (typeof(duration) === "undefined")
+  if (typeof (duration) === "undefined")
     duration = texts.length * 60;
   if (duration > 3000)
     duration = 3000;
@@ -347,12 +336,12 @@ function messageBox(texts, duration) {
   msgbox.innerHTML = texts.replace(/\n/g, '<br />');
   outer.appendChild(msgbox);
   msgboxWrapper.appendChild(outer);
-  setTimeout(function() {
+  setTimeout(function () {
     msgbox.style.opacity = 1;
   }, 100);
-  setTimeout(function() {
+  setTimeout(function () {
     msgbox.style.opacity = 0;
-    setTimeout(function() {
+    setTimeout(function () {
       msgbox.parentNode.removeChild(msgbox);
     }, 300);
   }, duration);
@@ -365,37 +354,15 @@ function messageBox(texts, duration) {
  */
 
 function loadPrevWorks() {
-  // Load previous workspace
-  chrome.storage.local.get("documents", function(result) {
+  chrome.storage.local.get("documents", function (result) {
     if (result.documents) {
-      result.documents.forEach(function(doc) { docs.push(doc) });
-
-      if (docs.length) {
-        var ul = document.getElementById("tabs");
-        var activeTab = null;
-        docs.forEach(function(doc) {
-          // Parse document text data
-          var parsed = parse(doc.texts);
-          var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
-
-          // Create tab
-          var tab = Tab.create(docTitle);
-          if (doc.active) activeTab = tab;
-          
-          // Add tab
-          ul.insertBefore(tab, ul.children[ul.children.length - 1]);
-        });
-
-        // Click active tab
-        if (activeTab) activeTab.mousedown();
-      } else {
-        Tab.addNew();
-      }
-    } else {
-      Tab.addNew();
+      result.documents.forEach(function (docInfo) {
+        var tab = Tab.create(docInfo);
+        Tab.add(tab, docInfo);
+      });
     }
-
-    Tab.resize();
+    if (Tab.count() == 0)
+      Tab.addNew();
   });
 }
 
@@ -415,11 +382,11 @@ function closeAllHelperPanels() {
 }
 
 function closeAllHelperPanelPages() {
-  Array.from(panelWrapperHelper.getElementsByClassName("hpage")).forEach(function(hpage) {
+  Array.from(panelWrapperHelper.getElementsByClassName("hpage")).forEach(function (hpage) {
     hpage.style.display = "none";
   });
-  Array.from(panelWrapperHelper.getElementsByClassName("panel-menu")).forEach(function(panelMenu) {
-    Array.from(panelMenu.children).forEach(function(panelMenuItem) {
+  Array.from(panelWrapperHelper.getElementsByClassName("panel-menu")).forEach(function (panelMenu) {
+    Array.from(panelMenu.children).forEach(function (panelMenuItem) {
       panelMenuItem.classList.remove("selected");
     });
   });
@@ -455,7 +422,7 @@ function adjustDropdownPosition(el) {
   var dropdown = el.getElementsByClassName("dropdown")[0];
   if (dropdown.style.display === "none")
     return;
-  
+
   var containerWidth = parseInt(window.getComputedStyle(el.getAncestorByClassName("panel-header")).width);
   var thisLeft = parseInt(el.offsetLeft);
   var dropdownWidth = parseInt(window.getComputedStyle(dropdown).width);
@@ -470,22 +437,22 @@ function adjustDropdownPosition(el) {
 }
 
 function collapseAllDropdowns() {
-  Array.from(document.getElementsByClassName("dropdown")).forEach(function(dropdown) {
+  Array.from(document.getElementsByClassName("dropdown")).forEach(function (dropdown) {
     dropdown.style.display = "none";
   });
 }
 
 function deselectAllPanelMenuItems() {
-  Array.from(document.getElementsByClassName("panel-menu")).forEach(function(panelMenu) {
-    Array.from(panelMenu.children).forEach(function(panelMenuItem) {
+  Array.from(document.getElementsByClassName("panel-menu")).forEach(function (panelMenu) {
+    Array.from(panelMenu.children).forEach(function (panelMenuItem) {
       panelMenuItem.classList.remove("selected");
     });
   });
 }
 
 function deselectAllTempPanelMenuItems() {
-  Array.from(document.getElementsByClassName("panel-menu")).forEach(function(panelMenu) {
-    Array.from(panelMenu.children).forEach(function(panelMenuItem) {
+  Array.from(document.getElementsByClassName("panel-menu")).forEach(function (panelMenu) {
+    Array.from(panelMenu.children).forEach(function (panelMenuItem) {
       if (panelMenuItem.classList.contains("has-dropdown"))
         panelMenuItem.classList.remove("selected");
     });
@@ -493,7 +460,7 @@ function deselectAllTempPanelMenuItems() {
 }
 
 function closeAllDialogs() {
-  Array.from(document.getElementsByClassName("dlg")).forEach(function(dialog) {
+  Array.from(document.getElementsByClassName("dlg")).forEach(function (dialog) {
     dialog.style.display = "none";
   });
 }
@@ -506,7 +473,7 @@ function closeAllDialogs() {
 
 function expandViewer() {
   var panelHeaderHeight = 45;
-  
+
   if (this.hasAttribute("expanded")) {
     this.removeAttribute("expanded");
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-expand\"></use>";
@@ -551,11 +518,13 @@ function runJekyll() {
   }
 
   var xhr = new XMLHttpRequest();
-  xhr.onload = function() {
+  xhr.onload = function () {
     messageBox("Jekyll is now running on port " + port + ".");
   }
-  xhr.onerror = function() {
-    chrome.runtime.sendNativeMessage("jekyllserve" + port, { text: "" }, function(response) {
+  xhr.onerror = function () {
+    chrome.runtime.sendNativeMessage("jekyllserve" + port, {
+      text: ""
+    }, function (response) {
       if (!response) {
         var lastError = chrome.runtime.lastError;
         if (lastError) {
@@ -587,10 +556,10 @@ function visitJekyllSite() {
   }
 
   var xhr = new XMLHttpRequest();
-  xhr.onload = function() {
+  xhr.onload = function () {
     window.open("http://localhost:" + port);
   }
-  xhr.onerror = function() {
+  xhr.onerror = function () {
     messageBox("The Jekyll site is not responding.\nCheck if Jekyll is running properly.");
   }
   xhr.open("GET", "http://localhost:" + port + "/", true);
@@ -636,7 +605,7 @@ function checkJSONFormat() {
   try {
     JSON.parse(this.value);
     this.style["background"] = "#383838";
-  } catch(e) {
+  } catch (e) {
     this.style["background"] = "rgb(238,97,80)";
   }
 }
@@ -654,7 +623,9 @@ function numberOnly(e) {
 }
 
 function getRubyLang() {
-  chrome.tabs.create({ url: "https://rubyinstaller.org/downloads/" });
+  chrome.tabs.create({
+    url: "https://rubyinstaller.org/downloads/"
+  });
 }
 
 function getJekyllStandalone() {
@@ -758,7 +729,9 @@ EXIT /b
   var zip = new JSZip();
   zip.file("installer.bat", installer);
   zip.file("uninstaller.bat", uninstaller);
-  zip.generateAsync({ type: "blob" }).then(function(zipped) {
+  zip.generateAsync({
+    type: "blob"
+  }).then(function (zipped) {
     var a = document.createElement('a');
     a.href = URL.createObjectURL(zipped);
     a.download = "jekyll_launcher.zip";
@@ -782,7 +755,7 @@ function selectFontsize() {
 
 function getCurDatetimeString() {
   var now = new Date();
-  now.setTime(now.getTime()-(now.getTimezoneOffset() * 60 * 1000));
+  now.setTime(now.getTime() - (now.getTimezoneOffset() * 60 * 1000));
   var strDatetime = now.getUTCFullYear() + "-" + ("0" + (now.getUTCMonth() + 1)).slice(-2) + "-" + ("0" + now.getUTCDate()).slice(-2);
   strDatetime += " " + ("0" + now.getUTCHours()).slice(-2) + ":" + ("0" + now.getUTCMinutes()).slice(-2) + ":" + ("0" + now.getUTCSeconds()).slice(-2);
   return strDatetime;
@@ -815,7 +788,7 @@ function attachments() {
   input.type = "file";
   input.name = "files";
   input.multiple = "multiple";
-  input.addEventListener("change", function(e) {
+  input.addEventListener("change", function (e) {
     var cursor = editor.getCursor();
     var files = e.target.files;
 
@@ -826,8 +799,8 @@ function attachments() {
       }
 
       var reader = new FileReader();
-      reader.onload = (function(file) {
-        return function(evt) {
+      reader.onload = (function (file) {
+        return function (evt) {
           var fname = file.name;
           var fext = fname.toLowerCase().split(".").pop();
           var storage = document.getElementById('attachment-settings-location').value.replace(/\/+$/, '');
@@ -839,8 +812,8 @@ function attachments() {
           var subdir = "";
           for (var k in jsonObj) {
             if (jsonObj[k].indexOf(fext) >= 0) {
-            subdir = k + "/";
-            break;
+              subdir = k + "/";
+              break;
             }
           }
 
@@ -864,9 +837,18 @@ function attachments() {
           }
 
           // Insert text
-          var inputtext = (file.type.startsWith("image")?"!":"")+"["+file.name+"]("+storage+"/"+subdir+fname+")\n";
-          editor.replaceRange(inputtext, { line: cursor.line, ch: cursor.ch }, { line: cursor.line, ch: cursor.ch });
-          editor.setCursor({ line: cursor.line + 1, ch: 0 });
+          var inputtext = (file.type.startsWith("image") ? "!" : "") + "[" + file.name + "](" + storage + "/" + subdir + fname + ")\n";
+          editor.replaceRange(inputtext, {
+            line: cursor.line,
+            ch: cursor.ch
+          }, {
+            line: cursor.line,
+            ch: cursor.ch
+          });
+          editor.setCursor({
+            line: cursor.line + 1,
+            ch: 0
+          });
         };
       })(f);
       reader.readAsArrayBuffer(files[i]);
@@ -876,7 +858,11 @@ function attachments() {
   input.click();
 }
 
-var Working = Object.freeze({ "READY": {}, "METADATA": {}, "BODY": {} });
+var Working = Object.freeze({
+  "READY": {},
+  "METADATA": {},
+  "BODY": {}
+});
 
 function parse(data) {
   var parsed = {}
@@ -900,7 +886,7 @@ function parse(data) {
       if (!curLine.length)
         continue;
 
-      if (curLine.startsWith("---")) {    // At the beginning of post header
+      if (curLine.startsWith("---")) { // At the beginning of post header
         curState = Working.METADATA;
       } else {
         curState = Working.BODY;
@@ -911,7 +897,7 @@ function parse(data) {
       if (!curLine.length)
         continue;
 
-      if (curLine.startsWith("---")) {    // At the end of post header
+      if (curLine.startsWith("---")) { // At the end of post header
         curState = Working.BODY;
       } else {
         // Save key-value pair of post header
@@ -967,13 +953,19 @@ function resetPostingTime() {
       // At the beginning or end of post header
       if (lines[i] == "---")
         isPostHeader = !isPostHeader;
-  
+
       var curLine = lines[i];
       if (isPostHeader) {
         var key = curLine.split(":")[0].trim();
         if (key == "date") {
           curLine = "date: " + getCurDatetimeString();
-          editor.replaceRange(curLine, { line: i, ch: 0 }, { line: i, ch: Infinity });
+          editor.replaceRange(curLine, {
+            line: i,
+            ch: 0
+          }, {
+            line: i,
+            ch: Infinity
+          });
           break;
         }
       } else {
@@ -993,9 +985,9 @@ function preview(parsed) {
 
     // Set site's base url to localhost
     var baseurl = document.getElementById("viewer-settings-baseurl").value;
-    
+
     data = data.replace(/{{ site.baseurl }}/gi, baseurl);
-    
+
     // Show preview panel
     var viewer = document.getElementById("viewer");
     var data = converter.makeHtml(data);

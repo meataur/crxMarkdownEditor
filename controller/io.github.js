@@ -221,8 +221,11 @@ IO.Github = (function () {
       editor.focus();
       editor.setCursor(0, 0);
 
-      var activeTab = Tab.getActive();
-      docs[activeTab.index].texts_original = editor.getValue();
+      var selectedTab = Tab.get();
+      selectedTab.info.metadata.type = "github";
+      selectedTab.info.metadata.id = "";
+      selectedTab.info.originalTexts = editor.getValue();
+      Tab.set(selectedTab.index, selectedTab.info);
 
       closeAllDialogs();
     } else {
@@ -407,6 +410,16 @@ IO.Github = (function () {
           var exportBtn = document.getElementById("btn-export-to-github");
           exportBtn.onclick = function (e) {
             if (this.hasAttribute("activated")) {
+              var selectedTab = Tab.get();
+              selectedTab.info.metadata.type = "github";
+              selectedTab.info.metadata.id = "";
+              selectedTab.info.metadata.title = inputFilename.value;
+              selectedTab.info.texts = editor.getValue();
+              selectedTab.info.originalTexts = editor.getValue();
+              selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+              selectedTab.info.editor.cursor = editor.getCursor();
+              selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+
               IO.Spinner.show(exportList, "spinner-github-export");
 
               var data = {
@@ -434,6 +447,9 @@ IO.Github = (function () {
                   }
                 } else if (this.status == 404) {
                   _xhrWithToken("PUT", requestUrl, access_token, function () {
+                    // Save tab data
+                    Tab.set(selectedTab.index, selectedTab.info);
+
                     IO.Spinner.hide("spinner-github-export");
 
                     if (this.status == 201) {

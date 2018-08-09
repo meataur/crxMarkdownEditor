@@ -2,9 +2,9 @@ let debug = true;
 
 let IO = {
   checkBeforeLeave: function () {
-    var activeTab = Tab.getActive();
+    var selectedTab = Tab.get();
     var parsed = parse(editor.getValue());
-    if (docs[activeTab.index].texts_original !== editor.getValue() && parsed.body.texts.length)
+    if (selectedTab.info.originalTexts !== editor.getValue() && parsed.body.texts.length)
       return confirm("Changes you made may not be saved.\nAre you sure to open another document?")
     return true;
   }

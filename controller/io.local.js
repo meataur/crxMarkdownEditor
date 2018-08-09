@@ -36,9 +36,12 @@ IO.Local = (function () {
             editor.setValue(evt.target.result);
             editor.focus();
             editor.setCursor(0, 0);
-
-            var activeTab = Tab.getActive();
-            docs[activeTab.index].texts_original = editor.getValue();
+            
+            var selectedTab = Tab.get();
+            selectedTab.info.metadata.type = "local";
+            selectedTab.info.metadata.id = "";
+            selectedTab.info.originalTexts = editor.getValue();
+            Tab.set(selectedTab.index, selectedTab.info);
           }
         };
         reader.readAsText(e.target.files[0]);
@@ -50,16 +53,24 @@ IO.Local = (function () {
     },
     saveAsMarkdown: function () {
       if (editor) {
+        var selectedTab = Tab.get();
+        selectedTab.info.metadata.type = "local";
+        selectedTab.info.metadata.id = "";
+        selectedTab.info.texts = editor.getValue();
+        selectedTab.info.originalTexts = editor.getValue();
+        selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+        selectedTab.info.editor.cursor = editor.getCursor();
+        selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+
         // Parse document text data
-        var data = editor.getValue();
-        var parsed = parse(data);
+        var parsed = parse(editor.getValue());
         var docDatetime = (parsed.header.date && parsed.header.date.length) ? parsed.header.date : getCurDatetimeString();
         var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
         var filename = docDatetime.split(" ")[0] + "-" + docTitle.replaceAll(" ", "-").toLowerCase() + ".md";
 
         // Create download link element
         chrome.downloads.download({
-          url: URL.createObjectURL(new Blob([data], {
+          url: URL.createObjectURL(new Blob([editor.getValue()], {
             type: "text/x-markdown"
           })),
           filename: filename,
@@ -71,31 +82,25 @@ IO.Local = (function () {
               // Display alert message
               messageBox("Download Complete!");
 
-              // Save workspace data
-              var activeTab = Tab.getActive();
-              docs[activeTab.index] = {
-                last_modified: docs[activeTab.index].last_modified,
-                texts_original: editor.getValue(),
-                texts: editor.getValue(),
-                scrollbar: editor.getScrollInfo(),
-                cursor: editor.getCursor(),
-                viewer_scroll: document.getElementById("viewer").scrollTop,
-                active: true
-              };
+              // Save tab data
+              chrome.downloads.search({ id: downloadId }, function (result) {
+                selectedTab.info.metadata.title = result[0].filename.replace(/^.*[\\\/]/, '');
+                Tab.set(selectedTab.index, selectedTab.info);
+              });
             }
           })
         });
       }
     },
     saveAsHtml: function () {
-      var docTitle = Tab.getActive().tab.getElementsByClassName("doc-title")[0].innerHTML;
-      var ifrm = _createIframe(docTitle);
+      var selectedTab = Tab.get();
+      var ifrm = _createIframe(selectedTab.info.metadata.title);
 
       // Create download link element
       setTimeout(function () {
         chrome.downloads.download({
           url: "data:text/html;charset=utf-8," + encodeURIComponent(ifrm.contentWindow.document.documentElement.outerHTML),
-          filename: docTitle + ".html",
+          filename: selectedTab.info.metadata.title + ".html",
           conflictAction: "overwrite",
           saveAs: true
         }, function (downloadId) {
@@ -116,8 +121,8 @@ IO.Local = (function () {
       messageBox("Not support yet...");
     },
     print: function () {
-      var docTitle = Tab.getActive().tab.getElementsByClassName("doc-title")[0].innerHTML;
-      var ifrm = _createIframe(docTitle);
+      var selectedTab = Tab.get();
+      var ifrm = _createIframe(selectedTab.info.metadata.title);
       setTimeout(function () {
         ifrm.contentWindow.focus();
         ifrm.contentWindow.print();
