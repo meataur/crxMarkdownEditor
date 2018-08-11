@@ -67,7 +67,10 @@ li.tab:hover { background: #424242; }
 li.tab:active { color: #fff; }
 li.tab[selected] { color: #fff; background: #1e1e1e; }
 li.tab div { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-li.tab .doc-title { height: 45px; font-size: .85rem; line-height: 45px; }
+li.tab .doc-type { position: absolute; width: 1.35em; height: 45px; top: 0; left: 20px; color: #a8afbd; transition-duration: .3s; }
+li.tab[selected] .doc-type { color: #fff; }
+li.tab .doc-type > svg { position: absolute; width: 1.35em; height: 1.35em; top: 50%; right: 0; transform: translate(0, -50%); }
+li.tab .doc-title { margin-left: 1.9em; height: 45px; font-size: .85rem; line-height: 45px; }
 li.tab .tab-close { position: absolute; width: 1em; height: 45px; top: 0; right: 1em; color: #585858; transition-duration: .3s; }
 li.tab .tab-close:hover { color: #a8afbd; }
 li.tab .tab-close:active { color: #fff; }

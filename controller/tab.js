@@ -1,8 +1,10 @@
 let Tab = (function () {
-  const MAXTABS = 8;
+  const MAXTABS = 10;
+  const TABWIDTH = 200;
 
   let _data = [];
 
+  let _isTabClosed = false;
   let _isNewTabAdded = false;
   let _prevSelectedIdx = 0;
   let _dragSrcTab = null;
@@ -62,6 +64,18 @@ let Tab = (function () {
     _isNewTabAdded = false;
   }
 
+  let _getDocTypeIconId = function (type) {
+    if (type == "local") {
+      return "icon-laptop";
+    } else if (type == "github") {
+      return "icon-github";
+    } else if (type == "gdrive") {
+      return "icon-gdrive";
+    } else {
+      return "icon-file"
+    }
+  }
+
   return {
     get: function (idx) {
       var tabs = document.getElementsByClassName("tab");
@@ -86,15 +100,18 @@ let Tab = (function () {
     set: function (idx, info) {
       _data[idx] = info;
 
-      // Update tab label
       var tabs = document.getElementsByClassName("tab");
+      tabs[idx].getElementsByClassName("doc-type")[0].innerHTML = "<svg><use xlink:href=\"icons.svg#" + _getDocTypeIconId(info.metadata.type) + "\"></use></svg>";
       tabs[idx].getElementsByClassName("doc-title")[0].innerHTML = info.metadata.title;
-      tabs[idx].title = "[" + info.metadata.type.toUpperCase() + "] " + info.metadata.title;
+      tabs[idx].title = info.metadata.title;
     },
     count: function () {
       return _data.length;
     },
     create: function (info) {
+      var divType = document.createElement("div");
+      divType.className = "doc-type";
+      divType.innerHTML = "<svg><use xlink:href=\"icons.svg#" + _getDocTypeIconId(info.metadata.type) + "\"></use></svg>";
       var divTitle = document.createElement("div");
       divTitle.className = "doc-title";
       divTitle.innerHTML = info.metadata.title.length ? info.metadata.title : "Untitled Document";
@@ -102,7 +119,8 @@ let Tab = (function () {
       var li = document.createElement("li");
       li.className = "tab";
       li.style.width = 0;
-      li.title = "[" + info.metadata.type.toUpperCase() + "] " + divTitle.innerHTML;
+      li.title = divTitle.innerHTML;
+      li.appendChild(divType);
       li.appendChild(divTitle);
       li.setAttribute("draggable", "true");
       li.addEventListener("dragstart", function (e) {
@@ -237,10 +255,8 @@ let Tab = (function () {
         selectedTab.tab.innerHTML = "";
         selectedTab.tab.style.padding = 0;
         selectedTab.tab.style.width = 0;
-        setTimeout(function () {
-          document.getElementById("tabs").removeChild(selectedTab.tab);
-          Tab.resize();
-        }, 300);
+
+        document.getElementById("tabs").removeChild(selectedTab.tab);
       }
     },
     backup: function () {
@@ -260,8 +276,8 @@ let Tab = (function () {
       var addTabBtnWidth = parseInt(window.getComputedStyle(addTabBtn).width);
       if (addTabBtn.style.display === "none")
         addTabBtnWidth = 0;
-      var newWidth = (bodyWidth - menuWidth - addTabBtnWidth - 80) / (tabs.length - 1);
-      if (newWidth > 180) newWidth = 180;
+      var newWidth = (bodyWidth - menuWidth - addTabBtnWidth - 60) / (tabs.length - 1);
+      if (newWidth > TABWIDTH) newWidth = TABWIDTH;
       Array.from(tabs).forEach(function (tab) {
         if (tab.id !== "create-tab")
           tab.style.width = newWidth + "px";

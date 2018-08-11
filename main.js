@@ -81,6 +81,15 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   loadPrevWorks();
 
+  var header = document.getElementsByTagName("header")[0];
+  header.addEventListener("mouseleave", function (e) {
+    Tab.resize();
+  });
+  var headerMenu = header.getElementsByTagName("menu")[0];
+  headerMenu.addEventListener("mouseenter", function (e) {
+    Tab.resize();
+  });
+
   // Panels and splitter
   panelEditor = document.getElementsByTagName("editor")[0];
   panelWrapperHelper = document.getElementsByTagName("helper")[0];
@@ -763,6 +772,11 @@ function getCurDatetimeString() {
 
 function initTextarea() {
   if (editor) {
+    // Set document icon
+    var selected = Tab.get();
+    selected.info.metadata.type = "";
+    Tab.set(selected.index, selected.info);
+
     // Make document template
     var template = "---\n\n";
     template += "layout: post\n";
@@ -772,6 +786,7 @@ function initTextarea() {
     template += "tags: \n\n";
     template += "---\n\n";
 
+    // Set editor's content
     editor.setValue(template);
     editor.focus();
     editor.setCursor(editor.lineCount(), 0);
