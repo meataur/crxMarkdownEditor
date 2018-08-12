@@ -1,10 +1,108 @@
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("select-metadata-type").onchange = function (e) {
+    var keywords = {
+      local: "local",
+      github: "github",
+      google: "gdrive"
+    }
+    var iconId = "icon-file";
+    for (var k in keywords) {
+      if (this.value.toLowerCase().contains(k)) {
+        iconId = "icon-" + keywords[k];
+        break;
+      }
+    }
+    var selectedTab = Tab.get();
+    selectedTab.tab.getElementsByClassName("doc-type")[0].innerHTML = "<svg><use xlink:href=\"icons.svg#" + iconId + "\"></use></svg>";
+  }
+
+  document.getElementById("input-metadata-title").onchange = function (e) {
+    var selectedTab = Tab.get();
+    selectedTab.tab.getElementsByClassName("doc-title")[0].innerHTML = this.value;
+    selectedTab.tab.title = this.value;
+    document.title = manifestData.name + " - " + this.value;
+
+    if (editor)
+      preview(this.value, editor.getValue());
+  }
+
+  document.getElementById("refresh-datetime").onclick = function () {
+    document.getElementById("input-metadata-date").value = Util.curtime();
+  }
+});
+
+let Metadata = {
+  getMetadataFromPanel: function () {
+    var metadata = {
+      type: ""
+    }
+    var keywords = {
+      local: "local",
+      github: "github",
+      google: "gdrive"
+    }
+    for (var k in keywords) {
+      if (document.getElementById("select-metadata-type").value.toLowerCase().contains(k)) {
+        metadata.type = keywords[k];
+        break;
+      }
+    }
+    metadata.id = document.getElementById("input-metadata-id").value;
+    metadata.layout = document.getElementById("input-metadata-layout").value;
+    metadata.title = document.getElementById("input-metadata-title").value;
+    metadata.date = document.getElementById("input-metadata-date").value;
+    metadata.category = document.getElementById("input-metadata-category").value;
+    metadata.tags = document.getElementById("input-metadata-tags").value;
+    metadata.comment = document.getElementById("input-metadata-comment").value;
+
+    // Get custom key-values
+    for (var i = 1; i <= 3; i++) {
+      var customKey = document.getElementById("input-metadata-reserved-key" + i).value;
+      var customValue = document.getElementById("input-metadata-reserved-value" + i).value;
+      if (customKey.length)
+        metadata[customKey] = customValue;
+    }
+
+    return metadata;
+  },
+  setMetadataToPanel: function (metadata) {
+    document.getElementById("select-metadata-type").value = "Not specified";
+    if (metadata.type && metadata.type.length) {
+      var docTypes = {
+        local: "Local file",
+        github: "Github markdown page",
+        gdrive: "Google document"
+      }
+      document.getElementById("select-metadata-type").value = docTypes[metadata.type];
+    }
+
+    document.getElementById("input-metadata-id").value = metadata.id;
+    document.getElementById("input-metadata-layout").value = metadata.layout;
+    document.getElementById("input-metadata-title").value = metadata.title;
+    document.getElementById("input-metadata-date").value = metadata.date;
+    document.getElementById("input-metadata-category").value = metadata.category;
+    document.getElementById("input-metadata-tags").value = metadata.tags;
+    document.getElementById("input-metadata-comment").value = metadata.comment;
+
+    // Set custom key-values
+    var generalKeys = ["type", "id", "layout", "title", "date", "category", "tags", "comment"];
+    var cnt = 0;
+    for (var k in metadata) {
+      if (!generalKeys.includes(k) && cnt < 3) {
+        cnt += 1;
+        document.getElementById("input-metadata-reserved-key" + cnt).value = k;
+        document.getElementById("input-metadata-reserved-value" + cnt).value = metadata[k];
+      }
+    }
+  }
+}
+
 let Tab = (function () {
   const MAXTABS = 10;
   const TABWIDTH = 200;
 
   let _data = [];
 
-  let _isTabClosed = false;
   let _isNewTabAdded = false;
   let _prevSelectedIdx = 0;
   let _dragSrcTab = null;
@@ -14,7 +112,7 @@ let Tab = (function () {
     if (this.hasAttribute("selected"))
       return;
 
-    // Save editing environment if there exists currently selected tab
+    // Save editing environment (if currently selected tab exists)
     var selectedTab = Tab.get();
     if (selectedTab) {
       var i = selectedTab.index;
@@ -23,6 +121,13 @@ let Tab = (function () {
       _data[i].editor.scrollbar = editor.getScrollInfo();
       _data[i].editor.cursor = editor.getCursor();
       _data[i].viewer.scrollPos = document.getElementById("viewer").scrollTop;
+
+      var metadata = Metadata.getMetadataFromPanel();
+      for (var key in metadata) {
+        _data[i].metadata[key] = metadata[key];
+      }
+
+      // Mark currently selected tab as previous one
       _prevSelectedIdx = i;
 
       // Remove selected attribute
@@ -46,8 +151,12 @@ let Tab = (function () {
       editor.focus();
       editor.setCursor(_data[i].editor.cursor.line, _data[i].editor.cursor.ch);
 
-      // Set browser tab title
-      document.title = manifestData.name + " - " + _data[i].metadata.title;
+      // Set metadata to each panel elements
+      Metadata.setMetadataToPanel(_data[i].metadata);
+
+      // Manually trigger onchange events
+      document.getElementById("select-metadata-type").onchange();
+      document.getElementById("input-metadata-title").onchange();
 
       // Activate tab-close button
       var divClose = document.createElement("div");
@@ -55,8 +164,6 @@ let Tab = (function () {
       divClose.title = "Close tab";
       divClose.innerHTML = "<svg><use xlink:href=\"icons.svg#icon-tab-close\"></use></svg>";
       divClose.onclick = Tab.close;
-
-      // Attach tab-close button to each tab
       selectedTab.tab.appendChild(divClose);
     }
 
@@ -65,23 +172,49 @@ let Tab = (function () {
   }
 
   let _getDocTypeIconId = function (type) {
-    if (type == "local") {
-      return "icon-laptop";
-    } else if (type == "github") {
-      return "icon-github";
-    } else if (type == "gdrive") {
-      return "icon-gdrive";
-    } else {
-      return "icon-file"
-    }
+    if (type.length)
+      return "icon-" + type;
+    return "icon-file"
   }
 
   return {
+    getInitData: function () {
+      return {
+        selected: true,
+        metadata: {
+          type: "",
+          id: "",
+          layout: "",
+          title: "Untitled Document",
+          date: "",
+          category: "",
+          tags: "",
+          comment: ""
+        },
+        texts: "",
+        originalTexts: "",
+        editor: {
+          width: -1,
+          scrollPos: {
+            left: 0,
+            top: 0
+          },
+          cursor: {
+            line: 0,
+            ch: 0
+          }
+        },
+        viewer: {
+          width: -1,
+          scrollPos: 0
+        }
+      }
+    },
     get: function (idx) {
       var tabs = document.getElementsByClassName("tab");
       if (idx == null) {
         for (var i = 0; i < tabs.length - 1; i++) {
-          if (tabs[i].hasAttribute("selected"))
+          if (tabs[i].hasAttribute("selected")) // Get currently selected tab
             return {
               index: i,
               info: _data[i],
@@ -98,12 +231,15 @@ let Tab = (function () {
       }
     },
     set: function (idx, info) {
+      // Save document information
       _data[idx] = info;
 
-      var tabs = document.getElementsByClassName("tab");
-      tabs[idx].getElementsByClassName("doc-type")[0].innerHTML = "<svg><use xlink:href=\"icons.svg#" + _getDocTypeIconId(info.metadata.type) + "\"></use></svg>";
-      tabs[idx].getElementsByClassName("doc-title")[0].innerHTML = info.metadata.title;
-      tabs[idx].title = info.metadata.title;
+      // Set metadata to each panel elements
+      Metadata.setMetadataToPanel(info.metadata);
+
+      // Manually trigger onchange events
+      document.getElementById("select-metadata-type").onchange();
+      document.getElementById("input-metadata-title").onchange();
     },
     count: function () {
       return _data.length;
@@ -176,65 +312,43 @@ let Tab = (function () {
       Tab.resize();
     },
     addNew: function () {
-      var docInfo = {
-        selected: true,
-        metadata: {
-          type: "",
-          id: "",
-          layout: "",
-          title: "Untitled Document",
-          datetime: "",
-          category: [],
-          tags: [],
-          comment: ""
-        },
-        texts: "",
-        originalTexts: "",
-        editor: {
-          width: -1,
-          scrollPos: {
-            left: 0,
-            top: 0
-          },
-          cursor: {
-            line: 0,
-            ch: 0
-          }
-        },
-        viewer: {
-          width: -1,
-          scrollPos: 0
-        }
-      }
-      var newtab = Tab.create(docInfo);
-      Tab.add(newtab, docInfo);
-      
-      var template = initTextarea();
-      var selected = Tab.get();
-      _data[selected.index].texts = template;
+      var newDocInfo = Tab.getInitData();
+      newDocInfo.metadata.date = Util.curtime();
+      var newtab = Tab.create(newDocInfo);
+      Tab.add(newtab, newDocInfo);
 
       _isNewTabAdded = true;
     },
+    makeNew: function () {
+      if (editor) {
+        editor.setValue("");
+        editor.focus();
+        editor.setCursor(editor.lineCount(), 0);
+
+        var selectedTab = Tab.get();
+        if (selectedTab) {
+          var newDocInfo = Tab.getInitData();
+          newDocInfo.metadata.date = Util.curtime();
+          Tab.set(selectedTab.index, newDocInfo);
+        }
+      }
+    },
     close: function () {
       // Not to ask if confirmed to close the tab if the previous work is empty
-      var selectedTab = Tab.get();
-      var parsed = parse(editor.getValue());
-      if (_data[selectedTab.index].texts_original !== editor.getValue() && parsed.body.texts.length) {
-        if (!confirm("Changes you made may not be saved.\nAre you sure to close the tab?"))
-          return;
-      }
+      if (!IO.checkBeforeLeave()) return;
 
       var tabs = document.getElementsByClassName("tab");
       var nTabs = tabs.length - 1;
       if (nTabs == 1) {
-        initTextarea();
+        Tab.makeNew();
         return;
       } else if (nTabs == MAXTABS) {
-        setTimeout(function() {
+        setTimeout(function () {
           document.getElementById("create-tab").style.display = "block";
         }, 300);
       }
 
+      var selectedTab = Tab.get();
       if (selectedTab) {
         // Move to another tab
         if (selectedTab.index === nTabs - 1) {

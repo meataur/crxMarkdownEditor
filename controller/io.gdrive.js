@@ -155,13 +155,18 @@ IO.GDrive = (function () {
     IO.Spinner.hide("spinner-gdrive-import");
 
     if (this.status == 200) {
-      editor.setValue(this.response);
+      var parsed = parse(this.response);
+
+      editor.setValue(parsed.body.texts);
       editor.focus();
       editor.setCursor(0, 0);
 
       var selectedTab = Tab.get();
+      selectedTab.info = Tab.getInitData();
       selectedTab.info.metadata.type = "gdrive";
-      selectedTab.info.metadata.id = "";
+      for (var key in parsed.header)
+        selectedTab.info.metadata[key] = parsed.header[key];
+      selectedTab.info.texts = editor.getValue();
       selectedTab.info.originalTexts = editor.getValue();
       Tab.set(selectedTab.index, selectedTab.info);
 
@@ -228,14 +233,6 @@ IO.GDrive = (function () {
       var exportList = document.getElementById("exportlist-gdrive");
       exportList.removeAllChildren();
 
-      // Filename
-      var inputFilename = document.getElementById("input-export-gdrive-filename");
-      var parsed = parse(editor.getValue());
-      var docDatetime = (parsed.header.date && parsed.header.date.length) ? parsed.header.date : getCurDatetimeString();
-      var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
-      inputFilename.value = docDatetime.split(" ")[0] + "-" + docTitle.replaceAll(" ", "-").toLowerCase() + ".md";
-      inputFilename.focus();
-
       // Create file tree
       var ul = document.createElement("ul");
       ul.className = "filetree";
@@ -269,40 +266,43 @@ IO.GDrive = (function () {
       // Navigate subtree
       _expFiletree(root, access_token, "root");
 
+      // Filename
+      var saveData = IO.makeSaveData();
+      var inputFilename = document.getElementById("input-export-gdrive-filename");
+      inputFilename.value = saveData.filename;
+      inputFilename.focus();
+
       // Set save button event handler
       var exportBtn = document.getElementById("btn-export-to-gdrive");
       exportBtn.onclick = function (e) {
         if (this.hasAttribute("activated")) {
-          var selectedTab = Tab.get();
-          selectedTab.info.metadata.type = "gdrive";
-          selectedTab.info.metadata.id = "";
-          selectedTab.info.metadata.title = inputFilename.value;
-          selectedTab.info.texts = editor.getValue();
-          selectedTab.info.originalTexts = editor.getValue();
-          selectedTab.info.editor.scrollPos = editor.getScrollInfo();
-          selectedTab.info.editor.cursor = editor.getCursor();
-          selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
-
           IO.Spinner.show(exportList, "spinner-gdrive-export");
 
           // Sending data
           var data = "--mdeditor_create_file\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n";
           data += "{ \"name\": \"" + inputFilename.value + "\", \"mimeType\": \"application/vnd.google-apps.document\", \"parents\": [\"" + this.getAttribute("data") + "\"] }\r\n\r\n";
           data += "--mdeditor_create_file\r\nContent-Type: text/plain\r\n\r\n";
-          data += editor.getValue() + "\r\n--mdeditor_create_file\r\n";
+          data += saveData.texts + "\r\n--mdeditor_create_file\r\n";
 
           var xhr = new XMLHttpRequest();
           xhr.open("POST", "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart");
           xhr.setRequestHeader("Authorization", "Bearer " + access_token);
           xhr.setRequestHeader("Content-Type", "multipart/related; boundary=mdeditor_create_file");
           xhr.onload = function () {
-            // Save tab data
-            Tab.set(selectedTab.index, selectedTab.info);
-
             IO.Spinner.hide("spinner-gdrive-export");
 
             if (this.status == 200) {
               messageBox("Successfully saved.");
+
+              var selectedTab = Tab.get();
+              selectedTab.info.metadata.type = "gdrive";
+              selectedTab.info.texts = editor.getValue();
+              selectedTab.info.originalTexts = editor.getValue();
+              selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+              selectedTab.info.editor.cursor = editor.getCursor();
+              selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+              Tab.set(selectedTab.index, selectedTab.info);
+
               closeAllDialogs();
             } else {
               messageBox("Unable to save google document: Error code(" + this.status + ")");

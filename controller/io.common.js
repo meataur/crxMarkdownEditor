@@ -1,4 +1,4 @@
-let debug = true;
+let debug = false;
 
 let IO = {
   checkBeforeLeave: function () {
@@ -7,6 +7,43 @@ let IO = {
     if (selectedTab.info.originalTexts !== editor.getValue() && parsed.body.texts.length)
       return confirm("Changes you made may not be saved.\nAre you sure to open another document?")
     return true;
+  },
+  makeSaveData: function () {
+    var data = {
+      filename: "",
+      texts: ""
+    }
+    var docDatetime = "";
+    var docTitle = "";
+
+    if (editor) {
+      data.texts += "---\n";
+      var metadata = Metadata.getMetadataFromPanel();
+
+      // Sort keys
+      var keys = [];
+      for (var k in metadata)
+        keys[keys.length] = k;
+      keys.sort();
+
+      keys.forEach(function (k) {
+        if (metadata[k].length) {
+          data.texts += k + ": " + metadata[k] + "\n";
+          if (k == "title") {
+            docTitle = metadata[k].length ? metadata[k] : "Untitled Document";
+            docTitle = docTitle.replaceAll(" ", "-").toLowerCase();
+          }
+        }
+        if (k == "date") {
+          docDatetime = metadata[k].length ? metadata[k] : Util.curtime();
+          docDatetime = docDatetime.split(" ")[0];
+        }
+      });
+      data.texts += "---\n\n";
+      data.texts += editor.getValue();
+      data.filename = [docDatetime, docTitle].join("-") + ".md";
+    }
+    return data;
   }
 }
 

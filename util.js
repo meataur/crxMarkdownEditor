@@ -55,10 +55,19 @@ String.prototype.contains = function (substr) {
  * Utility functions
  */
 
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  while (true) {
-    if ((new Date().getTime() - start) >= milliseconds)
-      break;
+let Util = {
+  sleep: function (milliseconds) {
+    var start = new Date().getTime();
+    while (true) {
+      if ((new Date().getTime() - start) >= milliseconds)
+        break;
+    }
+  },
+  curtime: function () {
+    var now = new Date();
+    now.setTime(now.getTime() - (now.getTimezoneOffset() * 60 * 1000));
+    var strDatetime = now.getUTCFullYear() + "-" + ("0" + (now.getUTCMonth() + 1)).slice(-2) + "-" + ("0" + now.getUTCDate()).slice(-2);
+    strDatetime += " " + ("0" + now.getUTCHours()).slice(-2) + ":" + ("0" + now.getUTCMinutes()).slice(-2) + ":" + ("0" + now.getUTCSeconds()).slice(-2);
+    return strDatetime;
   }
 }

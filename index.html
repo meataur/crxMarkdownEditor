@@ -102,7 +102,7 @@
 					<li>
 						<span>import from</span>
 						<ul class="dropdown">
-							<li id="editor-tools-import-local"><svg><use xlink:href="icons.svg#icon-laptop"></use></svg><div><span>local system</span></div></li>
+							<li id="editor-tools-import-local"><svg><use xlink:href="icons.svg#icon-local"></use></svg><div><span>local system</span></div></li>
 							<li id="editor-tools-import-github"><svg><use xlink:href="icons.svg#icon-github"></use></svg><div><span>github</span></div></li>
 							<li id="editor-tools-import-gdrive"><svg><use xlink:href="icons.svg#icon-gdrive"></use></svg><div><span>google drive</span></div></li>
 						</ul>
@@ -110,7 +110,7 @@
 					<li>
 						<span>save to</span>
 						<ul class="dropdown">
-							<li id="editor-tools-save-local"><svg><use xlink:href="icons.svg#icon-laptop"></use></svg><div><span>local system</span></div></li>
+							<li id="editor-tools-save-local"><svg><use xlink:href="icons.svg#icon-local"></use></svg><div><span>local system</span></div></li>
 							<li id="editor-tools-save-github"><svg><use xlink:href="icons.svg#icon-github"></use></svg><div><span>github</span></div></li>
 							<li id="editor-tools-save-gdrive"><svg><use xlink:href="icons.svg#icon-gdrive"></use></svg><div><span>google drive</span></div></li>
 						</ul>
@@ -118,10 +118,10 @@
 					<li>
 						<span>editor</span>
 						<ul class="dropdown">
-							<li id="editor-tools-template"><svg><use xlink:href="icons.svg#icon-file"></use></svg><div><span>make new</span></div></li>
+							<li id="editor-tools-doc-metadata"><svg><use xlink:href="icons.svg#icon-tag"></use></svg><div><span>metadata</span></div></li>
+							<li id="editor-tools-makenew"><svg><use xlink:href="icons.svg#icon-file"></use></svg><div><span>make new</span></div></li>
 							<li id="editor-tools-attachment"><svg><use xlink:href="icons.svg#icon-attachment"></use></svg><div><span>attachment</span></div></li>
 							<li id="editor-tools-prettify"><svg><use xlink:href="icons.svg#icon-formatting"></use></svg><div><span>prettify</span></div></li>
-							<li id="editor-tools-updtdatetime"><svg><use xlink:href="icons.svg#icon-datetime"></use></svg><div><span>update datetime</span></div></li>
 							<li id="editor-tools-settings"><svg><use xlink:href="icons.svg#icon-settings"></use></svg><div><span>settings</span></div></li>
 						</ul>
 					</li>
@@ -133,6 +133,7 @@
 
 			<div id="editor-import-gdrive" class="dlg">
 				<section>
+					<div class="section-title">google drive</div>
 					<item>
 						<div>select a google document:</div>
 						<ctrl id="importlist-gdrive" class="file-explorer"></ctrl>
@@ -144,6 +145,7 @@
 			</div>
 			<div id="editor-export-gdrive" class="dlg">
 				<section>
+					<div class="section-title">google drive</div>
 					<item>
 						<div>select a folder:</div>
 						<ctrl id="exportlist-gdrive" class="file-explorer"></ctrl>
@@ -158,6 +160,7 @@
 			</div>
 			<div id="editor-import-github" class="dlg">
 				<section>
+					<div class="section-title">github</div>
 					<item>
 						<div>select a github document:</div>
 						<ctrl id="importlist-github" class="file-explorer"></ctrl>
@@ -169,6 +172,7 @@
 			</div>
 			<div id="editor-export-github" class="dlg">
 				<section>
+					<div class="section-title">github</div>
 					<item>
 						<div>select a folder:</div>
 						<ctrl id="exportlist-github" class="file-explorer"></ctrl>
@@ -182,20 +186,76 @@
 				</section>
 			</div>
 
+			<div id="editor-doc-metadata" class="dlg">
+				<section>
+					<div class="section-title">document metadata</div>
+					<item>
+						<div>general metadata:</div>
+						<ctrl>
+							<div class="flex-container">
+								<input type="text" class="table-key" value="type" disabled>
+								<select id="select-metadata-type" class="table-value">
+									<option>Not specified</option>
+									<option>Local file</option>
+									<option>Github markdown page</option>
+									<option>Google document</option>
+								</select>
+							</div>
+						</ctrl>
+						<ctrl><div class="flex-container"><input type="text" class="table-key" value="id" disabled><input type="text" class="table-value" id="input-metadata-id" spellcheck="false" disabled></div></ctrl>
+						<ctrl><div class="flex-container"><input type="text" class="table-key" value="layout" disabled><input type="text" class="table-value" id="input-metadata-layout" spellcheck="false"></div></ctrl>
+						<ctrl><div class="flex-container"><input type="text" class="table-key" value="title" disabled><input type="text" class="table-value" id="input-metadata-title" spellcheck="false"></div></ctrl>
+						<ctrl>
+							<div class="flex-container">
+								<input type="text" class="table-key" value="date" disabled>
+								<input type="text" class="table-value" id="input-metadata-date" placeholder="YYYY-mm-dd HH:MM:SS" spellcheck="false">
+								<div id="refresh-datetime"><svg><use xlink:href="icons.svg#icon-refresh"></use></svg></div>
+							</div>
+						</ctrl>
+						<ctrl><div class="flex-container"><input type="text" class="table-key" value="category" disabled><input type="text" class="table-value" id="input-metadata-category" spellcheck="false"></div></ctrl>
+						<ctrl><div class="flex-container"><input type="text" class="table-key" value="tags" disabled><input type="text" class="table-value" id="input-metadata-tags" spellcheck="false"></div></ctrl>
+						<ctrl><div class="flex-container"><input type="text" class="table-key" value="comment" disabled><input type="text" class="table-value" id="input-metadata-comment" spellcheck="false"></div></ctrl>
+					</item>
+					<item>
+						<div>custom metadata:</div>
+						<ctrl>
+							<div class="flex-container">
+								<input type="text" id="input-metadata-reserved-key1" class="table-key" placeholder="custom key #1" spellcheck="false">
+								<input type="text" class="table-value" id="input-metadata-reserved-value1" spellcheck="false">
+							</div>
+						</ctrl>
+						<ctrl>
+							<div class="flex-container">
+								<input type="text" id="input-metadata-reserved-key2" class="table-key" placeholder="custom key #2" spellcheck="false">
+								<input type="text" class="table-value" id="input-metadata-reserved-value2" spellcheck="false">
+							</div>
+						</ctrl>
+						<ctrl>
+							<div class="flex-container">
+								<input type="text" id="input-metadata-reserved-key3" class="table-key" placeholder="custom key #3" spellcheck="false">
+								<input type="text" class="table-value" id="input-metadata-reserved-value3" spellcheck="false">
+							</div>
+						</ctrl>
+					</item>
+				</section>
+			</div>
+
 			<div id="editor-settings" class="dlg">
 				<section>
-					<item class="inline-subsect">
+					<div class="section-title">appearance</div>
+					<item class="inline">
 						<div>theme:</div>
 						<ctrl><select id="editor-settings-theme"><option>default</option></select></ctrl>
 					</item>
-					<item class="inline-subsect">
+					<item class="inline">
 						<div>font size:</div>
 						<ctrl><select id="editor-settings-fontsize"></select></ctrl>
 					</item>
 				</section>
 				<section>
+					<div class="section-title">attachment</div>
 					<item>
-						<div>attachment location (liquid-syntax):</div>
+						<div>attachment path (liquid-syntax):</div>
 						<ctrl><input type="text" id="attachment-settings-location" spellcheck="false"></ctrl>
 					</item>
 					<item>
@@ -245,9 +305,12 @@
 				</toolbox>
 			</div>
 			<div class="panel-body">
-				<div id="viewer"></div>
+				<div id="viewer">
+					<div class="no-content">There is nothing displayed on viewer.</div>
+				</div>
 				<div id="viewer-settings" class="dlg">
 					<section>
+						<div class="section-title">link</div>
 						<item>
 							<div>base url:</div>
 							<ctrl><input type="text" id="viewer-settings-baseurl" spellcheck="false"></ctrl>

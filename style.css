@@ -9,7 +9,7 @@
 a { color: #0473bc; text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-input[type="text"] { flex: 1; padding: .3em; font-family: 'consolas'; border: solid 1px #ccc; border-radius: 2px; }
+input[type="text"] { padding: .3em; font-family: 'consolas'; border: solid 1px #ccc; border-radius: 2px; }
 input[type="radio"] { display: inline-block; height: 1em; line-height: 1em; vertical-align: top; }
 
 svg { display: inline-flex; align-self: center; fill: currentColor; stroke: currentColor; stroke-width: 0; }
@@ -57,20 +57,18 @@ header:after { content: ""; display: table; clear: both; }
 nav { display: block; float: left; }
 ul#tabs { list-style: none; }
 li.tab {
-  position: relative; padding: 0 3em 0 20px; height: 45px; float: left;
-  color: #a8afbd;
-  transition-duration: .3s;
-  border-right: solid 1px #1e1e1e;
+  position: relative; padding: 0 3em 0 20px; height: 45px; float: left; border-right: solid 1px #1e1e1e;
+  color: #a8afbd; transition-duration: .3s;
 }
 li.tab:last-child { padding-top: 0; padding-right: 20px; width: unset; font-size: .75rem; }
 li.tab:hover { background: #424242; }
 li.tab:active { color: #fff; }
 li.tab[selected] { color: #fff; background: #1e1e1e; }
 li.tab div { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-li.tab .doc-type { position: absolute; width: 1.35em; height: 45px; top: 0; left: 20px; color: #a8afbd; transition-duration: .3s; }
+li.tab .doc-type { position: absolute; width: 1.3em; height: 45px; top: 0; left: 20px; color: #a8afbd; transition-duration: .3s; }
 li.tab[selected] .doc-type { color: #fff; }
-li.tab .doc-type > svg { position: absolute; width: 1.35em; height: 1.35em; top: 50%; right: 0; transform: translate(0, -50%); }
-li.tab .doc-title { margin-left: 1.9em; height: 45px; font-size: .85rem; line-height: 45px; }
+li.tab .doc-type > svg { position: absolute; width: 1.3em; height: 1.3em; top: 50%; right: 0; transform: translate(0, -50%); }
+li.tab .doc-title { margin-left: 1.875em; height: 45px; font-size: .75rem; line-height: 45px; }
 li.tab .tab-close { position: absolute; width: 1em; height: 45px; top: 0; right: 1em; color: #585858; transition-duration: .3s; }
 li.tab .tab-close:hover { color: #a8afbd; }
 li.tab .tab-close:active { color: #fff; }
@@ -155,33 +153,42 @@ viewer, localhost, help { display: none; }
 /* Dialog */
 
 .dlg {
-  display: none; position: absolute; top: 0; right: 0; margin: 24px; padding: 0 12px; min-width: calc(400px - 48px); width: 50%; max-width: 480px; max-height: 500px; overflow: auto;
+  display: none; position: absolute; top: 0; right: 0; margin: 24px; padding: 0 12px; min-width: calc(400px - 48px); width: 50%; max-width: 480px; max-height: 460px; overflow: auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400;
   border-color: #1e1e1e; border-style: solid; border-width: 24px 12px; background: #1e1e1e; user-select: none; z-index: 99;
 }
 .dlg section { display: block; }
-.dlg section:not(:last-child) { margin-bottom: 1em; }
-.dlg section > item { display: block; }
-.dlg section > item:not(:last-child) { margin-bottom: 1em; }
-.dlg section > item.inline-subsect { display: inline-block; }
-.dlg section > item.inline-subsect:not(:first-child) { margin-left: 1em; }
+.dlg section:not(:last-child) { margin-bottom: 1.6em; }
+.dlg section .section-title { display: block; margin-bottom: .3em; line-height: 100%; font-size: 1.4rem; font-weight: 300; color: #a8afbd; }
+.dlg section > item { display: block; margin-top: 1em; }
+.dlg section > item.inline { display: inline-block; }
 .dlg section > item > div { display: block; padding: 0; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important; }
-.dlg section > item > ctrl { display: block; margin: .5em 0; color: #a8afbd; }
+.dlg section > item ctrl { display: block; margin: .5em 0; color: #a8afbd; }
+.dlg section > item ctrl:last-child { margin-bottom: 0; }
 .dlg .option-radio { display: inline-block; margin-right: .5em; }
 .dlg .option-radio label { padding: 0 3px; color: #a8afbd; vertical-align: middle; }
 .dlg select { border-radius: 2px; color: #a8afbd; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #383838; border: none; }
 .dlg textarea {
-  width: 100%; height: 10em; padding: .3em;
+  width: 100%; height: 8.5em; padding: .3em;
   color: #a8afbd; background: #383838; font-family: consolas; line-height: 1.25; border: none; border-radius: 2px; resize: none; overflow: auto; white-space: nowrap;
+  font-weight: 300;
 }
 .dlg input[type="text"] { width: 100%; color: #a8afbd; background: #383838; font-family: consolas; border: none; }
+.dlg input[type="text"]:disabled { color: #777; background: #2a2a2a; }
 .dlg input[type="radio"] { vertical-align: middle; background: #383838; }
 
+.dlg input.table-key { width: 110px; margin-right: .5em; }
+.dlg input.table-value { flex: 1; }
+
+#refresh-datetime { display: inline-flex; margin-left: .5em; padding: 4px 0; color: #383838; }
+#refresh-datetime > svg { width: 14px; height: 14px; }
+#refresh-datetime:hover { color: #a8afbd; }
+#refresh-datetime:active { color: #fff; }
 
 
 /* File dialog */
 
-.file-explorer { padding: 1em; max-height: 380px; background: #383838; border-radius: 2px; overflow: auto; }
+.file-explorer { padding: 1em; max-height: 320px; background: #383838; border-radius: 2px; overflow: auto; }
 .file-explorer ul { margin: 0; padding: 0; list-style: none; }
 .file-explorer ul:not(.filetree) { padding-left: 1.5em; }
 .file-explorer li { padding-top: .5em; white-space: nowrap; }
@@ -194,7 +201,6 @@ viewer, localhost, help { display: none; }
 .file-explorer li[selected] > span { color: #fff; }
 
 .fileicon { display: inline-block; margin-right: .5em; width: 1em; height: 1em; vertical-align: middle; }
-.file-explorer-tools input { flex: 2; }
 .file-explorer-button {
   margin-left: .5em; padding: .5em .8em;
   color: #a8afbd; font-size: .7rem; background: #383838; text-transform: uppercase; border-radius: 2px;
@@ -260,7 +266,7 @@ viewer, localhost, help { display: none; }
 .hpage tablecaption, figcaption > strong { user-select: none; margin-right: .5em; }
 
 .hpage ul, ol { margin: 1em 0 1em 1.6em; }
-.hpage li { margin-bottom: .4em; }
+.hpage li { margin-bottom: .5em; }
 .hpage li > ul, li > ol { margin: .5em 0 .5em 1.6em; }
 
 .hpage button { padding: .2em .4em; }

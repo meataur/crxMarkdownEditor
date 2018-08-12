@@ -1,11 +1,11 @@
 IO.Github = (function () {
-  let _clientId = 'ac52e15a05c1f05e2a14';
-  let _clientSecret = '612056756863407c1241706306ec711c76bb8814';
+  let _clientId = "ac52e15a05c1f05e2a14";                           // Release
+  let _clientSecret = "612056756863407c1241706306ec711c76bb8814";   // Release
   if (debug) {
-    // _clientId = "fffdcf84e36ddeb9bce4";
-    // _clientSecret = "609f288a1df9763979ac258a5db17d19ee8ee49e";
-    _clientId = "9c527167998b0e4b7c4f";
-    _clientSecret = "fe3bfef28a7e5cd53f69ac494857b1fe19a5d47b";
+    // _clientId = "fffdcf84e36ddeb9bce4";                             // Work at home
+    // _clientSecret = "609f288a1df9763979ac258a5db17d19ee8ee49e";     // Work at home
+    _clientId = "9c527167998b0e4b7c4f";                             // Work at office
+    _clientSecret = "fe3bfef28a7e5cd53f69ac494857b1fe19a5d47b";     // Work at office
   }
   let _redirectUri = chrome.identity.getRedirectURL("provider_cb");
 
@@ -212,9 +212,11 @@ IO.Github = (function () {
     if (this.status == 200) {
       var data = JSON.parse(this.response);
       if (data.encoding === "base64") {
-        editor.setValue(decodeURIComponent(Array.prototype.map.call(atob(data.content), function (c) {
+        var textData = decodeURIComponent(Array.prototype.map.call(atob(data.content), function (c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-        }).join('')));
+        }).join(''));
+        var parsed = parse(textData);
+        editor.setValue(parsed.body.texts);
       } else {
         editor.setValue("");
       }
@@ -222,8 +224,12 @@ IO.Github = (function () {
       editor.setCursor(0, 0);
 
       var selectedTab = Tab.get();
+      selectedTab.info = Tab.getInitData();
       selectedTab.info.metadata.type = "github";
-      selectedTab.info.metadata.id = "";
+      selectedTab.info.metadata.id = data.sha;
+      for (var key in parsed.header)
+        selectedTab.info.metadata[key] = parsed.header[key];
+      selectedTab.info.texts = editor.getValue();
       selectedTab.info.originalTexts = editor.getValue();
       Tab.set(selectedTab.index, selectedTab.info);
 
@@ -329,14 +335,6 @@ IO.Github = (function () {
           var exportList = document.getElementById("exportlist-github");
           exportList.removeAllChildren();
 
-          // Filename
-          var inputFilename = document.getElementById("input-export-github-filename");
-          var parsed = parse(editor.getValue());
-          var docDatetime = (parsed.header.date && parsed.header.date.length) ? parsed.header.date : getCurDatetimeString();
-          var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
-          inputFilename.value = docDatetime.split(" ")[0] + "-" + docTitle.replaceAll(" ", "-").toLowerCase() + ".md";
-          inputFilename.focus();
-
           // Create root node
           var ul = document.createElement("ul");
           ul.className = "filetree";
@@ -406,25 +404,21 @@ IO.Github = (function () {
             }
           });
 
+          // Filename
+          var saveData = IO.makeSaveData();
+          var inputFilename = document.getElementById("input-export-github-filename");
+          inputFilename.value = saveData.filename;
+          inputFilename.focus();
+
           // Set save button event handler
           var exportBtn = document.getElementById("btn-export-to-github");
           exportBtn.onclick = function (e) {
             if (this.hasAttribute("activated")) {
-              var selectedTab = Tab.get();
-              selectedTab.info.metadata.type = "github";
-              selectedTab.info.metadata.id = "";
-              selectedTab.info.metadata.title = inputFilename.value;
-              selectedTab.info.texts = editor.getValue();
-              selectedTab.info.originalTexts = editor.getValue();
-              selectedTab.info.editor.scrollPos = editor.getScrollInfo();
-              selectedTab.info.editor.cursor = editor.getCursor();
-              selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
-
               IO.Spinner.show(exportList, "spinner-github-export");
 
               var data = {
                 message: "commit from MDEditor",
-                content: btoa(unescape(encodeURIComponent(editor.getValue())))
+                content: btoa(unescape(encodeURIComponent(saveData.texts)))
               }
 
               // Try to create new file
@@ -439,24 +433,43 @@ IO.Github = (function () {
 
                       if (this.status == 200) {
                         messageBox("Successfully updated.");
+
+                        var selectedTab = Tab.get();
+                        selectedTab.info.metadata.type = "github";
+                        selectedTab.info.metadata.id = JSON.parse(this.response).data;
+                        selectedTab.info.texts = editor.getValue();
+                        selectedTab.info.originalTexts = editor.getValue();
+                        selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+                        selectedTab.info.editor.cursor = editor.getCursor();
+                        selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+                        Tab.set(selectedTab.index, selectedTab.info);
+
                         closeAllDialogs();
                       } else {
-                        messageBox("Failed to update file.");
+                        messageBox("Failed to update file. Error code(" + this.status + ")");
                       }
                     }, JSON.stringify(data));
                   }
                 } else if (this.status == 404) {
                   _xhrWithToken("PUT", requestUrl, access_token, function () {
-                    // Save tab data
-                    Tab.set(selectedTab.index, selectedTab.info);
-
                     IO.Spinner.hide("spinner-github-export");
 
                     if (this.status == 201) {
                       messageBox("Successfully saved.");
+
+                      var selectedTab = Tab.get();
+                      selectedTab.info.metadata.type = "github";
+                      selectedTab.info.metadata.id = JSON.parse(this.response).content.sha;
+                      selectedTab.info.texts = editor.getValue();
+                      selectedTab.info.originalTexts = editor.getValue();
+                      selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+                      selectedTab.info.editor.cursor = editor.getCursor();
+                      selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+                      Tab.set(selectedTab.index, selectedTab.info);
+
                       closeAllDialogs();
                     } else {
-                      messageBox("Failed to save file. Error code(201)");
+                      messageBox("Failed to save file. Error code(" + this.status + ")");
                     }
                   }, JSON.stringify(data));
                 } else {

@@ -14,7 +14,7 @@ var panelHelp = null;
 var splitter = null;
 var isPanelResizing = false;
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener("DOMContentLoaded", function () {
   // Set tab title
   document.title = manifestData.name;
 
@@ -58,8 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
   editor.on("change", function (e) {
     var selectedTab = Tab.get();
     if (selectedTab) {
-      var parsed = parse(editor.getValue());
-      preview(parsed);
+      preview(selectedTab.info.metadata.title, editor.getValue());
     }
   });
 
@@ -192,10 +191,10 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById("editor-tools-save-local").onclick = IO.Local.save;
   document.getElementById("editor-tools-save-github").onclick = IO.Github.save;
   document.getElementById("editor-tools-save-gdrive").onclick = IO.GDrive.save;
-  document.getElementById("editor-tools-template").onclick = initTextarea;
+  document.getElementById("editor-tools-doc-metadata").onclick = openMetadataPanel;
+  document.getElementById("editor-tools-makenew").onclick = Tab.makeNew;
   document.getElementById("editor-tools-attachment").onclick = attachments;
   document.getElementById("editor-tools-prettify").onclick = prettify;
-  document.getElementById("editor-tools-updtdatetime").onclick = resetPostingTime;
   document.getElementById("editor-tools-settings").onclick = openEditorSettingsPanel;
 
   document.getElementById("viewer-tools-export-html").onclick = IO.Local.saveAsHtml;
@@ -333,7 +332,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function messageBox(texts, duration) {
   if (typeof (duration) === "undefined")
-    duration = texts.length * 60;
+    duration = texts.length * 90;
   if (duration > 3000)
     duration = 3000;
   if (duration < 1500)
@@ -604,6 +603,12 @@ function openAboutPage() {
  * Et cetera
  */
 
+function openMetadataPanel() {
+  var div = document.getElementById("editor-doc-metadata");
+  div.style.display = "block";
+  document.getElementById("select-metadata-type").focus();
+}
+
 function openEditorSettingsPanel() {
   var div = document.getElementById("editor-settings");
   div.style.display = "block";
@@ -762,42 +767,6 @@ function selectFontsize() {
   editor.refresh();
 }
 
-function getCurDatetimeString() {
-  var now = new Date();
-  now.setTime(now.getTime() - (now.getTimezoneOffset() * 60 * 1000));
-  var strDatetime = now.getUTCFullYear() + "-" + ("0" + (now.getUTCMonth() + 1)).slice(-2) + "-" + ("0" + now.getUTCDate()).slice(-2);
-  strDatetime += " " + ("0" + now.getUTCHours()).slice(-2) + ":" + ("0" + now.getUTCMinutes()).slice(-2) + ":" + ("0" + now.getUTCSeconds()).slice(-2);
-  return strDatetime;
-}
-
-function initTextarea() {
-  if (editor) {
-    // Set document icon
-    var selected = Tab.get();
-    selected.info.metadata.type = "";
-    Tab.set(selected.index, selected.info);
-
-    // Make document template
-    var template = "---\n\n";
-    template += "layout: post\n";
-    template += "title: \n";
-    template += "date: " + getCurDatetimeString() + "\n";
-    template += "category: \n";
-    template += "tags: \n\n";
-    template += "---\n\n";
-
-    // Set editor's content
-    editor.setValue(template);
-    editor.focus();
-    editor.setCursor(editor.lineCount(), 0);
-
-    // Automatic preview rendering
-    preview(parse(editor.getValue()));
-
-    return template;
-  }
-}
-
 function attachments() {
   var input = document.createElement("input");
   input.type = "file";
@@ -914,6 +883,8 @@ function parse(data) {
 
       if (curLine.startsWith("---")) { // At the end of post header
         curState = Working.BODY;
+      } else if (curLine.startsWith("#")) {
+        // Skip this line because this line is a comment
       } else {
         // Save key-value pair of post header
         var key = curLine.split(":")[0].trim();
@@ -935,80 +906,22 @@ function parse(data) {
   return parsed;
 }
 
-function getPrettified(data) {
-  // Parse data
-  var parsed = parse(data);
-  var prettified = "---\n\n";
-
-  // Write header
-  for (var key in parsed.header)
-    prettified += key + ": " + parsed.header[key] + "\n";
-
-  // Write body
-  prettified += "\n---\n\n" + parsed.body.texts;
-
-  return prettified;
-}
-
 function prettify() {
-  if (editor) {
-    var data = editor.getValue();
-    editor.setValue(getPrettified(data));
-  }
+  messageBox("Not support yet...");
 }
 
-function resetPostingTime() {
-  var isPostHeader = false;
+function preview(docTitle, data) {
   if (editor) {
-    var data = editor.getValue();
-    data = data.replace(/\r/gi, "");
-    var lines = data.split("\n");
-
-    for (var i in lines) {
-      // At the beginning or end of post header
-      if (lines[i] == "---")
-        isPostHeader = !isPostHeader;
-
-      var curLine = lines[i];
-      if (isPostHeader) {
-        var key = curLine.split(":")[0].trim();
-        if (key == "date") {
-          curLine = "date: " + getCurDatetimeString();
-          editor.replaceRange(curLine, {
-            line: i,
-            ch: 0
-          }, {
-            line: i,
-            ch: Infinity
-          });
-          break;
-        }
-      } else {
-        break;
-      }
-    }
-  }
-}
-
-function preview(parsed) {
-  if (editor) {
-    var data = "";
-    if (parsed.header.title && parsed.header.title.length)
-      data += "# " + parsed.header.title + "\n\n";
-    if (parsed.body.texts.length)
-      data += parsed.body.texts;
-
-    // Set site's base url to localhost
-    var baseurl = document.getElementById("viewer-settings-baseurl").value;
-
-    data = data.replace(/{{ site.baseurl }}/gi, baseurl);
-
-    // Show preview panel
     var viewer = document.getElementById("viewer");
-    var data = converter.makeHtml(data);
     if (data.length) {
+      // Set site's base url to localhost
+      var baseurl = document.getElementById("viewer-settings-baseurl").value;
+      data = data.replace(/{{ site.baseurl }}/gi, baseurl);
+
+      // Show preview panel
+      var html = converter.makeHtml("# " + docTitle + "\n\n" + data);
       viewer.removeAllChildren();
-      viewer.innerHTML = data;
+      viewer.innerHTML = html;
     } else {
       viewer.removeAllChildren();
       var noContent = document.createElement("div");

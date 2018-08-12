@@ -33,13 +33,18 @@ IO.Local = (function () {
         var reader = new FileReader();
         reader.onload = function (evt) {
           if (evt.target.readyState == FileReader.DONE) {
-            editor.setValue(evt.target.result);
+            var parsed = parse(evt.target.result);
+
+            editor.setValue(parsed.body.texts);
             editor.focus();
             editor.setCursor(0, 0);
             
             var selectedTab = Tab.get();
+            selectedTab.info = Tab.getInitData();
             selectedTab.info.metadata.type = "local";
-            selectedTab.info.metadata.id = "";
+            for (var key in parsed.header)
+              selectedTab.info.metadata[key] = parsed.header[key];
+            selectedTab.info.texts = editor.getValue();
             selectedTab.info.originalTexts = editor.getValue();
             Tab.set(selectedTab.index, selectedTab.info);
           }
@@ -53,38 +58,27 @@ IO.Local = (function () {
     },
     saveAsMarkdown: function () {
       if (editor) {
-        var selectedTab = Tab.get();
-        selectedTab.info.metadata.type = "local";
-        selectedTab.info.metadata.id = "";
-        selectedTab.info.texts = editor.getValue();
-        selectedTab.info.originalTexts = editor.getValue();
-        selectedTab.info.editor.scrollPos = editor.getScrollInfo();
-        selectedTab.info.editor.cursor = editor.getCursor();
-        selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
-
-        // Parse document text data
-        var parsed = parse(editor.getValue());
-        var docDatetime = (parsed.header.date && parsed.header.date.length) ? parsed.header.date : getCurDatetimeString();
-        var docTitle = (parsed.header.title && parsed.header.title.length) ? parsed.header.title : "Untitled Document";
-        var filename = docDatetime.split(" ")[0] + "-" + docTitle.replaceAll(" ", "-").toLowerCase() + ".md";
-
-        // Create download link element
+        var saveData = IO.makeSaveData();
         chrome.downloads.download({
-          url: URL.createObjectURL(new Blob([editor.getValue()], {
+          url: URL.createObjectURL(new Blob([saveData.texts], {
             type: "text/x-markdown"
           })),
-          filename: filename,
+          filename: saveData.filename,
           conflictAction: "overwrite",
           saveAs: true
         }, function (downloadId) {
           chrome.downloads.onChanged.addListener(function (e) {
             if (e.id == downloadId && e.state && e.state.current === "complete") {
-              // Display alert message
-              messageBox("Download Complete!");
-
-              // Save tab data
               chrome.downloads.search({ id: downloadId }, function (result) {
-                selectedTab.info.metadata.title = result[0].filename.replace(/^.*[\\\/]/, '');
+                messageBox("Download Complete.\n- path: " + result[0].filename);
+
+                var selectedTab = Tab.get();
+                // selectedTab.info.metadata.comment = result[0].filename;
+                selectedTab.info.texts = editor.getValue();
+                selectedTab.info.originalTexts = editor.getValue();
+                selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+                selectedTab.info.editor.cursor = editor.getCursor();
+                selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
                 Tab.set(selectedTab.index, selectedTab.info);
               });
             }
@@ -119,6 +113,9 @@ IO.Local = (function () {
     },
     saveAsPdf: function () {
       messageBox("Not support yet...");
+      // var doc = new jsPDF();
+      // doc.fromHTML(document.getElementById("viewer"));
+      // doc.save("document.pdf");
     },
     print: function () {
       var selectedTab = Tab.get();
