@@ -11,31 +11,32 @@ let IO = {
   makeSaveData: function () {
     var data = {
       filename: "",
+      metadata: {},
       texts: ""
     }
     var docDatetime = "";
     var docTitle = "";
 
     if (editor) {
+      data.metadata = Metadata.getMetadataFromPanel();
       data.texts += "---\n";
-      var metadata = Metadata.getMetadataFromPanel();
 
       // Sort keys
       var keys = [];
-      for (var k in metadata)
+      for (var k in data.metadata)
         keys[keys.length] = k;
       keys.sort();
 
       keys.forEach(function (k) {
-        if (metadata[k].length) {
-          data.texts += k + ": " + metadata[k] + "\n";
+        if (k != "type" && data.metadata[k].length) {
+          data.texts += k + ": " + data.metadata[k] + "\n";
           if (k == "title") {
-            docTitle = metadata[k].length ? metadata[k] : "Untitled Document";
+            docTitle = data.metadata[k].length ? data.metadata[k] : "Untitled Document";
             docTitle = docTitle.replaceAll(" ", "-").toLowerCase();
           }
         }
         if (k == "date") {
-          docDatetime = metadata[k].length ? metadata[k] : Util.curtime();
+          docDatetime = data.metadata[k].length ? data.metadata[k] : Util.curtime();
           docDatetime = docDatetime.split(" ")[0];
         }
       });

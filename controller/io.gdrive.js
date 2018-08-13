@@ -295,6 +295,9 @@ IO.GDrive = (function () {
               messageBox("Successfully saved.");
 
               var selectedTab = Tab.get();
+              for (var key in saveData.metadata) {
+                selectedTab.info.metadata[key] = saveData.metadata[key];
+              }
               selectedTab.info.metadata.type = "gdrive";
               selectedTab.info.texts = editor.getValue();
               selectedTab.info.originalTexts = editor.getValue();

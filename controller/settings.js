@@ -15,6 +15,16 @@ let Settings = (function () {
   }
 
   return {
+    openEditorSettingsPanel: function () {
+      var div = document.getElementById("editor-settings");
+      div.style.display = "block";
+      document.getElementById("editor-settings-theme").focus();
+    },
+    openViewerSettingsPanel: function () {
+      var div = document.getElementById("viewer-settings");
+      div.style.display = "block";
+      document.getElementById("viewer-settings-baseurl").focus();
+    },
     load: function (key) {
       if (key == "editor") {
         // Insert font-size options
@@ -123,10 +133,10 @@ let Settings = (function () {
       return true;
     },
     loadAll: function () {
-      return (this.load("editor") && this.load("attachment") && this.load("viewer") && this.load("jekyll"));
+      return (Settings.load("editor") && Settings.load("attachment") && Settings.load("viewer") && Settings.load("jekyll"));
     },
     saveAll: function () {
-      return (this.save("editor") && this.save("attachment") && this.save("viewer") && this.save("jekyll"));
+      return (Settings.save("editor") && Settings.save("attachment") && Settings.save("viewer") && Settings.save("jekyll"));
     }
   }
 })();

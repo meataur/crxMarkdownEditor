@@ -70,9 +70,12 @@ IO.Local = (function () {
           chrome.downloads.onChanged.addListener(function (e) {
             if (e.id == downloadId && e.state && e.state.current === "complete") {
               chrome.downloads.search({ id: downloadId }, function (result) {
-                messageBox("Download Complete.\n- path: " + result[0].filename);
+                messageBox("Download Complete.");
 
                 var selectedTab = Tab.get();
+                for (var key in saveData.metadata) {
+                  selectedTab.info.metadata[key] = saveData.metadata[key];
+                }
                 // selectedTab.info.metadata.comment = result[0].filename;
                 selectedTab.info.texts = editor.getValue();
                 selectedTab.info.originalTexts = editor.getValue();

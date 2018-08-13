@@ -435,6 +435,9 @@ IO.Github = (function () {
                         messageBox("Successfully updated.");
 
                         var selectedTab = Tab.get();
+                        for (var key in saveData.metadata) {
+                          selectedTab.info.metadata[key] = saveData.metadata[key];
+                        }
                         selectedTab.info.metadata.type = "github";
                         selectedTab.info.metadata.id = JSON.parse(this.response).data;
                         selectedTab.info.texts = editor.getValue();
@@ -458,6 +461,9 @@ IO.Github = (function () {
                       messageBox("Successfully saved.");
 
                       var selectedTab = Tab.get();
+                      for (var key in saveData.metadata) {
+                        selectedTab.info.metadata[key] = saveData.metadata[key];
+                      }
                       selectedTab.info.metadata.type = "github";
                       selectedTab.info.metadata.id = JSON.parse(this.response).content.sha;
                       selectedTab.info.texts = editor.getValue();

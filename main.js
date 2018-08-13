@@ -104,7 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById('menu-viewer').click();
 
   // Set buttons event handler
-  document.getElementById("create-tab").onclick = Tab.addNew;
   document.getElementById('btn-download-ruby').onclick = getRubyLang;
   document.getElementById('btn-download-jekyll').onclick = getJekyllStandalone;
   document.getElementById('btn-download-jekylllauncher').onclick = getJekyllLauncher;
@@ -191,17 +190,17 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("editor-tools-save-local").onclick = IO.Local.save;
   document.getElementById("editor-tools-save-github").onclick = IO.Github.save;
   document.getElementById("editor-tools-save-gdrive").onclick = IO.GDrive.save;
-  document.getElementById("editor-tools-doc-metadata").onclick = openMetadataPanel;
+  document.getElementById("editor-tools-doc-metadata").onclick = Metadata.openPanel;
   document.getElementById("editor-tools-makenew").onclick = Tab.makeNew;
   document.getElementById("editor-tools-attachment").onclick = attachments;
   document.getElementById("editor-tools-prettify").onclick = prettify;
-  document.getElementById("editor-tools-settings").onclick = openEditorSettingsPanel;
+  document.getElementById("editor-tools-settings").onclick = Settings.openEditorSettingsPanel;
 
   document.getElementById("viewer-tools-export-html").onclick = IO.Local.saveAsHtml;
   document.getElementById("viewer-tools-export-pdf").onclick = IO.Local.saveAsPdf;
   document.getElementById("viewer-tools-print").onclick = IO.Local.print;
   document.getElementById("viewer-tools-expand").onclick = expandViewer;
-  document.getElementById("viewer-tools-settings").onclick = openPanelViewerSettingsPanel;
+  document.getElementById("viewer-tools-settings").onclick = Settings.openViewerSettingsPanel;
 
   document.getElementById("localhost-tools-jekyll-setup").onclick = setupJekyll;
   document.getElementById("localhost-tools-run-jekyll").onclick = runJekyll;
@@ -300,8 +299,12 @@ document.addEventListener("DOMContentLoaded", function () {
     // Save setting values
     Settings.saveAll();
 
-    // Save open documents
+    // Save current document information
     var selectedTab = Tab.get();
+    var metadata = Metadata.getMetadataFromPanel();
+    for (var key in metadata) {
+      selectedTab.info.metadata[key] = metadata[key];
+    }
     selectedTab.info.texts = editor.getValue();
     selectedTab.info.editor.scrollPos = editor.getScrollInfo();
     selectedTab.info.editor.cursor = editor.getCursor();
@@ -505,12 +508,6 @@ function expandViewer() {
   }
 }
 
-function openPanelViewerSettingsPanel() {
-  var div = document.getElementById("viewer-settings");
-  div.style.display = "block";
-  document.getElementById("viewer-settings-baseurl").focus();
-}
-
 function setupJekyll() {
   closeAllHelperPanelPages();
   document.getElementById("hpage-jekyll-setup").style.display = "block";
@@ -602,18 +599,6 @@ function openAboutPage() {
 /**
  * Et cetera
  */
-
-function openMetadataPanel() {
-  var div = document.getElementById("editor-doc-metadata");
-  div.style.display = "block";
-  document.getElementById("select-metadata-type").focus();
-}
-
-function openEditorSettingsPanel() {
-  var div = document.getElementById("editor-settings");
-  div.style.display = "block";
-  document.getElementById("editor-settings-theme").focus();
-}
 
 function checkJSONFormat() {
   try {

@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("create-tab").onclick = Tab.addNew;
+
   document.getElementById("select-metadata-type").onchange = function (e) {
     var keywords = {
       local: "local",
@@ -32,6 +34,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 let Metadata = {
+  openPanel: function () {
+    var div = document.getElementById("editor-doc-metadata");
+    div.style.display = "block";
+    document.getElementById("select-metadata-type").focus();
+  },
   getMetadataFromPanel: function () {
     var metadata = {
       type: ""
