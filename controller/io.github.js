@@ -215,7 +215,7 @@ IO.Github = (function () {
         var textData = decodeURIComponent(Array.prototype.map.call(atob(data.content), function (c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
         }).join(''));
-        var parsed = parse(textData);
+        var parsed = Parser.parse(textData);
         editor.setValue(parsed.body.texts);
       } else {
         editor.setValue("");

@@ -97,6 +97,10 @@ let Metadata = (function () {
 
       // Set custom key-values
       var generalKeys = ["type", "id", "layout", "title", "date", "category", "tags", "description"];
+      for (var i = 1; i <= 3; i++) {
+        document.getElementById("input-metadata-reserved-key" + i).value = "";
+        document.getElementById("input-metadata-reserved-value" + i).value = "";
+      }
       var cnt = 0;
       for (var k in metadata) {
         if (!generalKeys.includes(k) && cnt < 3) {
@@ -129,15 +133,11 @@ let Tab = (function () {
     if (selectedTab) {
       var i = selectedTab.index;
       _data[i].selected = false;
+      _data[i].metadata = Metadata.getMetadataFromPanel();
       _data[i].texts = editor.getValue();
       _data[i].editor.scrollbar = editor.getScrollInfo();
       _data[i].editor.cursor = editor.getCursor();
       _data[i].viewer.scrollPos = document.getElementById("viewer").scrollTop;
-
-      var metadata = Metadata.getMetadataFromPanel();
-      for (var key in metadata) {
-        _data[i].metadata[key] = metadata[key];
-      }
 
       // Mark currently selected tab as previous one
       _prevSelectedIdx = i;

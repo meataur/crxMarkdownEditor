@@ -1,7 +1,7 @@
 #viewer {
   display: block; padding: 1.6em; width: 100%; height: 100%;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: justify; word-wrap: break-word;
-  font-size: .9rem; line-height: 1.6; background: #fff;
+  font-size: .92rem; line-height: 1.6; background: #fff;
   transform: rotate(-0.0000000001deg); text-shadow: 0 0 1px rgba(0,0,0,.3); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden; overflow-y: scroll;
 }
@@ -48,7 +48,7 @@
 #viewer code {
   display: inline-block; margin: 0; padding: .2em .4em;
   background: rgba(27,31,35,.05); border-radius: 3px;
-  font-family: consolas; font-size: .9rem; line-height: 1.2;
+  font-family: consolas; font-size: .4rem; line-height: 1.2;
 }
 
 #viewer pre { margin: 1em 0; padding: 1em; font-family: consolas; overflow-x: auto; background: #1d1f21 !important; color: #c5c8c6 }
@@ -56,6 +56,7 @@
 #viewer pre > code table { margin: 0; border: 0; }
 #viewer pre > code table td { padding: 0; border: 0; }
 #viewer pre > code table td > pre { padding: 0 1em; }
+#viewer p > code { font-size: .83rem; }
 
 #viewer pre.highlight, figure.highlight { border: 1px solid #e8e8e8; }
 #viewer .highlight pre { tab-size: 4; }

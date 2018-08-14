@@ -300,26 +300,6 @@ document.addEventListener("DOMContentLoaded", function () {
   //   viewerScrollSync = false;
   // });
 
-  // Save the last state of workspace
-  window.onbeforeunload = function (e) {
-    // Save current document information
-    var selectedTab = Tab.get();
-    var metadata = Metadata.getMetadataFromPanel();
-    for (var key in metadata) {
-      selectedTab.info.metadata[key] = metadata[key];
-    }
-    selectedTab.info.texts = editor.getValue();
-    selectedTab.info.editor.scrollPos = editor.getScrollInfo();
-    selectedTab.info.editor.cursor = editor.getCursor();
-    selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
-    Tab.set(selectedTab.index, selectedTab.info);
-    
-    if (Settings.autoSave) {
-      Settings.saveAll();
-      Tab.save();
-    }
-  }
-
   // The 'window.onresize' callback function is called after printing.
   window.onresize = function (e) {
     if (panelEditor.style.display == "none" || splitter.style.display == "none" || panelWrapperHelper.style.display == "none")
@@ -336,6 +316,22 @@ document.addEventListener("DOMContentLoaded", function () {
       var ratio = 400 / wrapper.clientWidth * 100;
       panelEditor.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
       panelWrapperHelper.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
+    }
+  }
+
+  // Save the last state of workspace
+  window.onbeforeunload = function (e) {
+    var selectedTab = Tab.get();
+    selectedTab.info.metadata = Metadata.getMetadataFromPanel();
+    selectedTab.info.texts = editor.getValue();
+    selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+    selectedTab.info.editor.cursor = editor.getCursor();
+    selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+    Tab.set(selectedTab.index, selectedTab.info);
+    
+    if (Settings.autoSave) {
+      Settings.saveAll();
+      Tab.save();
     }
   }
 });
@@ -585,7 +581,16 @@ function openMdTutorial() {
   xhr.open("GET", "tutorial.md");
   xhr.onload = function (e) {
     var data = converter.makeHtml(this.response);
+    data = data.replaceAll("·", "<ind>·</ind>").replaceAll("↵", "<ind>↵</ind>").replaceAll("⇥", "<ind>⇥</ind>");
     document.getElementById("hpage-md-tutorial").innerHTML = data;
+    renderMathInElement(document.getElementById("hpage-md-tutorial"), {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "\\[", right: "\\]", display: true},
+        {left: "$", right: "$", display: false},
+        {left: "\\(", right: "\\)", display: false}
+      ]
+    });
   }
   xhr.send();
 
@@ -841,70 +846,6 @@ function attachments() {
   input.click();
 }
 
-var Working = Object.freeze({
-  "READY": {},
-  "METADATA": {},
-  "BODY": {}
-});
-
-function parse(data) {
-  var parsed = {}
-  parsed["header"] = {};
-  parsed["body"] = {};
-  parsed.body["hierarchy"] = "";
-  parsed.body["texts"] = "";
-
-  var prevLine = "";
-  var curState = Working.READY;
-
-  data = data.replace(/\r/gi, "");
-  var lines = data.split("\n");
-  for (var i = 0; i < lines.length; i++) {
-    // Current line texts
-    var curLine = lines[i];
-
-    // Work with current line
-    if (curState == Working.READY) {
-      curLine = curLine.trim();
-      if (!curLine.length)
-        continue;
-
-      if (curLine.startsWith("---")) { // At the beginning of post header
-        curState = Working.METADATA;
-      } else {
-        curState = Working.BODY;
-        i--;
-      }
-    } else if (curState == Working.METADATA) {
-      curLine = curLine.trim();
-      if (!curLine.length)
-        continue;
-
-      if (curLine.startsWith("---")) { // At the end of post header
-        curState = Working.BODY;
-      } else if (curLine.startsWith("#")) {
-        // Skip this line because this line is a comment
-      } else {
-        // Save key-value pair of post header
-        var key = curLine.split(":")[0].trim();
-        var value = curLine.split(":").slice(1).join(":").trim().replace(/ +/g, ' ');
-        if (key.length)
-          parsed.header[key] = value;
-      }
-    } else if (curState == Working.BODY) {
-      // Remove succeeding blank lines
-      curLine = curLine.trimEnd();
-      if (!curLine.length && !prevLine.length)
-        continue;
-
-      parsed.body["texts"] += curLine + "\n";
-      prevLine = curLine;
-    }
-  }
-
-  return parsed;
-}
-
 function prettify() {
   messageBox("Not support yet...");
 }
@@ -921,6 +862,14 @@ function preview(docTitle, data) {
       var html = converter.makeHtml("# " + docTitle + "\n\n" + data);
       viewer.removeAllChildren();
       viewer.innerHTML = html;
+      renderMathInElement(viewer, {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "\\[", right: "\\]", display: true},
+          {left: "$", right: "$", display: false},
+          {left: "\\(", right: "\\)", display: false}
+        ]
+      });
     } else {
       viewer.removeAllChildren();
       var noContent = document.createElement("div");

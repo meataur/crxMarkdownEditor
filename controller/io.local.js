@@ -33,7 +33,7 @@ IO.Local = (function () {
         var reader = new FileReader();
         reader.onload = function (evt) {
           if (evt.target.readyState == FileReader.DONE) {
-            var parsed = parse(evt.target.result);
+            var parsed = Parser.parse(evt.target.result);
 
             editor.setValue(parsed.body.texts);
             editor.focus();

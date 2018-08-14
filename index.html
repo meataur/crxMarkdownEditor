@@ -64,11 +64,19 @@
 	<!-- JSZip -->
 	<script src="lib/jszip-3.1.5/jszip.min.js"></script>
 
+	<!-- KaTeX -->
+	<link rel="stylesheet" href="lib/katex-0.10.0/katex.min.css">
+	<link rel="stylesheet" href="lib/katex-0.10.0/contrib/copy-tex.min.css">
+	<script src="lib/katex-0.10.0/katex.min.js"></script>
+	<script src="lib/katex-0.10.0/contrib/auto-render.min.js"></script>
+	<script src="lib/katex-0.10.0/contrib/copy-tex.min.js"></script>
+	
 	<!-- Showdown.js -->
 	<script src="lib/showdown-1.8.6/showdown.min.js"></script>
 
 	<!-- Main Script -->
 	<script src="util.js"></script>
+	<script src="controller/parser.js"></script>
 	<script src="controller/io.common.js"></script>
 	<script src="controller/io.local.js"></script>
 	<script src="controller/io.gdrive.js"></script>
@@ -341,9 +349,9 @@
 					<button type="button" id="btn-download-jekyll"><svg class="svg-btn"><use xlink:href="icons.svg#icon-download"></use></svg> Jekyll-Standalone v3.7.3</button>
 					<h3>Step 2. Set Localhost Environment</h3>
 					<ul>
-						<li><strong>Working Directory Path: </strong><br />
+						<li><strong>Local Working Directory: </strong><br />
 						<input type="text" class="expand" id="jekyll-settings-localpath" spellcheck="false"></li>
-						<li><strong>Port: </strong><input type="text" id="jekyll-settings-port" spellcheck="false" maxlength="5" size="5"></li>
+						<li><strong>Port: </strong><input type="text" id="jekyll-settings-port" spellcheck="false" maxlength="5" size="5"> (This value must be specified if you want to run Jekyll.)</li>
 					</ul>
 					<h3>Step 3. Install Jekyll Launcher</h3>
 					<div>Download and execute the Jekyll Launcher installer:</div>
@@ -367,12 +375,13 @@
 				<div id="hpage-md-tutorial" class="hpage"></div>
 				<div id="hpage-about" class="hpage">
 					<h1><span class="appname"></span> <span class="appvers"></span></h1>
-					<div>Made by ChangUk (<a href="https://changuk.github.io" target="_blank">changuk.github.io</a>)</div>
-					<h2>Features and Tips</h2>
+					<div>Made by ChangUk (<a href="https://changuk.github.io">changuk.github.io</a>)</div>
+					<h2>Features</h2>
 					<ul>
-						<li>Support drag-and-drop to present files attached to markdown document.</li>
-						<li>Support hashing for preventing duplication of resource filenames.</li>
-						<li>Support import/export to cloud storage such as Google Drive or Github.</li>
+						<li>Support drag-and-drop to display attachments on the editor.</li>
+						<li>Provide hash functions for preventing attachment filename duplicates.</li>
+						<li>Support import/export to cloud storage such as <a href="https://drive.google.com">Google Drive</a> or <a href="https://github.com">Github</a>.</li>
+						<li>Provide Jekyll Launcher program to easily execute Jekyll engine on localhost.</li>
 					</ul>
 					<h2>Keyboard Shortcuts</h2>
 					<ul>
@@ -390,14 +399,15 @@
 					</ul>
 					<h2>Dependents</h2>
 					<ul>
-						<li><a href="https://codemirror.net/" target="_blank">CodeMirror</a></li>
-						<li><a href="http://showdownjs.com/" target="_blank">Showdown.js</a></li>
-						<li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
-						<li><a href="https://stuk.github.io/jszip/" target="_blank">JSZip.js</a></li>
+						<li><a href="https://codemirror.net/">CodeMirror</a></li>
+						<li><a href="http://showdownjs.com/">Showdown.js</a></li>
+						<li><a href="https://khan.github.io/KaTeX/">KaTeX</a></li>
+						<li><a href="https://github.com/brix/crypto-js">CryptoJS</a></li>
+						<li><a href="https://stuk.github.io/jszip/">JSZip.js</a></li>
 					</ul>
 					<h2>Troubleshooting</h2>
-					<div>Remove all setting values stored in sandboxed local storage:</div>
-					<button type="button" id="btn-reset-settings"><svg class="svg-btn"><use xlink:href="icons.svg#icon-trash"></use></svg> Remove All Settings</button>
+					<div>Application updating may cause backward compatibility issues. Remove all setting values stored in sandboxed local storage and clean memory up to fix the problem:</div>
+					<button type="button" id="btn-reset-settings"><svg class="svg-btn"><use xlink:href="icons.svg#icon-trash"></use></svg> Reset All Settings</button>
 				</div>
 			</div>
 		</help>

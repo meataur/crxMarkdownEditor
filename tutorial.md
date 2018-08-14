@@ -12,8 +12,6 @@ Markdown's syntax is comprised entirely of punctuation characters, which punctua
 
 Makrdown is not a replacement for HTML, or even close to it. HTML is a **publishing** format; Markdown is a **writing** format.
 
-#### Demo
-
 	This is a regular paragraph of markdown document.
 	<button>Button</button>
 
@@ -26,8 +24,6 @@ This is a regular paragraph of markdown document.
 
 In HTML, there are two characters that demand special treatment: < and &. If you want to use them as literal characters in HTML, you must escape them as entities, e.g. `&lt;` and `&amp;`. But, markdown allows you to use these characters naturally.
 
-#### Demo
-
 	The left angle bracket(<) and Ampersands(&)
 
 The left angle bracket(<) and Ampersands(&)
@@ -37,8 +33,6 @@ The left angle bracket(<) and Ampersands(&)
 ### Paragraph
 
 A paragraph is simply one or more consecutive lines or text, separated by one or more blank lines.
-
-#### Demo
 
 	This is the first paragraph.↵
 	↵
@@ -52,9 +46,7 @@ This is the second paragraph.
 
 ### Line Breaks
 
-In HTML, the tag `<br />` is used to break line. When you do want to insert a `<br />` break tag using Markdown, you end a line with two or more spaces.
-
-#### Demo
+In HTML, the tag `<br />` is used to break line.
 
 	Line bre↵
 	ak here.
@@ -68,8 +60,6 @@ ak here.
 
 Markdown supports Atx-style headers(1-6 levels).
 
-#### Demo
-
 	#·Header Level 1
 	##·Header Level 2
 	###·Header Level 3
@@ -80,9 +70,7 @@ Markdown supports Atx-style headers(1-6 levels).
 ### Header Level 3
 #### Header Level 4
 
-#### Demo: Misuse
-
-Compare the above with the below:
+Compare the above with the below. The below is an example of misuse:
 
 	#Header Level 1
 	##Header Level 2
@@ -98,8 +86,6 @@ Compare the above with the below:
 
 ### Emphasis
 
-#### Demo
-
 	**Strong** and *Italic*
 
 **Strong** and *Italic*
@@ -107,8 +93,6 @@ Compare the above with the below:
 ---
 
 ### Strike Through
-
-#### Demo
 
 	a ~~strikethrough~~ element
 
@@ -119,8 +103,6 @@ a ~~strikethrough~~ element
 ### Blockquotes
 
 Markdown uses email-style > characters for blockquoting.
-
-#### Demo
 
 	> This is a blockquote with two paragraphs.
 	> 
@@ -142,9 +124,7 @@ Markdown uses email-style > characters for blockquoting.
 
 ### Lists
 
-Markdown supports ordered and unordered lists.
-
-#### Demo
+Markdown supports ordered and unordered lists:
 
 	- Red
 	- Green
@@ -172,8 +152,6 @@ Markdown supports ordered and unordered lists.
 
 You can produce a horizontal rule tag `<hr />` by placing three or more hyphens, asterisks, or underscores.
 
-#### Demo
-
 ```
 ---
 ***
@@ -187,8 +165,6 @@ ___
 
 ### Inline Links
 
-#### Demo
-
 ```
 I use [google](https://google.com/) and [naver](https://naver.com/) for information retrieval.
 ```
@@ -197,8 +173,6 @@ I use [google](https://google.com/) and [naver](https://naver.com/) for informat
 ---
 
 ### Reference-Style Links
-
-#### Demo
 
 	I use [google][1] and [naver][2] for information retrieval.
 
@@ -226,8 +200,6 @@ I use [google][] and [naver][] for information retrieval.
 
 Markdown uses an image syntax that is intended to resemble the syntax for links.
 
-#### Demo
-
 	![alt texts](https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png =272x*)
 	![](https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png =272x80 "Optional title")
 
@@ -239,8 +211,6 @@ Markdown uses an image syntax that is intended to resemble the syntax for links.
 ### Tables
 
 Markdown has a special syntax for tables.
-
-#### Demo
 
 	Item     | Value
 	-------- | ---
@@ -272,8 +242,6 @@ You can specify column alignment with one or two colons.
 
 ### Code Block
 
-#### Demo
-
 	⇥#include <stdio.h>
 	⇥int main() {
 	⇥⇥printf("Hello world!\n");
@@ -288,37 +256,21 @@ The tab spacing is replaced with 4 spaces:
 		return 0;
 	}
 
+If you want to make inline code block:
+
+	... is described in the file `readme.txt` ...
+
+... is described in the file `readme.txt` ...
+
 ---
 
 ### Code Highlighting
 
-#### Demo
-
-	This is a sample code from `sample.cpp`.
-	
-	```cpp
-	#include <stdio.h>
-	int main() {
-		printf("Hello world!\n");
-		return 0;
-	}
-	```
-
-This is a sample code from `sample.cpp`.
-
-```cpp
-#include <stdio.h>
-int main() {
-	printf("Hello world!\n");
-	return 0;
-}
-```
+Not support yet.
 
 ---
 
 ### Task Lists
-
-#### Demo
 
 	- [x] This task is done
 	- [ ] This is still pending
@@ -328,11 +280,25 @@ int main() {
 
 ---
 
+### Math Equation
+
+Math equation rendering is powered by [KaTeX](https://github.com/Khan/KaTeX).
+
+	$$\hat{\theta}_{\text{MLE}}=\underset {\theta}{\text{argmax }} L(x|\theta)$$
+
+$$\hat{\theta}_{\text{MLE}}=\underset {\theta}{\text{argmax }} L(x|\theta)$$
+
+If you want to render inline formula:
+
+	... to get parameter using maximum likelihood estimation: $\hat{\theta}_{\text{MLE}}=\underset {\theta}{\text{argmax }} L(x|\theta)$ ...
+
+... to get parameter using maximum likelihood estimation: $\hat{\theta}_{\text{MLE}}=\underset {\theta}{\text{argmax }} L(x|\theta)$ ...
+
+---
+
 ### Keyboard Buttons
 
-For more HTML symbols, see [https://www.toptal.com/designers/htmlarrows/](https://www.toptal.com/designers/htmlarrows/).
-
-#### Demo
+For more HTML symbols, see [https://www.toptal.com/designers/htmlarrows/](https://khan.github.io/KaTeX/).
 
 	<kbd>⎋ Esc</kbd>
 	

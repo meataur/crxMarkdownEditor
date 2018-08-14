@@ -155,7 +155,7 @@ IO.GDrive = (function () {
     IO.Spinner.hide("spinner-gdrive-import");
 
     if (this.status == 200) {
-      var parsed = parse(this.response);
+      var parsed = Parser.parse(this.response);
 
       editor.setValue(parsed.body.texts);
       editor.focus();
