@@ -104,9 +104,10 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById('menu-viewer').click();
 
   // Set buttons event handler
-  document.getElementById('btn-download-ruby').onclick = getRubyLang;
-  document.getElementById('btn-download-jekyll').onclick = getJekyllStandalone;
-  document.getElementById('btn-download-jekylllauncher').onclick = getJekyllLauncher;
+  document.getElementById("btn-download-ruby").onclick = getRubyLang;
+  document.getElementById("btn-download-jekyll").onclick = getJekyllStandalone;
+  document.getElementById("btn-download-jekylllauncher").onclick = getJekyllLauncher;
+  document.getElementById("btn-reset-settings").onclick = resetAllSettings;
 
   // Setting values key-pressing event handlers
   document.getElementById("editor-settings-theme").onchange = selectTheme;
@@ -249,15 +250,15 @@ document.addEventListener("DOMContentLoaded", function () {
   document.onkeydown = function (e) {
     if (e.ctrlKey) {
       switch (e.which) {
-        case 79: // Ctrl + O
+        case 79:  // Ctrl + O
           e.preventDefault();
           IO.Local.open();
           break;
-        case 81: // Ctrl + Q (for testing)
+        case 81:  // Ctrl + Q (for testing)
           e.preventDefault();
           messageBox("test");
           break;
-        case 83: // Ctrl + S
+        case 83:  // Ctrl + S
           e.preventDefault();
           IO.Local.save();
           break;
@@ -266,39 +267,41 @@ document.addEventListener("DOMContentLoaded", function () {
       switch (e.which) {
         case 27: // Escape key
           e.preventDefault();
+
+          var toggle = document.getElementById("viewer-tools-expand");
+          if (toggle.hasAttribute("expanded"))
+            toggle.click();
+
           closeAllDialogs();
           break;
       }
     }
-  };
+  }
 
   // Scrollbar synchronization
   var editorScroll = document.getElementsByClassName("CodeMirror-scroll")[0];
   var viewerScroll = document.getElementById("viewer");
   var editorScrollSync = false;
   var viewerScrollSync = false;
-  editorScroll.addEventListener("scroll", function () {
-    if (!editorScrollSync) {
-      viewerScrollSync = true;
-      var posRatio = editorScroll.scrollTop / editorScroll.scrollHeight;
-      viewerScroll.scrollTop = viewerScroll.scrollHeight * posRatio;
-    }
-    editorScrollSync = false;
-  });
-  viewerScroll.addEventListener("scroll", function () {
-    if (!viewerScrollSync) {
-      editorScrollSync = true;
-      var posRatio = viewerScroll.scrollTop / viewerScroll.scrollHeight;
-      editorScroll.scrollTop = editorScroll.scrollHeight * posRatio;
-    }
-    viewerScrollSync = false;
-  });
+  // editorScroll.addEventListener("scroll", function (e) {
+  //   if (!editorScrollSync) {
+  //     viewerScrollSync = true;
+  //     var posRatio = editorScroll.scrollTop / editorScroll.scrollHeight;
+  //     viewerScroll.scrollTop = viewerScroll.scrollHeight * posRatio;
+  //   }
+  //   editorScrollSync = false;
+  // });
+  // viewerScroll.addEventListener("scroll", function (e) {
+  //   if (!viewerScrollSync) {
+  //     editorScrollSync = true;
+  //     var posRatio = viewerScroll.scrollTop / viewerScroll.scrollHeight;
+  //     editorScroll.scrollTop = editorScroll.scrollHeight * posRatio;
+  //   }
+  //   viewerScrollSync = false;
+  // });
 
   // Save the last state of workspace
   window.onbeforeunload = function (e) {
-    // Save setting values
-    Settings.saveAll();
-
     // Save current document information
     var selectedTab = Tab.get();
     var metadata = Metadata.getMetadataFromPanel();
@@ -310,7 +313,11 @@ document.addEventListener("DOMContentLoaded", function () {
     selectedTab.info.editor.cursor = editor.getCursor();
     selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
     Tab.set(selectedTab.index, selectedTab.info);
-    Tab.backup();
+    
+    if (Settings.autoSave) {
+      Settings.saveAll();
+      Tab.save();
+    }
   }
 
   // The 'window.onresize' callback function is called after printing.
@@ -498,7 +505,7 @@ function expandViewer() {
   } else {
     this.setAttribute("expanded", "");
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-converge\"></use>";
-    this.getElementsByTagName("span")[0].innerHTML = "back to editor";
+    this.getElementsByTagName("span")[0].innerHTML = "return to editor";
     document.getElementsByTagName("header")[0].style.display = "none";
     document.getElementsByTagName("content")[0].style.height = "calc(100vh)";
     document.getElementById("viewer").getAncestorByClassName("panel-body").style.height = "calc(100vh - " + panelHeaderHeight + "px)";
@@ -736,6 +743,13 @@ EXIT /b
     a.download = "jekyll_launcher.zip";
     a.click();
   });
+}
+
+function resetAllSettings () {
+  Tab.resetData();
+  Settings.reset();
+  Settings.autoSave = false;
+  chrome.runtime.reload();
 }
 
 function selectTheme() {

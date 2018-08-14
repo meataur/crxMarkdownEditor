@@ -76,7 +76,8 @@ IO.Local = (function () {
                 for (var key in saveData.metadata) {
                   selectedTab.info.metadata[key] = saveData.metadata[key];
                 }
-                // selectedTab.info.metadata.comment = result[0].filename;
+                // selectedTab.info.metadata.description = result[0].filename;
+                selectedTab.info.metadata.type = "local";
                 selectedTab.info.texts = editor.getValue();
                 selectedTab.info.originalTexts = editor.getValue();
                 selectedTab.info.editor.scrollPos = editor.getScrollInfo();
@@ -85,7 +86,7 @@ IO.Local = (function () {
                 Tab.set(selectedTab.index, selectedTab.info);
               });
             }
-          })
+          });
         });
       }
     },

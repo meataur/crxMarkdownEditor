@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   document.getElementById("input-metadata-title").onchange = function (e) {
+    if (!this.value.length)
+      this.value = "Untitled Document";
+
     var selectedTab = Tab.get();
     selectedTab.tab.getElementsByClassName("doc-title")[0].innerHTML = this.value;
     selectedTab.tab.title = this.value;
@@ -33,76 +36,78 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-let Metadata = {
-  openPanel: function () {
-    var div = document.getElementById("editor-doc-metadata");
-    div.style.display = "block";
-    document.getElementById("select-metadata-type").focus();
-  },
-  getMetadataFromPanel: function () {
-    var metadata = {
-      type: ""
-    }
-    var keywords = {
-      local: "local",
-      github: "github",
-      google: "gdrive"
-    }
-    for (var k in keywords) {
-      if (document.getElementById("select-metadata-type").value.toLowerCase().contains(k)) {
-        metadata.type = keywords[k];
-        break;
+let Metadata = (function () {
+  return {
+    openPanel: function () {
+      var div = document.getElementById("editor-doc-metadata");
+      div.style.display = "block";
+      document.getElementById("input-metadata-layout").focus();
+    },
+    getMetadataFromPanel: function () {
+      var metadata = {
+        type: ""
       }
-    }
-    metadata.id = document.getElementById("input-metadata-id").value;
-    metadata.layout = document.getElementById("input-metadata-layout").value;
-    metadata.title = document.getElementById("input-metadata-title").value;
-    metadata.date = document.getElementById("input-metadata-date").value;
-    metadata.category = document.getElementById("input-metadata-category").value;
-    metadata.tags = document.getElementById("input-metadata-tags").value;
-    metadata.comment = document.getElementById("input-metadata-comment").value;
-
-    // Get custom key-values
-    for (var i = 1; i <= 3; i++) {
-      var customKey = document.getElementById("input-metadata-reserved-key" + i).value;
-      var customValue = document.getElementById("input-metadata-reserved-value" + i).value;
-      if (customKey.length)
-        metadata[customKey] = customValue;
-    }
-
-    return metadata;
-  },
-  setMetadataToPanel: function (metadata) {
-    document.getElementById("select-metadata-type").value = "Not specified";
-    if (metadata.type && metadata.type.length) {
-      var docTypes = {
-        local: "Local file",
-        github: "Github markdown page",
-        gdrive: "Google document"
+      var keywords = {
+        local: "local",
+        github: "github",
+        google: "gdrive"
       }
-      document.getElementById("select-metadata-type").value = docTypes[metadata.type];
-    }
+      for (var k in keywords) {
+        if (document.getElementById("select-metadata-type").value.toLowerCase().contains(k)) {
+          metadata.type = keywords[k];
+          break;
+        }
+      }
+      metadata.id = document.getElementById("input-metadata-id").value;
+      metadata.layout = document.getElementById("input-metadata-layout").value;
+      metadata.title = document.getElementById("input-metadata-title").value;
+      metadata.date = document.getElementById("input-metadata-date").value;
+      metadata.category = document.getElementById("input-metadata-category").value;
+      metadata.tags = document.getElementById("input-metadata-tags").value;
+      metadata.description = document.getElementById("input-metadata-description").value;
 
-    document.getElementById("input-metadata-id").value = metadata.id;
-    document.getElementById("input-metadata-layout").value = metadata.layout;
-    document.getElementById("input-metadata-title").value = metadata.title;
-    document.getElementById("input-metadata-date").value = metadata.date;
-    document.getElementById("input-metadata-category").value = metadata.category;
-    document.getElementById("input-metadata-tags").value = metadata.tags;
-    document.getElementById("input-metadata-comment").value = metadata.comment;
+      // Get custom key-values
+      for (var i = 1; i <= 3; i++) {
+        var customKey = document.getElementById("input-metadata-reserved-key" + i).value;
+        var customValue = document.getElementById("input-metadata-reserved-value" + i).value;
+        if (customKey.length)
+          metadata[customKey] = customValue;
+      }
 
-    // Set custom key-values
-    var generalKeys = ["type", "id", "layout", "title", "date", "category", "tags", "comment"];
-    var cnt = 0;
-    for (var k in metadata) {
-      if (!generalKeys.includes(k) && cnt < 3) {
-        cnt += 1;
-        document.getElementById("input-metadata-reserved-key" + cnt).value = k;
-        document.getElementById("input-metadata-reserved-value" + cnt).value = metadata[k];
+      return metadata;
+    },
+    setMetadataToPanel: function (metadata) {
+      document.getElementById("select-metadata-type").value = "Not specified";
+      if (metadata.type && metadata.type.length) {
+        var docTypes = {
+          local: "Local file",
+          github: "Github markdown page",
+          gdrive: "Google document"
+        }
+        document.getElementById("select-metadata-type").value = docTypes[metadata.type];
+      }
+
+      document.getElementById("input-metadata-id").value = metadata.id;
+      document.getElementById("input-metadata-layout").value = metadata.layout;
+      document.getElementById("input-metadata-title").value = metadata.title;
+      document.getElementById("input-metadata-date").value = metadata.date;
+      document.getElementById("input-metadata-category").value = metadata.category;
+      document.getElementById("input-metadata-tags").value = metadata.tags;
+      document.getElementById("input-metadata-description").value = metadata.description;
+
+      // Set custom key-values
+      var generalKeys = ["type", "id", "layout", "title", "date", "category", "tags", "description"];
+      var cnt = 0;
+      for (var k in metadata) {
+        if (!generalKeys.includes(k) && cnt < 3) {
+          cnt += 1;
+          document.getElementById("input-metadata-reserved-key" + cnt).value = k;
+          document.getElementById("input-metadata-reserved-value" + cnt).value = metadata[k];
+        }
       }
     }
   }
-}
+})();
 
 let Tab = (function () {
   const MAXTABS = 10;
@@ -196,7 +201,7 @@ let Tab = (function () {
           date: "",
           category: "",
           tags: "",
-          comment: ""
+          description: ""
         },
         texts: "",
         originalTexts: "",
@@ -320,6 +325,7 @@ let Tab = (function () {
     },
     addNew: function () {
       var newDocInfo = Tab.getInitData();
+      newDocInfo.metadata.layout = "post";
       newDocInfo.metadata.date = Util.curtime();
       var newtab = Tab.create(newDocInfo);
       Tab.add(newtab, newDocInfo);
@@ -335,6 +341,7 @@ let Tab = (function () {
         var selectedTab = Tab.get();
         if (selectedTab) {
           var newDocInfo = Tab.getInitData();
+          newDocInfo.metadata.layout = "post";
           newDocInfo.metadata.date = Util.curtime();
           Tab.set(selectedTab.index, newDocInfo);
         }
@@ -380,7 +387,7 @@ let Tab = (function () {
         document.getElementById("tabs").removeChild(selectedTab.tab);
       }
     },
-    backup: function () {
+    save: function () {
       chrome.storage.local.set({
         documents: _data
       });
@@ -403,6 +410,9 @@ let Tab = (function () {
         if (tab.id !== "create-tab")
           tab.style.width = newWidth + "px";
       });
+    },
+    resetData: function () {
+      _data = [];
     }
   }
 })();

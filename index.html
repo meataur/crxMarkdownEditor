@@ -214,7 +214,7 @@
 						</ctrl>
 						<ctrl><div class="flex-container"><input type="text" class="table-key" value="category" disabled><input type="text" class="table-value" id="input-metadata-category" spellcheck="false"></div></ctrl>
 						<ctrl><div class="flex-container"><input type="text" class="table-key" value="tags" disabled><input type="text" class="table-value" id="input-metadata-tags" spellcheck="false"></div></ctrl>
-						<ctrl><div class="flex-container"><input type="text" class="table-key" value="comment" disabled><input type="text" class="table-value" id="input-metadata-comment" spellcheck="false"></div></ctrl>
+						<ctrl><div class="flex-container"><input type="text" class="table-key" value="description" disabled><input type="text" class="table-value" id="input-metadata-description" spellcheck="false"></div></ctrl>
 					</item>
 					<item>
 						<div>custom metadata:</div>
@@ -386,6 +386,7 @@
 						</li>
 						<li>Replace all: <kbd>Ctrl</kbd> + <kbd>H</kbd></li>
 						<li>Jump to line: <kbd>Alt</kbd> + <kbd>G</kbd></li>
+						<li>Return to editor on expanded-viewer mode: <kbd>Esc</kbd></li>
 					</ul>
 					<h2>Dependents</h2>
 					<ul>
@@ -394,6 +395,9 @@
 						<li><a href="https://github.com/brix/crypto-js" target="_blank">CryptoJS</a></li>
 						<li><a href="https://stuk.github.io/jszip/" target="_blank">JSZip.js</a></li>
 					</ul>
+					<h2>Troubleshooting</h2>
+					<div>Remove all setting values stored in sandboxed local storage:</div>
+					<button type="button" id="btn-reset-settings"><svg class="svg-btn"><use xlink:href="icons.svg#icon-trash"></use></svg> Remove All Settings</button>
 				</div>
 			</div>
 		</help>

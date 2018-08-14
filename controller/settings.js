@@ -15,6 +15,7 @@ let Settings = (function () {
   }
 
   return {
+    autoSave: true,
     openEditorSettingsPanel: function () {
       var div = document.getElementById("editor-settings");
       div.style.display = "block";
@@ -137,6 +138,9 @@ let Settings = (function () {
     },
     saveAll: function () {
       return (Settings.save("editor") && Settings.save("attachment") && Settings.save("viewer") && Settings.save("jekyll"));
+    },
+    reset: function () {
+      chrome.storage.local.clear();
     }
   }
 })();

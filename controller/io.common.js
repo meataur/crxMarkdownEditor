@@ -14,8 +14,6 @@ let IO = {
       metadata: {},
       texts: ""
     }
-    var docDatetime = "";
-    var docTitle = "";
 
     if (editor) {
       data.metadata = Metadata.getMetadataFromPanel();
@@ -27,17 +25,23 @@ let IO = {
         keys[keys.length] = k;
       keys.sort();
 
+      // Make metadata string to append
+      var docDatetime = "";
+      var docTitle = "";
       keys.forEach(function (k) {
-        if (k != "type" && data.metadata[k].length) {
-          data.texts += k + ": " + data.metadata[k] + "\n";
-          if (k == "title") {
-            docTitle = data.metadata[k].length ? data.metadata[k] : "Untitled Document";
-            docTitle = docTitle.replaceAll(" ", "-").toLowerCase();
-          }
-        }
-        if (k == "date") {
+        if (k == "type") {
+          // Do nothing
+        } else if (k == "title") {
+          docTitle = data.metadata[k].length ? data.metadata[k] : "Untitled Document";
+          data.texts += k + ": " + docTitle + "\n";
+          docTitle = docTitle.replaceAll(" ", "-").toLowerCase();
+        } else if (k == "date") {
           docDatetime = data.metadata[k].length ? data.metadata[k] : Util.curtime();
+          data.texts += k + ": " + docDatetime + "\n";
           docDatetime = docDatetime.split(" ")[0];
+        } else {
+          if (data.metadata[k].length)
+            data.texts += k + ": " + data.metadata[k] + "\n";
         }
       });
       data.texts += "---\n\n";
