@@ -212,6 +212,7 @@ IO.Github = (function () {
     if (this.status == 200) {
       var data = JSON.parse(this.response);
       if (data.encoding === "base64") {
+        document.getElementById("viewer").scrollTop = 0;
         var textData = decodeURIComponent(Array.prototype.map.call(atob(data.content), function (c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
         }).join(''));

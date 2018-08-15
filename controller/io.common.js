@@ -5,7 +5,7 @@ let IO = {
     var selectedTab = Tab.get();
     var parsed = Parser.parse(editor.getValue());
     if (selectedTab.info.originalTexts !== editor.getValue() && parsed.body.texts.length)
-      return confirm("Changes you made may not be saved.\nAre you sure to open another document?")
+      return confirm("Changes you made may not be saved.\nAre you sure to open another document?");
     return true;
   },
   makeSaveData: function () {

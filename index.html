@@ -225,7 +225,7 @@
 						<ctrl><div class="flex-container"><input type="text" class="table-key" value="description" disabled><input type="text" class="table-value" id="input-metadata-description" spellcheck="false"></div></ctrl>
 					</item>
 					<item>
-						<div>custom metadata:</div>
+						<div>custom metadata (shows up to 3):</div>
 						<ctrl>
 							<div class="flex-container">
 								<input type="text" id="input-metadata-reserved-key1" class="table-key" placeholder="custom key #1" spellcheck="false">
@@ -297,7 +297,7 @@
 						<li>
 							<span>export as</span>
 							<ul class="dropdown">
-								<li id="viewer-tools-export-html"><svg><use xlink:href="icons.svg#icon-html"></use></svg><div><span>html</span></div></li>
+								<li id="viewer-tools-export-html"><svg><use xlink:href="icons.svg#icon-html"></use></svg><div><span>styled html</span></div></li>
 								<li id="viewer-tools-export-pdf"><svg><use xlink:href="icons.svg#icon-pdf"></use></svg><div><span>pdf</span></div></li>
 								<li id="viewer-tools-print"><svg><use xlink:href="icons.svg#icon-print"></use></svg><div><span>print</span></div></li>
 							</ul>
@@ -305,6 +305,7 @@
 						<li>
 							<span>viewer</span>
 							<ul class="dropdown">
+								<li id="viewer-tools-mode"><svg><use xlink:href="icons.svg#icon-html"></use></svg><div><span>html code</span></div></li>
 								<li id="viewer-tools-expand"><svg><use xlink:href="icons.svg#icon-expand"></use></svg><div><span>expand screen</span></div></li>
 								<li id="viewer-tools-settings"><svg><use xlink:href="icons.svg#icon-settings"></use></svg><div><span>settings</span></div></li>
 							</ul>
@@ -313,9 +314,7 @@
 				</toolbox>
 			</div>
 			<div class="panel-body">
-				<div id="viewer">
-					<div class="no-content">There is nothing displayed on viewer.</div>
-				</div>
+				<div id="viewer"></div>
 				<div id="viewer-settings" class="dlg">
 					<section>
 						<div class="section-title">link</div>

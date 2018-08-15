@@ -35,6 +35,7 @@ IO.Local = (function () {
           if (evt.target.readyState == FileReader.DONE) {
             var parsed = Parser.parse(evt.target.result);
 
+            document.getElementById("viewer").scrollTop = 0;
             editor.setValue(parsed.body.texts);
             editor.focus();
             editor.setCursor(0, 0);

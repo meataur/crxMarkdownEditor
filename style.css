@@ -19,6 +19,8 @@ svg { display: inline-flex; align-self: center; fill: currentColor; stroke: curr
 .left { float: left; }
 .right { float: right; }
 
+.monotype { font-family: consolas !important; }
+
 
 
 /* Custom scrollbar */
@@ -292,8 +294,8 @@ viewer, localhost, help { display: none; }
 .hpage pre > code table { margin: 0; border: 0; }
 .hpage pre > code table td { padding: 0; border: 0; }
 .hpage pre > code table td > pre { padding: 0 1em; }
-.hpage p > code { font-size: .83rem; }
-.hpage pre ind { color: #585858; }
+.hpage p > code { font-size: .9rem; }
+.hpage pre ind { color: #777; }
 
 .hpage table { margin: 1.6em 0; width: 100%; text-align: left; color: #3f3f3f; border-collapse: collapse; border: 1px solid #e8e8e8; }
 .hpage table tr:nth-child(odd) { background: #fff; }

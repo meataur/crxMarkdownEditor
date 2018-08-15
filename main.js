@@ -200,6 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("viewer-tools-export-html").onclick = IO.Local.saveAsHtml;
   document.getElementById("viewer-tools-export-pdf").onclick = IO.Local.saveAsPdf;
   document.getElementById("viewer-tools-print").onclick = IO.Local.print;
+  document.getElementById("viewer-tools-mode").onclick = switchViewerMode;
   document.getElementById("viewer-tools-expand").onclick = expandViewer;
   document.getElementById("viewer-tools-settings").onclick = Settings.openViewerSettingsPanel;
 
@@ -485,6 +486,22 @@ function closeAllDialogs() {
  * Helper functions
  */
 
+function switchViewerMode() {
+  if (this.hasAttribute("raw")) {
+    this.removeAttribute("raw");
+    document.getElementById("viewer").classList.remove("monotype");
+    this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-html\"></use>";
+    this.getElementsByTagName("span")[0].innerHTML = "html code";
+  } else {
+    this.setAttribute("raw", "");
+    document.getElementById("viewer").classList.add("monotype");
+    this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-see\"></use>";
+    this.getElementsByTagName("span")[0].innerHTML = "styled html";
+  }
+  var selectedTab = Tab.get();
+  preview(selectedTab.info.metadata.title, editor.getValue());
+}
+
 function expandViewer() {
   var panelHeaderHeight = 45;
 
@@ -751,10 +768,12 @@ EXIT /b
 }
 
 function resetAllSettings () {
-  Tab.resetData();
-  Settings.reset();
-  Settings.autoSave = false;
-  chrome.runtime.reload();
+  if (confirm("All open documents will be closed without saving, and all settings are initialized.\nAre you sure you want to continue?")) {
+    Tab.resetData();
+    Settings.reset();
+    Settings.autoSave = false;
+    chrome.runtime.reload();
+  }
 }
 
 function selectTheme() {
@@ -861,15 +880,26 @@ function preview(docTitle, data) {
       // Show preview panel
       var html = converter.makeHtml("# " + docTitle + "\n\n" + data);
       viewer.removeAllChildren();
-      viewer.innerHTML = html;
-      renderMathInElement(viewer, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "\\[", right: "\\]", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\\(", right: "\\)", display: false}
-        ]
-      });
+
+      var toggle = document.getElementById("viewer-tools-mode");
+      if (toggle.hasAttribute("raw")) {
+        html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+          return '&#'+i.charCodeAt(0)+';';
+        });
+        html.match(/[^\r\n]+/g).forEach(function (line) {
+          viewer.innerHTML += line + "<br />";
+        });
+      } else {
+        viewer.innerHTML = html;
+        renderMathInElement(viewer, {
+          delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "\\[", right: "\\]", display: true},
+            {left: "$", right: "$", display: false},
+            {left: "\\(", right: "\\)", display: false}
+          ]
+        });
+      }
     } else {
       viewer.removeAllChildren();
       var noContent = document.createElement("div");

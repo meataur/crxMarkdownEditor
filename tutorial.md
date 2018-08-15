@@ -126,15 +126,15 @@ Markdown uses email-style > characters for blockquoting.
 
 Markdown supports ordered and unordered lists:
 
-	- Red
-	- Green
-	- Blue
+	-·Red
+	-·Green
+	-·Blue
 	
-	1. Red
-	··- Nested Red 1
-	··- Nested Red 2
-	2. Green
-	3. Blue
+	1.·Red
+	··-·Nested Red 1
+	··-·Nested Red 2
+	2.·Green
+	3.·Blue
 
 - Red
 - Green
@@ -248,7 +248,15 @@ You can specify column alignment with one or two colons.
 	⇥⇥return 0;
 	⇥}
 
-The tab spacing is replaced with 4 spaces:
+or 
+
+	····#include <stdio.h>
+	····int main() {
+	········printf("Hello world!\n");
+	········return 0;
+	····}
+
+renders:
 
 	#include <stdio.h>
 	int main() {
@@ -272,8 +280,8 @@ Not support yet.
 
 ### Task Lists
 
-	- [x] This task is done
-	- [ ] This is still pending
+	-·[x] This task is done
+	-·[ ] This is still pending
 	
 - [x] This task is done
 - [ ] This is still pending
