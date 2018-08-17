@@ -2,8 +2,8 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<link rel="stylesheet" href="style.css">
-	<link rel="stylesheet" href="preview.css">
+	<link rel="stylesheet" href="style.css" media="screen, print">
+	<link id="viewer-style-layout" rel="stylesheet" href="preview.css" media="screen, print">
 
 	<!-- CryptoJS -->
 	<script src="lib/crypto-js-3.1.2/core.js"></script>
@@ -22,7 +22,7 @@
 	<script src="lib/codemirror-5.39.0/mode/xml/xml.js"></script>
 
 	<!-- CodeMirror themes -->
-	<link rel="stylesheet" href="themes.css">
+	<link rel="stylesheet" href="lib/codemirror-5.39.0/theme.css">
 
 	<!-- CodeMirror addons -->
 	<link rel="stylesheet" href="lib/codemirror-5.39.0/addon/search/matchesonscrollbar.css">
@@ -70,7 +70,15 @@
 	<script src="lib/katex-0.10.0/katex.min.js"></script>
 	<script src="lib/katex-0.10.0/contrib/auto-render.min.js"></script>
 	<script src="lib/katex-0.10.0/contrib/copy-tex.min.js"></script>
-	
+
+	<!-- Beautify  -->
+	<script src="lib/beautify-1.8.0/beautify-html.min.js"></script>
+	<script src="lib/beautify-1.8.0/beautify-html.min.js"></script>
+
+	<!-- Highlight.js -->
+	<link id="viewer-style-codeblock" rel="stylesheet" href="lib/highlight-9.12.0/styles/default.css">
+	<script src="lib/highlight-9.12.0/highlight.pack.js"></script>
+
 	<!-- Showdown.js -->
 	<script src="lib/showdown-1.8.6/showdown.min.js"></script>
 
@@ -317,6 +325,13 @@
 				<div id="viewer"></div>
 				<div id="viewer-settings" class="dlg">
 					<section>
+						<div class="section-title">style</div>
+						<item class="inline">
+							<div>code block:</div>
+							<ctrl><select id="viewer-settings-codestyle"></select></ctrl>
+						</item>
+					</section>
+					<section>
 						<div class="section-title">link</div>
 						<item>
 							<div>base url:</div>
@@ -400,6 +415,8 @@
 					<ul>
 						<li><a href="https://codemirror.net/">CodeMirror</a></li>
 						<li><a href="http://showdownjs.com/">Showdown.js</a></li>
+						<li><a href="https://github.com/beautify-web/js-beautify/">JS Beautifier</a></li>
+						<li><a href="https://highlightjs.org/">highlight.js</a></li>
 						<li><a href="https://khan.github.io/KaTeX/">KaTeX</a></li>
 						<li><a href="https://github.com/brix/crypto-js">CryptoJS</a></li>
 						<li><a href="https://stuk.github.io/jszip/">JSZip.js</a></li>

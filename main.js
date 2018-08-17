@@ -75,9 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Load previous workspaces and setting values
-  if (!Settings.loadAll()) {
-    messageBox("Unabled to load setting values.");
-  }
+  Settings.loadAll();
   loadPrevWorks();
 
   var header = document.getElementsByTagName("header")[0];
@@ -107,13 +105,6 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("btn-download-ruby").onclick = getRubyLang;
   document.getElementById("btn-download-jekyll").onclick = getJekyllStandalone;
   document.getElementById("btn-download-jekylllauncher").onclick = getJekyllLauncher;
-  document.getElementById("btn-reset-settings").onclick = resetAllSettings;
-
-  // Setting values key-pressing event handlers
-  document.getElementById("editor-settings-theme").onchange = selectTheme;
-  document.getElementById("editor-settings-fontsize").onchange = selectFontsize;
-  document.getElementById("attachment-settings-types").onkeyup = checkJSONFormat;
-  document.getElementById("jekyll-settings-port").onkeypress = numberOnly;
 
   // Set menu event handler of content panels
   Array.from(document.getElementsByClassName("panel-menu")).forEach(function (panelMenu) {
@@ -489,7 +480,7 @@ function closeAllDialogs() {
 function switchViewerMode() {
   if (this.hasAttribute("raw")) {
     this.removeAttribute("raw");
-    document.getElementById("viewer").classList.remove("monotype");
+    document.getElementById("viewer").className = "";
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-html\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "html code";
   } else {
@@ -600,6 +591,15 @@ function openMdTutorial() {
     var data = converter.makeHtml(this.response);
     data = data.replaceAll("·", "<ind>·</ind>").replaceAll("↵", "<ind>↵</ind>").replaceAll("⇥", "<ind>⇥</ind>");
     document.getElementById("hpage-md-tutorial").innerHTML = data;
+    document.getElementById("hpage-md-tutorial").querySelectorAll("pre code").forEach(function (code) {
+      if (code.classList.length) {
+        var worker = new Worker("lib/highlight-9.12.0/worker.js");
+        worker.onmessage = function(event) {
+          code.innerHTML = event.data;
+        }
+        worker.postMessage(code.textContent);
+      }
+    });
     renderMathInElement(document.getElementById("hpage-md-tutorial"), {
       delimiters: [
         {left: "$$", right: "$$", display: true},
@@ -628,27 +628,6 @@ function openAboutPage() {
 /**
  * Et cetera
  */
-
-function checkJSONFormat() {
-  try {
-    JSON.parse(this.value);
-    this.style["background"] = "#383838";
-  } catch (e) {
-    this.style["background"] = "rgb(238,97,80)";
-  }
-}
-
-function numberOnly(e) {
-  var evt = e || window.event;
-  var key = evt.keyCode || evt.which;
-  key = String.fromCharCode(key);
-  var regex = /[0-9]|\./;
-  if (!regex.test(key)) {
-    evt.returnValue = false;
-    if (evt.preventDefault)
-      evt.preventDefault();
-  }
-}
 
 function getRubyLang() {
   chrome.tabs.create({
@@ -767,29 +746,6 @@ EXIT /b
   });
 }
 
-function resetAllSettings () {
-  if (confirm("All open documents will be closed without saving, and all settings are initialized.\nAre you sure you want to continue?")) {
-    Tab.resetData();
-    Settings.reset();
-    Settings.autoSave = false;
-    chrome.runtime.reload();
-  }
-}
-
-function selectTheme() {
-  var selector = document.getElementById("editor-settings-theme");
-  var theme = selector.options[selector.selectedIndex].textContent;
-  editor.setOption("theme", theme);
-}
-
-function selectFontsize() {
-  var selector = document.getElementById("editor-settings-fontsize");
-  var fontsize = selector.options[selector.selectedIndex].textContent;
-  var editorObj = document.getElementsByClassName('CodeMirror')[0];
-  editorObj.style["font-size"] = fontsize + "px";
-  editor.refresh();
-}
-
 function attachments() {
   var input = document.createElement("input");
   input.type = "file";
@@ -869,28 +825,84 @@ function prettify() {
   messageBox("Not support yet...");
 }
 
+
+// function initSnippet() {
+//   var snippet = document.querySelector('#snippet pre code');
+//   hljs.highlightBlock(snippet);
+//   var style = document.getElementById('style-link').textContent;
+//   var links = document.querySelectorAll('.codestyle');
+//   Array.prototype.forEach.call(links, function(link) {
+//     link.rel = 'stylesheet';
+//     link.disabled = !link.href.match(style + '\\.css$');
+//   });
+//   document.getElementById('language-link').innerHTML = snippet.result.language;
+//   var controls = document.querySelectorAll('#control a');
+//   Array.prototype.forEach.call(controls, function(control) {
+//     control.addEventListener('click', function(e) {
+//       fetch(control.href, {headers: new Headers({'X-Requested-With': 'XMLHttpRequest'})})
+//         .then(response => response.text())
+//         .then(text => {
+//           document.getElementById('snippet').innerHTML = text;
+//           initSnippet();
+//         });
+//       e.preventDefault();
+//     });
+//   });
+// }
+
+var viewerScrollPos = 0;
 function preview(docTitle, data) {
   if (editor) {
     var viewer = document.getElementById("viewer");
+    viewerScrollPos = viewer.scrollTop;
+    viewer.removeAllChildren();
+
     if (data.length) {
       // Set site's base url to localhost
       var baseurl = document.getElementById("viewer-settings-baseurl").value;
       data = data.replace(/{{ site.baseurl }}/gi, baseurl);
 
-      // Show preview panel
+      // Convert markdown into html
       var html = converter.makeHtml("# " + docTitle + "\n\n" + data);
-      viewer.removeAllChildren();
 
       var toggle = document.getElementById("viewer-tools-mode");
       if (toggle.hasAttribute("raw")) {
+        html = html_beautify(html, {
+          "indent_size": "2",
+          "indent_char": " ",
+          "max_preserve_newlines": "5",
+          "preserve_newlines": true,
+          "keep_array_indentation": false,
+          "break_chained_methods": false,
+          "indent_scripts": "normal",
+          "brace_style": "collapse",
+          "space_before_conditional": true,
+          "unescape_strings": false,
+          "jslint_happy": false,
+          "end_with_newline": false,
+          "wrap_line_length": "0",
+          "indent_inner_html": false,
+          "comma_first": false,
+          "e4x": false
+        });
         html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
           return '&#'+i.charCodeAt(0)+';';
-        });
+        }).replace(/ /g, "&nbsp;").replace(/\t/g, "  ");
         html.match(/[^\r\n]+/g).forEach(function (line) {
           viewer.innerHTML += line + "<br />";
         });
+        hljs.highlightBlock(viewer);
       } else {
         viewer.innerHTML = html;
+        viewer.querySelectorAll("pre code").forEach(function (code) {
+          if (code.classList.length) {
+            var worker = new Worker("lib/highlight-9.12.0/worker.js");
+            worker.onmessage = function(event) {
+              code.innerHTML = event.data;
+            }
+            worker.postMessage(code.textContent);
+          }
+        });
         renderMathInElement(viewer, {
           delimiters: [
             {left: "$$", right: "$$", display: true},
@@ -900,8 +912,9 @@ function preview(docTitle, data) {
           ]
         });
       }
+
+      viewer.scrollTop = viewerScrollPos;
     } else {
-      viewer.removeAllChildren();
       var noContent = document.createElement("div");
       noContent.classList.add("no-content");
       noContent.innerHTML = "There is nothing displayed on viewer.";

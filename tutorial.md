@@ -242,19 +242,22 @@ You can specify column alignment with one or two colons.
 
 ### Code Block
 
-	⇥#include <stdio.h>
-	⇥int main() {
-	⇥⇥printf("Hello world!\n");
-	⇥⇥return 0;
-	⇥}
+To specify an entire block of pre-formatted code, indent every line of the block by 1 tab or 4 spaces.
 
-or 
-
-	····#include <stdio.h>
-	····int main() {
-	········printf("Hello world!\n");
-	········return 0;
-	····}
+```
+⇥#include <stdio.h>
+⇥int main() {
+⇥⇥printf("Hello world!\n");
+⇥⇥return 0;
+⇥}
+```
+```
+····#include <stdio.h>
+····int main() {
+········printf("Hello world!\n");
+········return 0;
+····}
+```
 
 renders:
 
@@ -264,17 +267,33 @@ renders:
 		return 0;
 	}
 
-If you want to make inline code block:
+For syntax highlighting, use triple backtick ``` and specify code type behind it:
+
+	```cpp
+	#include <stdio.h>
+	int main() {
+		printf("Hello world!\n");
+		return 0;
+	}
+	```
+
+```cpp
+#include <stdio.h>
+int main() {
+	printf("Hello world!\n");
+	return 0;
+}
+```
+
+---
+
+### Inline Code
+
+For inline code in a paragraph, type a single backtick ` to begin and end your code:
 
 	... is described in the file `readme.txt` ...
 
 ... is described in the file `readme.txt` ...
-
----
-
-### Code Highlighting
-
-Not support yet.
 
 ---
 
@@ -290,23 +309,21 @@ Not support yet.
 
 ### Math Equation
 
-Math equation rendering is powered by [KaTeX](https://github.com/Khan/KaTeX).
+You can render LaTeX mathematical expressions using [KaTeX](https://github.com/Khan/KaTeX):
 
-	$$\hat{\theta}_{\text{MLE}}=\underset {\theta}{\text{argmax }} L(x|\theta)$$
+	The Gamma function satisfying $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$ is via the Euler integral:
 
-$$\hat{\theta}_{\text{MLE}}=\underset {\theta}{\text{argmax }} L(x|\theta)$$
+	$$\Gamma(z) = \int_0^\infty t^{z-1}e^{-t}dt$$
 
-If you want to render inline formula:
+The Gamma function satisfying $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$ is via the Euler integral:
 
-	... to get parameter using maximum likelihood estimation: $\hat{\theta}_{\text{MLE}}=\underset {\theta}{\text{argmax }} L(x|\theta)$ ...
-
-... to get parameter using maximum likelihood estimation: $\hat{\theta}_{\text{MLE}}=\underset {\theta}{\text{argmax }} L(x|\theta)$ ...
+$$\Gamma(z) = \int_0^\infty t^{z-1}e^{-t}dt$$
 
 ---
 
 ### Keyboard Buttons
 
-For more HTML symbols, see [https://www.toptal.com/designers/htmlarrows/](https://khan.github.io/KaTeX/).
+For more HTML symbols, see [https://www.toptal.com/designers/htmlarrows/](https://www.toptal.com/designers/htmlarrows/).
 
 	<kbd>⎋ Esc</kbd>
 	
