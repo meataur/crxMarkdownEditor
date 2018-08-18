@@ -1,22 +1,39 @@
 IO.Local = (function () {
+  let _get = function (uri, onload, onerror) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", uri);
+    xhr.onload = onload;
+    xhr.onerror = onerror;
+    xhr.send();
+  }
   let _createIframe = function (docTitle) {
     var ifrm = document.createElement("iframe");
     ifrm.style.position = "absolute";
     ifrm.style.display = "none";
     document.body.appendChild(ifrm);
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", "preview.css");
-    xhr.onload = function () {
+    _get("lib/katex-0.10.0/katex.print.min.css", function () {
       ifrm.contentWindow.document.open();
       ifrm.contentWindow.document.write("<html>\n<head>\n<title>" + docTitle + "</title>\n");
-      ifrm.contentWindow.document.write("<style>" + xhr.responseText + "</style>\n");
-      ifrm.contentWindow.document.write("</head>\n");
-      ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + document.getElementById("viewer").innerHTML + "</body>\n");
-      ifrm.contentWindow.document.write("</html>");
-      ifrm.contentWindow.document.close();
-    }
-    xhr.send();
+      ifrm.contentWindow.document.write("<style>" + this.responseText + "</style>\n");
+
+      _get("preview.css", function () {
+        ifrm.contentWindow.document.write("<style>" + this.responseText + "</style>\n");
+
+        _get("lib/highlight-9.12.0/styles/" + document.getElementById("viewer-settings-codestyle").value + ".css", function () {
+          ifrm.contentWindow.document.write("<style>" + this.responseText + "</style>\n");
+          ifrm.contentWindow.document.write("</head>\n");
+          ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + document.getElementById("viewer").innerHTML + "</body>\n");
+          ifrm.contentWindow.document.write("</html>");
+          ifrm.contentWindow.document.close();
+        }, function () {
+          ifrm.contentWindow.document.write("</head>\n");
+          ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + document.getElementById("viewer").innerHTML + "</body>\n");
+          ifrm.contentWindow.document.write("</html>");
+          ifrm.contentWindow.document.close();
+        });
+      });
+    });
 
     return ifrm;
   }
@@ -39,7 +56,7 @@ IO.Local = (function () {
             editor.setValue(parsed.body.texts);
             editor.focus();
             editor.setCursor(0, 0);
-            
+
             var selectedTab = Tab.get();
             selectedTab.info = Tab.getInitData();
             selectedTab.info.metadata.type = "local";
@@ -70,7 +87,9 @@ IO.Local = (function () {
         }, function (downloadId) {
           chrome.downloads.onChanged.addListener(function (e) {
             if (e.id == downloadId && e.state && e.state.current === "complete") {
-              chrome.downloads.search({ id: downloadId }, function (result) {
+              chrome.downloads.search({
+                id: downloadId
+              }, function (result) {
                 messageBox("Download Complete.");
 
                 var selectedTab = Tab.get();

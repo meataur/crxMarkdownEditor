@@ -55,12 +55,13 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   });
-  editor.on("change", function (e) {
+  var updtViewer = Util.debounce(function () {
     var selectedTab = Tab.get();
     if (selectedTab) {
       preview(selectedTab.info.metadata.title, editor.getValue());
     }
-  });
+  }, 300);
+  editor.on("change", updtViewer);
 
   // Create showdown object
   converter = new showdown.Converter({
@@ -478,14 +479,23 @@ function closeAllDialogs() {
  */
 
 function switchViewerMode() {
-  if (this.hasAttribute("raw")) {
-    this.removeAttribute("raw");
-    document.getElementById("viewer").className = "";
+  var viewer = document.getElementById("viewer");
+  var nothingOnViewer = document.getElementById("nothing-on-viewer");
+
+  if (viewer.hasAttribute("raw")) {
+    viewer.removeAttribute("raw");
+    viewer.className = "";
+    viewer.style.background = "#fff";
+    nothingOnViewer.style.color = "#1e1e1e";
+
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-html\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "html code";
   } else {
-    this.setAttribute("raw", "");
-    document.getElementById("viewer").classList.add("monotype");
+    viewer.setAttribute("raw", "");
+    viewer.classList.add("monotype");
+    viewer.style.background = "#383838";
+    nothingOnViewer.style.color = "#fff";
+
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-see\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "styled html";
   }
@@ -825,48 +835,32 @@ function prettify() {
   messageBox("Not support yet...");
 }
 
+var viewerScrollPos = null;
 
-// function initSnippet() {
-//   var snippet = document.querySelector('#snippet pre code');
-//   hljs.highlightBlock(snippet);
-//   var style = document.getElementById('style-link').textContent;
-//   var links = document.querySelectorAll('.codestyle');
-//   Array.prototype.forEach.call(links, function(link) {
-//     link.rel = 'stylesheet';
-//     link.disabled = !link.href.match(style + '\\.css$');
-//   });
-//   document.getElementById('language-link').innerHTML = snippet.result.language;
-//   var controls = document.querySelectorAll('#control a');
-//   Array.prototype.forEach.call(controls, function(control) {
-//     control.addEventListener('click', function(e) {
-//       fetch(control.href, {headers: new Headers({'X-Requested-With': 'XMLHttpRequest'})})
-//         .then(response => response.text())
-//         .then(text => {
-//           document.getElementById('snippet').innerHTML = text;
-//           initSnippet();
-//         });
-//       e.preventDefault();
-//     });
-//   });
-// }
-
-var viewerScrollPos = 0;
-function preview(docTitle, data) {
+function preview(docTitle, content) {
   if (editor) {
     var viewer = document.getElementById("viewer");
-    viewerScrollPos = viewer.scrollTop;
-    viewer.removeAllChildren();
+    var nothingOnViewer = document.getElementById("nothing-on-viewer");
 
-    if (data.length) {
+    if (!viewerScrollPos) {
+      var selectedTab = Tab.get();
+      viewerScrollPos = selectedTab.info.viewer.scrollPos;
+    } else {
+      viewerScrollPos = viewer.scrollTop;
+    }
+
+    if (content.length) {
+      // Remove no-content helper message
+      nothingOnViewer.style.display = "none";
+
       // Set site's base url to localhost
       var baseurl = document.getElementById("viewer-settings-baseurl").value;
-      data = data.replace(/{{ site.baseurl }}/gi, baseurl);
+      content = content.replace(/{{ site.baseurl }}/gi, baseurl);
 
       // Convert markdown into html
-      var html = converter.makeHtml("# " + docTitle + "\n\n" + data);
+      var html = converter.makeHtml("# " + docTitle + "\n\n" + content);
 
-      var toggle = document.getElementById("viewer-tools-mode");
-      if (toggle.hasAttribute("raw")) {
+      if (viewer.hasAttribute("raw")) {
         html = html_beautify(html, {
           "indent_size": "2",
           "indent_char": " ",
@@ -885,15 +879,30 @@ function preview(docTitle, data) {
           "comma_first": false,
           "e4x": false
         });
+
         html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
           return '&#'+i.charCodeAt(0)+';';
         }).replace(/ /g, "&nbsp;").replace(/\t/g, "  ");
-        html.match(/[^\r\n]+/g).forEach(function (line) {
-          viewer.innerHTML += line + "<br />";
-        });
-        hljs.highlightBlock(viewer);
-      } else {
+
+        // Set content
         viewer.innerHTML = html;
+
+        // Syntax highlighting
+        hljs.configure({ languages: ["html"] });
+        hljs.highlightBlock(viewer);
+
+        var codelines = "";
+        viewer.innerHTML.match(/[^\r\n]+/g).forEach(function (line) {
+          codelines += line + "<br />";
+        });
+
+        // Set content
+        viewer.innerHTML = codelines;
+      } else {
+        // Set content
+        viewer.innerHTML = html;
+
+        // Syntax highlighting
         viewer.querySelectorAll("pre code").forEach(function (code) {
           if (code.classList.length) {
             var worker = new Worker("lib/highlight-9.12.0/worker.js");
@@ -903,6 +912,8 @@ function preview(docTitle, data) {
             worker.postMessage(code.textContent);
           }
         });
+
+        // Render math equations
         renderMathInElement(viewer, {
           delimiters: [
             {left: "$$", right: "$$", display: true},
@@ -911,14 +922,27 @@ function preview(docTitle, data) {
             {left: "\\(", right: "\\)", display: false}
           ]
         });
-      }
 
-      viewer.scrollTop = viewerScrollPos;
+        // Set previous scrollbar postion
+        var watcher = 0;
+        var images = viewer.getElementsByTagName("img");
+        for (var i = 0; i < images.length; i++) {
+          images[i].onerror = function () {
+            watcher += 1;
+            if (watcher == images.length)
+              viewer.scrollTop = viewerScrollPos;
+          }
+          images[i].onload = function () {
+            watcher += 1;
+            if (watcher == images.length) {
+              viewer.scrollTop = viewerScrollPos;
+            }
+          }
+        }
+      }
     } else {
-      var noContent = document.createElement("div");
-      noContent.classList.add("no-content");
-      noContent.innerHTML = "There is nothing displayed on viewer.";
-      viewer.appendChild(noContent);
+      viewer.removeAllChildren();
+      nothingOnViewer.style.display = "block";
     }
   }
 }
