@@ -271,27 +271,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Scrollbar synchronization
-  var editorScroll = document.getElementsByClassName("CodeMirror-scroll")[0];
-  var viewerScroll = document.getElementById("viewer");
-  var editorScrollSync = false;
-  var viewerScrollSync = false;
-  // editorScroll.addEventListener("scroll", function (e) {
-  //   if (!editorScrollSync) {
-  //     viewerScrollSync = true;
-  //     var posRatio = editorScroll.scrollTop / editorScroll.scrollHeight;
-  //     viewerScroll.scrollTop = viewerScroll.scrollHeight * posRatio;
-  //   }
-  //   editorScrollSync = false;
-  // });
-  // viewerScroll.addEventListener("scroll", function (e) {
-  //   if (!viewerScrollSync) {
-  //     editorScrollSync = true;
-  //     var posRatio = viewerScroll.scrollTop / viewerScroll.scrollHeight;
-  //     editorScroll.scrollTop = editorScroll.scrollHeight * posRatio;
-  //   }
-  //   viewerScrollSync = false;
-  // });
+  // Scroll synchronization
+  document.getElementsByClassName("CodeMirror-scroll")[0].addEventListener("scroll", Scroll.onEditorScroll);
+  document.getElementById("viewer").addEventListener("scroll", Scroll.onViewerScroll);
 
   // The 'window.onresize' callback function is called after printing.
   window.onresize = function (e) {

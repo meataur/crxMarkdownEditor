@@ -107,11 +107,13 @@ let Settings = (function () {
           _get(key, function (value) {
             document.getElementById("editor-settings-theme").value = value.theme;
             document.getElementById("editor-settings-fontsize").value = value.fontsize;
+            document.getElementById("editor-settings-scrollsync").checked = value.scrollsync;
             document.getElementById("editor-settings-theme").onchange();
             document.getElementById("editor-settings-fontsize").onchange();
           }, {
             theme: "default",
-            fontsize: 13
+            fontsize: 13,
+            scrollsync: false
           });
         }
         xhr.send();
@@ -148,13 +150,15 @@ let Settings = (function () {
           _get(key, function (value) {
             document.getElementById("viewer-settings-codestyle").value = value.style.codeblock;
             document.getElementById("viewer-settings-baseurl").value = value.baseurl;
+            document.getElementById("viewer-settings-scrollsync").checked = value.scrollsync;
             document.getElementById("viewer-settings-codestyle").onchange();
           }, {
             style: {
               layout: "default",
               codeblock: "darcula"
             },
-            baseurl: "http://localhost:4000"
+            baseurl: "http://localhost:4000",
+            scrollsync: false
           });
         }
         xhr.send();
@@ -176,10 +180,11 @@ let Settings = (function () {
     save: function (key) {
       if (key == "editor") {
         var editorTheme = document.getElementById("editor-settings-theme");
-        var edithrFontsize = document.getElementById("editor-settings-fontsize");
+        var editorFontsize = document.getElementById("editor-settings-fontsize");
         _set(key, {
           theme: editorTheme.options[editorTheme.selectedIndex].textContent,
-          fontsize: edithrFontsize.options[edithrFontsize.selectedIndex].textContent
+          fontsize: editorFontsize.options[editorFontsize.selectedIndex].textContent,
+          scrollsync: document.getElementById("editor-settings-scrollsync").checked
         });
       } else if (key == "attachment") {
         try {
@@ -198,7 +203,8 @@ let Settings = (function () {
             layout: "default",
             codeblock: document.getElementById("viewer-settings-codestyle").value
           },
-          baseurl: document.getElementById("viewer-settings-baseurl").value
+          baseurl: document.getElementById("viewer-settings-baseurl").value,
+          scrollsync: document.getElementById("viewer-settings-scrollsync").checked
         });
       } else if (key == "jekyll") {
         _set(key, {

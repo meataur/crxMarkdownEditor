@@ -90,6 +90,7 @@
 	<script src="controller/io.gdrive.js"></script>
 	<script src="controller/io.github.js"></script>
 	<script src="controller/tab.js"></script>
+	<script src="controller/scroll.js"></script>
 	<script src="controller/settings.js"></script>
 	<script src="main.js"></script>
 </head>
@@ -258,7 +259,7 @@
 
 			<div id="editor-settings" class="dlg">
 				<section>
-					<div class="section-title">appearance</div>
+					<div class="section-title">appearance &amp; function</div>
 					<item class="inline">
 						<div>theme:</div>
 						<ctrl><select id="editor-settings-theme"><option>default</option></select></ctrl>
@@ -266,6 +267,15 @@
 					<item class="inline">
 						<div>font size:</div>
 						<ctrl><select id="editor-settings-fontsize"></select></ctrl>
+					</item>
+					<item class="inline">
+						<div>scroll:</div>
+						<ctrl>
+							<div class="option-checkbox">
+								<input type="checkbox" id="editor-settings-scrollsync">
+								<label for="editor-settings-scrollsync">Synchronize Viewer's Scroll with Editor</label>
+							</div>
+						</ctrl>
 					</item>
 				</section>
 				<section>
@@ -334,10 +344,19 @@
 						</item>
 					</section>
 					<section>
-						<div class="section-title">link</div>
+						<div class="section-title">function</div>
 						<item>
-							<div>base url:</div>
+							<div>base url redirection:</div>
 							<ctrl><input type="text" id="viewer-settings-baseurl" spellcheck="false"></ctrl>
+						</item>
+						<item class="inline">
+							<div>scroll:</div>
+							<ctrl>
+								<div class="option-checkbox">
+									<input type="checkbox" id="viewer-settings-scrollsync">
+									<label for="viewer-settings-scrollsync">Synchronize Editor's Scroll with Viewer</label>
+								</div>
+							</ctrl>
 						</item>
 					</section>
 				</div>
