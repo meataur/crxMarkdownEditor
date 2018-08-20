@@ -157,9 +157,9 @@ let Tab = (function () {
       _data[i].selected = true;
 
       // Load editing environment
+      document.getElementById("viewer").setAttribute("scrollpos", _data[i].viewer.scrollPos);
       editor.setValue(_data[i].texts);
       editor.scrollTo(_data[i].editor.scrollPos.left, _data[i].editor.scrollPos.top);
-      document.getElementById("viewer").scrollTop = _data[i].viewer.scrollPos;
       editor.focus();
       editor.setCursor(_data[i].editor.cursor.line, _data[i].editor.cursor.ch);
 

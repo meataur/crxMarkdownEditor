@@ -55,13 +55,12 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   });
-  var updtViewer = Util.debounce(function () {
+  editor.on("change", function () {
     var selectedTab = Tab.get();
     if (selectedTab) {
       preview(selectedTab.info.metadata.title, editor.getValue());
     }
-  }, 300);
-  editor.on("change", updtViewer);
+  });
 
   // Create showdown object
   converter = new showdown.Converter({
@@ -817,18 +816,16 @@ function prettify() {
   messageBox("Not support yet...");
 }
 
-var viewerScrollPos = null;
-
-function preview(docTitle, content) {
+var preview = Util.debounce(function (docTitle, content) {
   if (editor) {
     var viewer = document.getElementById("viewer");
     var nothingOnViewer = document.getElementById("nothing-on-viewer");
 
-    if (!viewerScrollPos) {
-      var selectedTab = Tab.get();
-      viewerScrollPos = selectedTab.info.viewer.scrollPos;
-    } else {
-      viewerScrollPos = viewer.scrollTop;
+    var initialScrollPos = null;
+    if (viewer.hasAttribute("scrollpos")) {
+      initialScrollPos = parseInt(viewer.getAttribute("scrollpos"));
+      viewer.scrollTop = initialScrollPos;
+      viewer.removeAttribute("scrollpos");
     }
 
     if (content.length) {
@@ -873,12 +870,11 @@ function preview(docTitle, content) {
         hljs.configure({ languages: ["html"] });
         hljs.highlightBlock(viewer);
 
+        // Set content again
         var codelines = "";
         viewer.innerHTML.match(/[^\r\n]+/g).forEach(function (line) {
           codelines += line + "<br />";
         });
-
-        // Set content
         viewer.innerHTML = codelines;
       } else {
         // Set content
@@ -911,13 +907,13 @@ function preview(docTitle, content) {
         for (var i = 0; i < images.length; i++) {
           images[i].onerror = function () {
             watcher += 1;
-            if (watcher == images.length)
-              viewer.scrollTop = viewerScrollPos;
+            if (watcher == images.length && initialScrollPos)
+              viewer.scrollTop = initialScrollPos;
           }
           images[i].onload = function () {
             watcher += 1;
-            if (watcher == images.length) {
-              viewer.scrollTop = viewerScrollPos;
+            if (watcher == images.length && initialScrollPos) {
+              viewer.scrollTop = initialScrollPos;
             }
           }
         }
@@ -927,4 +923,4 @@ function preview(docTitle, content) {
       nothingOnViewer.style.display = "block";
     }
   }
-}
+}, 300);
