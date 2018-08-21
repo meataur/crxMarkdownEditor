@@ -212,7 +212,7 @@ IO.Github = (function () {
     if (this.status == 200) {
       var data = JSON.parse(this.response);
       if (data.encoding === "base64") {
-        document.getElementById("viewer").scrollTop = 0;
+        viewer.scrollTop = 0;
         var textData = decodeURIComponent(Array.prototype.map.call(atob(data.content), function (c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
         }).join(''));
@@ -445,7 +445,7 @@ IO.Github = (function () {
                         selectedTab.info.originalTexts = editor.getValue();
                         selectedTab.info.editor.scrollPos = editor.getScrollInfo();
                         selectedTab.info.editor.cursor = editor.getCursor();
-                        selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+                        selectedTab.info.viewer.scrollPos = viewer.scrollTop;
                         Tab.set(selectedTab.index, selectedTab.info);
 
                         closeAllDialogs();
@@ -471,7 +471,7 @@ IO.Github = (function () {
                       selectedTab.info.originalTexts = editor.getValue();
                       selectedTab.info.editor.scrollPos = editor.getScrollInfo();
                       selectedTab.info.editor.cursor = editor.getCursor();
-                      selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+                      selectedTab.info.viewer.scrollPos = viewer.scrollTop;
                       Tab.set(selectedTab.index, selectedTab.info);
 
                       closeAllDialogs();

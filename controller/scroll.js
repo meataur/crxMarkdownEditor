@@ -2,13 +2,22 @@ let Scroll = (function () {
   var _scrollMap = null;
   var _syncWithEditor = false;
   var _syncWithViewer = false;
+
+  let _watcher = 0;
+  let _numAttachmentFiles = 0;
+  let _setScrollPos = function () {
+    _watcher += 1;
+    if (_watcher == _numAttachmentFiles) {
+      viewer.scrollTop = viewer.scrollPos;
+      viewer.scrollPos = -1;
+    }
+  }
   return {
     onEditorScroll: function () {
       if (!_syncWithViewer && document.getElementById("editor-settings-scrollsync").checked) {
         _syncWithEditor = true;
 
         var editor = document.getElementsByClassName("CodeMirror-scroll")[0];
-        var viewer = document.getElementById("viewer");
         var posRatio = editor.scrollTop / (editor.scrollHeight - editor.clientHeight);
         viewer.scrollTop = (viewer.scrollHeight - viewer.clientHeight) * posRatio;
 
@@ -25,11 +34,32 @@ let Scroll = (function () {
         _syncWithViewer = true;
 
         var editor = document.getElementsByClassName("CodeMirror-scroll")[0];
-        var viewer = document.getElementById("viewer");
         var posRatio = viewer.scrollTop / (viewer.scrollHeight - viewer.clientHeight);
         editor.scrollTop = (editor.scrollHeight - editor.clientHeight) * posRatio;
       }
       _syncWithEditor = false;
+    },
+    onViewerContentsLoaded: function () {
+      _watcher = 0;
+      _numAttachmentFiles = 0;
+
+      var images = viewer.getElementsByTagName("img");
+      _numAttachmentFiles += images.length;
+
+      // Detect when all the attachment files in viewer are loaded
+      if (_numAttachmentFiles) {
+        // Images
+        Array.from(images).forEach(function (image) {
+          image.onerror = _setScrollPos;
+          image.onabort = _setScrollPos;
+          image.onload = _setScrollPos;
+        });
+
+        // Et cetera...
+      } else {
+        viewer.scrollTop = viewer.scrollPos;
+        viewer.scrollPos = -1;
+      }
     }
   }
 })();

@@ -12,8 +12,6 @@ a:hover { text-decoration: underline; }
 input[type="text"] { padding: .3em; font-family: 'consolas'; border: solid 1px #ccc; border-radius: 2px; }
 input[type="radio"] { display: inline-block; height: 1em; line-height: 1em; vertical-align: top; }
 
-img { min-height: 23px; }
-
 svg { display: inline-flex; align-self: center; fill: currentColor; stroke: currentColor; stroke-width: 0; }
 .svg-btn { display: inline-block; width: 1.1em; height: 1.1em; }
 

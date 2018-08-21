@@ -157,7 +157,7 @@ IO.GDrive = (function () {
     if (this.status == 200) {
       var parsed = Parser.parse(this.response);
 
-      document.getElementById("viewer").scrollTop = 0;
+      viewer.scrollTop = 0;
       editor.setValue(parsed.body.texts);
       editor.focus();
       editor.setCursor(0, 0);
@@ -304,7 +304,7 @@ IO.GDrive = (function () {
               selectedTab.info.originalTexts = editor.getValue();
               selectedTab.info.editor.scrollPos = editor.getScrollInfo();
               selectedTab.info.editor.cursor = editor.getCursor();
-              selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+              selectedTab.info.viewer.scrollPos = viewer.scrollTop;
               Tab.set(selectedTab.index, selectedTab.info);
 
               closeAllDialogs();

@@ -23,12 +23,12 @@ IO.Local = (function () {
         _get("lib/highlight-9.12.0/styles/" + document.getElementById("viewer-settings-codestyle").value + ".css", function () {
           ifrm.contentWindow.document.write("<style>" + this.responseText + "</style>\n");
           ifrm.contentWindow.document.write("</head>\n");
-          ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + document.getElementById("viewer").innerHTML + "</body>\n");
+          ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + viewer.innerHTML + "</body>\n");
           ifrm.contentWindow.document.write("</html>");
           ifrm.contentWindow.document.close();
         }, function () {
           ifrm.contentWindow.document.write("</head>\n");
-          ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + document.getElementById("viewer").innerHTML + "</body>\n");
+          ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + viewer.innerHTML + "</body>\n");
           ifrm.contentWindow.document.write("</html>");
           ifrm.contentWindow.document.close();
         });
@@ -52,7 +52,7 @@ IO.Local = (function () {
           if (evt.target.readyState == FileReader.DONE) {
             var parsed = Parser.parse(evt.target.result);
 
-            document.getElementById("viewer").scrollTop = 0;
+            viewer.scrollTop = 0;
             editor.setValue(parsed.body.texts);
             editor.focus();
             editor.setCursor(0, 0);
@@ -102,7 +102,7 @@ IO.Local = (function () {
                 selectedTab.info.originalTexts = editor.getValue();
                 selectedTab.info.editor.scrollPos = editor.getScrollInfo();
                 selectedTab.info.editor.cursor = editor.getCursor();
-                selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+                selectedTab.info.viewer.scrollPos = viewer.scrollTop;
                 Tab.set(selectedTab.index, selectedTab.info);
               });
             }
@@ -138,7 +138,7 @@ IO.Local = (function () {
     saveAsPdf: function () {
       messageBox("Not support yet...");
       // var doc = new jsPDF();
-      // doc.fromHTML(document.getElementById("viewer"));
+      // doc.fromHTML(viewer);
       // doc.save("document.pdf");
     },
     print: function () {

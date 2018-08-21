@@ -137,7 +137,10 @@ let Tab = (function () {
       _data[i].texts = editor.getValue();
       _data[i].editor.scrollbar = editor.getScrollInfo();
       _data[i].editor.cursor = editor.getCursor();
-      _data[i].viewer.scrollPos = document.getElementById("viewer").scrollTop;
+      
+      // Save current viewer's scroll position
+      viewer.scrollPos = viewer.scrollTop;
+      _data[i].viewer.scrollPos = viewer.scrollPos;
 
       // Mark currently selected tab as previous one
       _prevSelectedIdx = i;
@@ -157,7 +160,7 @@ let Tab = (function () {
       _data[i].selected = true;
 
       // Load editing environment
-      document.getElementById("viewer").setAttribute("scrollpos", _data[i].viewer.scrollPos);
+      viewer.scrollPos = _data[i].viewer.scrollPos;
       editor.setValue(_data[i].texts);
       editor.scrollTo(_data[i].editor.scrollPos.left, _data[i].editor.scrollPos.top);
       editor.focus();

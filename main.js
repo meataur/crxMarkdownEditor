@@ -1,9 +1,12 @@
 // Load manifest data
 var manifestData = chrome.runtime.getManifest();
 
-// CodeMirro editor variable
+// CodeMirror editor variable
 var editor = null;
 var converter = null;
+
+// Viewer
+var viewer = null;
 
 // Vertical panels
 var panelEditor = null;
@@ -74,6 +77,17 @@ document.addEventListener("DOMContentLoaded", function () {
     parseImgDimensions: true
   });
 
+  // Panels and splitter
+  panelEditor = document.getElementsByTagName("editor")[0];
+  panelWrapperHelper = document.getElementsByTagName("helper")[0];
+  panelViewer = document.getElementsByTagName("viewer")[0];
+  panelLocalhost = document.getElementsByTagName("localhost")[0];
+  panelHelp = document.getElementsByTagName("help")[0];
+  splitter = document.getElementsByTagName("splitter")[0];
+
+  // Viewer
+  viewer = document.getElementById("viewer");
+
   // Load previous workspaces and setting values
   Settings.loadAll();
   loadPrevWorks();
@@ -86,14 +100,6 @@ document.addEventListener("DOMContentLoaded", function () {
   headerMenu.addEventListener("mouseenter", function (e) {
     Tab.resize();
   });
-
-  // Panels and splitter
-  panelEditor = document.getElementsByTagName("editor")[0];
-  panelWrapperHelper = document.getElementsByTagName("helper")[0];
-  panelViewer = document.getElementsByTagName("viewer")[0];
-  panelLocalhost = document.getElementsByTagName("localhost")[0];
-  panelHelp = document.getElementsByTagName("help")[0];
-  splitter = document.getElementsByTagName("splitter")[0];
 
   // Panel selection
   document.getElementById('menu-viewer').onclick = openPanelViewer;
@@ -272,7 +278,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Scroll synchronization
   document.getElementsByClassName("CodeMirror-scroll")[0].addEventListener("scroll", Scroll.onEditorScroll);
-  document.getElementById("viewer").addEventListener("scroll", Scroll.onViewerScroll);
+  viewer.addEventListener("scroll", Scroll.onViewerScroll);
 
   // The 'window.onresize' callback function is called after printing.
   window.onresize = function (e) {
@@ -300,7 +306,7 @@ document.addEventListener("DOMContentLoaded", function () {
     selectedTab.info.texts = editor.getValue();
     selectedTab.info.editor.scrollPos = editor.getScrollInfo();
     selectedTab.info.editor.cursor = editor.getCursor();
-    selectedTab.info.viewer.scrollPos = document.getElementById("viewer").scrollTop;
+    selectedTab.info.viewer.scrollPos = viewer.scrollTop;
     Tab.set(selectedTab.index, selectedTab.info);
     
     if (Settings.autoSave) {
@@ -460,7 +466,6 @@ function closeAllDialogs() {
  */
 
 function switchViewerMode() {
-  var viewer = document.getElementById("viewer");
   var nothingOnViewer = document.getElementById("nothing-on-viewer");
 
   if (viewer.hasAttribute("raw")) {
@@ -493,7 +498,7 @@ function expandViewer() {
     this.getElementsByTagName("span")[0].innerHTML = "expand screen";
     document.getElementsByTagName("header")[0].removeAttribute("style");
     document.getElementsByTagName("content")[0].removeAttribute("style");
-    document.getElementById("viewer").getAncestorByClassName("panel-body").removeAttribute("style");
+    viewer.getAncestorByClassName("panel-body").removeAttribute("style");
     panelEditor.removeAttribute("style");
     splitter.removeAttribute("style");
     panelWrapperHelper.removeAttribute("style");
@@ -503,7 +508,7 @@ function expandViewer() {
     this.getElementsByTagName("span")[0].innerHTML = "return to editor";
     document.getElementsByTagName("header")[0].style.display = "none";
     document.getElementsByTagName("content")[0].style.height = "calc(100vh)";
-    document.getElementById("viewer").getAncestorByClassName("panel-body").style.height = "calc(100vh - " + panelHeaderHeight + "px)";
+    viewer.getAncestorByClassName("panel-body").style.height = "calc(100vh - " + panelHeaderHeight + "px)";
     panelEditor.style.display = "none";
     splitter.style.display = "none";
     panelWrapperHelper.style.width = "100%";
@@ -818,15 +823,10 @@ function prettify() {
 
 var preview = Util.debounce(function (docTitle, content) {
   if (editor) {
-    var viewer = document.getElementById("viewer");
     var nothingOnViewer = document.getElementById("nothing-on-viewer");
 
-    var initialScrollPos = null;
-    if (viewer.hasAttribute("scrollpos")) {
-      initialScrollPos = parseInt(viewer.getAttribute("scrollpos"));
-      viewer.scrollTop = initialScrollPos;
-      viewer.removeAttribute("scrollpos");
-    }
+    if (viewer.scrollPos < 0)
+      viewer.scrollPos = viewer.scrollTop;
 
     if (content.length) {
       // Remove no-content helper message
@@ -839,7 +839,7 @@ var preview = Util.debounce(function (docTitle, content) {
       // Convert markdown into html
       var html = converter.makeHtml("# " + docTitle + "\n\n" + content);
 
-      if (viewer.hasAttribute("raw")) {
+      if (viewer.hasAttribute("raw")) {   // HTML code viewer
         html = html_beautify(html, {
           "indent_size": "2",
           "indent_char": " ",
@@ -876,9 +876,12 @@ var preview = Util.debounce(function (docTitle, content) {
           codelines += line + "<br />";
         });
         viewer.innerHTML = codelines;
-      } else {
+      } else {    // Styled HTML viewer
         // Set content
         viewer.innerHTML = html;
+
+        // Set scroll position
+        viewer.scrollTop = viewer.scrollPos;
 
         // Syntax highlighting
         viewer.querySelectorAll("pre code").forEach(function (code) {
@@ -902,21 +905,7 @@ var preview = Util.debounce(function (docTitle, content) {
         });
 
         // Set previous scrollbar postion
-        var watcher = 0;
-        var images = viewer.getElementsByTagName("img");
-        for (var i = 0; i < images.length; i++) {
-          images[i].onerror = function () {
-            watcher += 1;
-            if (watcher == images.length && initialScrollPos)
-              viewer.scrollTop = initialScrollPos;
-          }
-          images[i].onload = function () {
-            watcher += 1;
-            if (watcher == images.length && initialScrollPos) {
-              viewer.scrollTop = initialScrollPos;
-            }
-          }
-        }
+        Scroll.onViewerContentsLoaded();
       }
     } else {
       viewer.removeAllChildren();
