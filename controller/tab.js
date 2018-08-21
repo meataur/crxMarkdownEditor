@@ -135,7 +135,7 @@ let Tab = (function () {
       _data[i].selected = false;
       _data[i].metadata = Metadata.getMetadataFromPanel();
       _data[i].texts = editor.getValue();
-      _data[i].editor.scrollbar = editor.getScrollInfo();
+      _data[i].editor.scrollPos = editor.getScrollInfo();
       _data[i].editor.cursor = editor.getCursor();
       
       // Save current viewer's scroll position
@@ -373,21 +373,27 @@ let Tab = (function () {
             tabs[_prevSelectedIdx].mousedown();
             _isNewTabAdded = false;
           } else {
+            selectedTab.tab.removeAttribute("selected");
             tabs[selectedTab.index - 1].mousedown();
           }
         } else {
+          selectedTab.tab.removeAttribute("selected");
           tabs[selectedTab.index + 1].mousedown();
         }
 
-        // Remove from document list
-        _data.splice(selectedTab.index, 1);
-
-        // Tab removal animation
+        // Start tab removal animation
         selectedTab.tab.innerHTML = "";
         selectedTab.tab.style.padding = 0;
         selectedTab.tab.style.width = 0;
 
-        document.getElementById("tabs").removeChild(selectedTab.tab);
+        // After tab removal animation, remove the tab and its information completely
+        setTimeout(function () {
+          // Remove tab element
+          document.getElementById("tabs").removeChild(selectedTab.tab);
+
+          // Remove from document list
+          _data.splice(selectedTab.index, 1);
+        }, 300);
       }
     },
     save: function () {
