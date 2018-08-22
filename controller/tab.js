@@ -151,6 +151,9 @@ let Tab = (function () {
       var divTitle = document.createElement("div");
       divTitle.className = "doc-title";
       divTitle.innerHTML = info.metadata.title.length ? info.metadata.title : "Untitled Document";
+      divTitle.ondblclick = function (e) {
+        Dialog.Metadata.open();
+      }
 
       var li = document.createElement("li");
       li.className = "tab";
@@ -163,7 +166,7 @@ let Tab = (function () {
         e.dataTransfer.effectAllowed = "move";
         _dragSrcTab = e.target;
 
-        // Prepare dragging image by element copycopy
+        // Prepare dragging image by element copy
         _dragImg = _dragSrcTab.cloneNode(true);
         _dragImg.style.display = "none";
         document.body.appendChild(_dragImg);

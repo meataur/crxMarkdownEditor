@@ -259,6 +259,10 @@ document.addEventListener("DOMContentLoaded", function () {
     Dialog.closeAll();
   }
 
+  // Disable right mouse click
+  if (!Developer.debug)
+    document.addEventListener("contextmenu", event => event.preventDefault());
+
   // Keyboard shortcut
   document.onkeydown = function (e) {
     if (e.ctrlKey) {
@@ -269,7 +273,7 @@ document.addEventListener("DOMContentLoaded", function () {
           break;
         case 81:  // Ctrl + Q (for testing)
           e.preventDefault();
-          messageBox("test");
+          messageBox("testing...");
           break;
         case 83:  // Ctrl + S
           e.preventDefault();

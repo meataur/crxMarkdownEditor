@@ -1,11 +1,14 @@
 IO.Github = (function () {
-  let _clientId = "ac52e15a05c1f05e2a14";                           // Release
-  let _clientSecret = "612056756863407c1241706306ec711c76bb8814";   // Release
-  if (debug) {
-    // _clientId = "fffdcf84e36ddeb9bce4";                             // Work at home
-    // _clientSecret = "609f288a1df9763979ac258a5db17d19ee8ee49e";     // Work at home
-    _clientId = "9c527167998b0e4b7c4f";                             // Work at office
-    _clientSecret = "fe3bfef28a7e5cd53f69ac494857b1fe19a5d47b";     // Work at office
+  let _clientId = "ac52e15a05c1f05e2a14";
+  let _clientSecret = "612056756863407c1241706306ec711c76bb8814";
+  if (Developer.debug) {
+    if (Developer.workathome) {
+      _clientId = "fffdcf84e36ddeb9bce4";
+      _clientSecret = "609f288a1df9763979ac258a5db17d19ee8ee49e";
+    } else {
+      _clientId = "9c527167998b0e4b7c4f";
+      _clientSecret = "fe3bfef28a7e5cd53f69ac494857b1fe19a5d47b";
+    }
   }
   let _redirectUri = chrome.identity.getRedirectURL("provider_cb");
 
@@ -238,7 +241,7 @@ IO.Github = (function () {
       document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
       document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
 
-      closeAllDialogs();
+      Dialog.closeAll();
     } else {
       messageBox("Unable to import from Github: Error code(" + this.status + ")");
     }
@@ -452,7 +455,7 @@ IO.Github = (function () {
                         selectedTab.info.viewer.scrollPos = viewer.scrollTop;
                         Tab.set(selectedTab.index, selectedTab.info);
 
-                        closeAllDialogs();
+                        Dialog.closeAll();
                       } else {
                         messageBox("Failed to update file. Error code(" + this.status + ")");
                       }
@@ -478,7 +481,7 @@ IO.Github = (function () {
                       selectedTab.info.viewer.scrollPos = viewer.scrollTop;
                       Tab.set(selectedTab.index, selectedTab.info);
 
-                      closeAllDialogs();
+                      Dialog.closeAll();
                     } else {
                       messageBox("Failed to save file. Error code(" + this.status + ")");
                     }

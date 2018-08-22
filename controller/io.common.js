@@ -1,5 +1,3 @@
-let debug = false;
-
 let IO = {
   checkBeforeLeave: function () {
     var selectedTab = Tab.get();
