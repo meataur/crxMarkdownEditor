@@ -587,15 +587,7 @@ function openMdTutorial() {
     var data = converter.makeHtml(this.response);
     data = data.replaceAll("·", "<ind>·</ind>").replaceAll("↵", "<ind>↵</ind>").replaceAll("⇥", "<ind>⇥</ind>");
     document.getElementById("hpage-md-tutorial").innerHTML = data;
-    document.getElementById("hpage-md-tutorial").querySelectorAll("pre code").forEach(function (code) {
-      if (code.classList.length) {
-        var worker = new Worker("lib/highlight-9.12.0/worker.js");
-        worker.onmessage = function(event) {
-          code.innerHTML = event.data;
-        }
-        worker.postMessage(code.textContent);
-      }
-    });
+    document.getElementById("hpage-md-tutorial").querySelectorAll("pre code").forEach(highlighter);
     renderMathInElement(document.getElementById("hpage-md-tutorial"), {
       delimiters: [
         {left: "$$", right: "$$", display: true},
@@ -817,7 +809,7 @@ function attachments() {
   input.click();
 }
 
-function prettify() {
+function prettify () {
   messageBox("Not support yet...");
 }
 
@@ -884,15 +876,7 @@ var preview = Util.debounce(function (docTitle, content) {
         viewer.scrollTop = viewer.scrollPos;
 
         // Syntax highlighting
-        viewer.querySelectorAll("pre code").forEach(function (code) {
-          if (code.classList.length) {
-            var worker = new Worker("lib/highlight-9.12.0/worker.js");
-            worker.onmessage = function(event) {
-              code.innerHTML = event.data;
-            }
-            worker.postMessage(code.textContent);
-          }
-        });
+        viewer.querySelectorAll("pre code").forEach(highlighter);
 
         // Render math equations
         renderMathInElement(viewer, {
@@ -913,3 +897,16 @@ var preview = Util.debounce(function (docTitle, content) {
     }
   }
 }, 300);
+
+function highlighter (code) {
+  if (code.classList.length) {
+    var worker = new Worker("lib/highlight-9.12.0/worker.js");
+    worker.onmessage = function(event) {
+      code.innerHTML = event.data;
+
+      this.terminate();
+      worker = undefined;
+    }
+    worker.postMessage(code.textContent);
+  }
+}

@@ -286,8 +286,8 @@ viewer, localhost, help { display: none; }
 .hpage a:hover { color: #111; text-decoration: underline; }
 
 .hpage blockquote { margin: 1.6em 0; padding: 1.6em; border-left: 0.7em solid #eaeaea; background-color: #f7f7f7; }
-.hpage blockquote p:first-child { margin-top: 0; }
-.hpage blockquote p:last-child { margin-bottom: 0; }
+.hpage blockquote > *:first-child { margin-top: 0; }
+.hpage blockquote > *:last-child { margin-bottom: 0; }
 
 .hpage code {
   display: inline-block; margin: 0; padding: .2em .4em;

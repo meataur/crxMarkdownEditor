@@ -60,8 +60,8 @@ svg { display: inline-flex; align-self: center; fill: currentColor; stroke: curr
 #viewer a:hover { color: #111; text-decoration: underline; }
 
 #viewer blockquote { margin: 1.6em 0; padding: 1.6em; border-left: 0.7em solid #eaeaea; background-color: #f7f7f7; }
-#viewer blockquote p:first-child { margin-top: 0; }
-#viewer blockquote p:last-child { margin-bottom: 0; }
+#viewer blockquote > *:first-child { margin-top: 0; }
+#viewer blockquote > *:last-child { margin-bottom: 0; }
 
 #viewer code {
   display: inline-block; margin: 0; padding: .2em .4em;
