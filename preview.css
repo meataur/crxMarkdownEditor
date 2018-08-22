@@ -48,8 +48,9 @@ svg { display: inline-flex; align-self: center; fill: currentColor; stroke: curr
 #viewer tablecaption, figcaption > strong { user-select: none; margin-right: .5em; }
 
 #viewer ul, ol { margin: 1em 0 1em 1.6em; }
-#viewer li { margin-bottom: .5em; }
-#viewer li > ul, li > ol { margin: .5em 0 .5em 1.6em; }
+#viewer li { margin-bottom: .6em; }
+#viewer li > ul, li > ol { margin: .6em 0 .6em 1.6em; }
+#viewer li img { margin: .6em auto; }
 
 #viewer button { padding: .2em .4em; }
 #viewer button > svg { vertical-align: top; }

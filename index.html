@@ -5,6 +5,9 @@
 	<link rel="stylesheet" href="style.css" media="screen, print">
 	<link id="viewer-style-layout" rel="stylesheet" href="preview.css" media="screen, print">
 
+	<!-- PausableTimer -->
+	<script src="lib/pausabletimer-1.0.0/timer.js"></script>
+
 	<!-- CryptoJS -->
 	<script src="lib/crypto-js-3.1.2/core.js"></script>
 	<script src="lib/crypto-js-3.1.2/x64-core.js"></script>
@@ -91,6 +94,7 @@
 	<script src="controller/io.github.js"></script>
 	<script src="controller/tab.js"></script>
 	<script src="controller/scroll.js"></script>
+	<script src="controller/dialog.js"></script>
 	<script src="controller/settings.js"></script>
 	<script src="main.js"></script>
 </head>
@@ -269,7 +273,7 @@
 						<ctrl><select id="editor-settings-fontsize"></select></ctrl>
 					</item>
 					<item class="inline">
-						<div>scroll:</div>
+						<div>auto scroll:</div>
 						<ctrl>
 							<div class="option-checkbox">
 								<input type="checkbox" id="editor-settings-scrollsync">
@@ -291,12 +295,12 @@
 					<item>
 						<div>hash function to prevent attachment filename duplicates:</div>
 						<ctrl>
-							<div class="option-radio"><input type="radio" id="hash-none" name="hashing" value="none"><label for="hash-none">None</label></div>
-							<div class="option-radio"><input type="radio" id="hash-md5" name="hashing" value="md5"><label for="hash-md5">MD5</label></div>
-							<div class="option-radio"><input type="radio" id="hash-sha1" name="hashing" value="sha1"><label for="hash-sha1">SHA-1</label></div>
-							<div class="option-radio"><input type="radio" id="hash-sha224" name="hashing" value="sha224"><label for="hash-sha224">SHA-224</label></div>
-							<div class="option-radio"><input type="radio" id="hash-sha256" name="hashing" value="sha256"><label for="hash-sha256">SHA-256</label></div>
-							<div class="option-radio"><input type="radio" id="hash-sha512" name="hashing" value="sha512"><label for="hash-sha512">SHA-512</label></div>
+							<div class="option-radio"><input type="radio" id="hash-none" name="hashfunc" value="none"><label for="hash-none">None</label></div>
+							<div class="option-radio"><input type="radio" id="hash-md5" name="hashfunc" value="md5"><label for="hash-md5">MD5</label></div>
+							<div class="option-radio"><input type="radio" id="hash-sha1" name="hashfunc" value="sha1"><label for="hash-sha1">SHA-1</label></div>
+							<div class="option-radio"><input type="radio" id="hash-sha224" name="hashfunc" value="sha224"><label for="hash-sha224">SHA-224</label></div>
+							<div class="option-radio"><input type="radio" id="hash-sha256" name="hashfunc" value="sha256"><label for="hash-sha256">SHA-256</label></div>
+							<div class="option-radio"><input type="radio" id="hash-sha512" name="hashfunc" value="sha512"><label for="hash-sha512">SHA-512</label></div>
 						</ctrl>
 					</item>
 				</section>
@@ -350,7 +354,7 @@
 							<ctrl><input type="text" id="viewer-settings-baseurl" spellcheck="false"></ctrl>
 						</item>
 						<item class="inline">
-							<div>scroll:</div>
+							<div>auto scroll:</div>
 							<ctrl>
 								<div class="option-checkbox">
 									<input type="checkbox" id="viewer-settings-scrollsync">

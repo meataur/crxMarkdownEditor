@@ -55,7 +55,9 @@ let Scroll = (function () {
           image.onload = _setScrollPos;
         });
 
-        // Et cetera...
+        // Video
+
+        // Something else
       } else {
         viewer.scrollTop = viewer.scrollPos;
         viewer.scrollPos = -1;

@@ -171,6 +171,10 @@ IO.GDrive = (function () {
       selectedTab.info.originalTexts = editor.getValue();
       Tab.set(selectedTab.index, selectedTab.info);
 
+      // Manually trigger onchange events
+      document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+      document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
+
       closeAllDialogs();
     } else {
       messageBox("Unable to import google document: Error code(" + this.status + ")");

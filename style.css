@@ -247,7 +247,7 @@ viewer, localhost, help { display: none; }
 
 .hpage {
   display: block; padding: 1.6em 1.6em 3.2em 1.6em; width: 100%; height: 100%;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: justify; word-wrap: break-word;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: justify; word-break: break-all; word-wrap: break-word;
   font-size: .92rem; line-height: 1.6; background: #f7f7f7;
   transform: rotate(-0.0000000001deg); text-shadow: 0 0 1px rgba(0,0,0,.3); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden; overflow-y: scroll;
@@ -265,7 +265,7 @@ viewer, localhost, help { display: none; }
 .hpage h4 + h5, h4 + div { margin-top: 1em; }
 .hpage > *:first-child { margin-top: 0; }
 
-.hpage div { margin: .5em 0; }
+.hpage div { margin: 1em 0; }
 
 .hpage img { display: block; max-width: 100%; margin: 1.6em auto; }
 .hpage figure { margin: 1.6em 0; }
@@ -274,8 +274,9 @@ viewer, localhost, help { display: none; }
 .hpage tablecaption, figcaption > strong { user-select: none; margin-right: .5em; }
 
 .hpage ul, ol { margin: 1em 0 1em 1.6em; }
-.hpage li { margin-bottom: .5em; }
-.hpage li > ul, li > ol { margin: .5em 0 .5em 1.6em; }
+.hpage li { margin-bottom: .6em; }
+.hpage li > ul, li > ol { margin: .6em 0 .6em 1.6em; }
+.hpage li img { margin: .6em auto; }
 
 .hpage button { padding: .2em .4em; }
 .hpage button > svg { vertical-align: top; }
@@ -335,7 +336,8 @@ viewer, localhost, help { display: none; }
 
 messagebox {
   display: inline-block; margin: .5em; padding: 1em 1.6em;
-  color: #fff; font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .9rem; user-select: none; word-break: break-all;
-  background: #1e1e1e; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border: solid 1px #ccc; border-radius: 3px;
+  color: #fff; font-family: "Segoe UI", Helvetica, Arial, sans-serif, "Segoe UI Symbol"; font-size: .9rem; word-break: break-all;
+  background: #1e1e1e; box-shadow: 0 1px 2px 0 rgba(0,0,0,.1), 0 2px 5px 0 rgba(0,0,0,.1); border-left: solid 8px #383838; border-radius: 3px;
   transition: opacity .3s; opacity: 0;
 }
+messagebox:hover { border-left: solid 8px #585858; }

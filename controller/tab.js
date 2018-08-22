@@ -1,117 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("create-tab").onclick = Tab.addNew;
-
-  document.getElementById("select-metadata-type").onchange = function (e) {
-    var keywords = {
-      local: "local",
-      github: "github",
-      google: "gdrive"
-    }
-    var iconId = "icon-file";
-    for (var k in keywords) {
-      if (this.value.toLowerCase().contains(k)) {
-        iconId = "icon-" + keywords[k];
-        break;
-      }
-    }
-    var selectedTab = Tab.get();
-    selectedTab.tab.getElementsByClassName("doc-type")[0].innerHTML = "<svg><use xlink:href=\"icons.svg#" + iconId + "\"></use></svg>";
-  }
-
-  document.getElementById("input-metadata-title").onchange = function (e) {
-    if (!this.value.length)
-      this.value = "Untitled Document";
-
-    var selectedTab = Tab.get();
-    selectedTab.tab.getElementsByClassName("doc-title")[0].innerHTML = this.value;
-    selectedTab.tab.title = this.value;
-    document.title = manifestData.name + " - " + this.value;
-
-    if (editor)
-      preview(this.value, editor.getValue());
-  }
-
-  document.getElementById("refresh-datetime").onclick = function () {
-    document.getElementById("input-metadata-date").value = Util.curtime();
-  }
 });
-
-let Metadata = (function () {
-  return {
-    openPanel: function () {
-      var div = document.getElementById("editor-doc-metadata");
-      div.style.display = "block";
-      document.getElementById("input-metadata-layout").focus();
-    },
-    getMetadataFromPanel: function () {
-      var metadata = {
-        type: ""
-      }
-      var keywords = {
-        local: "local",
-        github: "github",
-        google: "gdrive"
-      }
-      for (var k in keywords) {
-        if (document.getElementById("select-metadata-type").value.toLowerCase().contains(k)) {
-          metadata.type = keywords[k];
-          break;
-        }
-      }
-      metadata.id = document.getElementById("input-metadata-id").value;
-      metadata.layout = document.getElementById("input-metadata-layout").value;
-      metadata.title = document.getElementById("input-metadata-title").value;
-      metadata.date = document.getElementById("input-metadata-date").value;
-      metadata.category = document.getElementById("input-metadata-category").value;
-      metadata.tags = document.getElementById("input-metadata-tags").value;
-      metadata.description = document.getElementById("input-metadata-description").value;
-
-      // Get custom key-values
-      for (var i = 1; i <= 3; i++) {
-        var customKey = document.getElementById("input-metadata-reserved-key" + i).value;
-        var customValue = document.getElementById("input-metadata-reserved-value" + i).value;
-        if (customKey.length)
-          metadata[customKey] = customValue;
-      }
-
-      return metadata;
-    },
-    setMetadataToPanel: function (metadata) {
-      document.getElementById("select-metadata-type").value = "Not specified";
-      if (metadata.type && metadata.type.length) {
-        var docTypes = {
-          local: "Local file",
-          github: "Github markdown page",
-          gdrive: "Google document"
-        }
-        document.getElementById("select-metadata-type").value = docTypes[metadata.type];
-      }
-
-      document.getElementById("input-metadata-id").value = metadata.id;
-      document.getElementById("input-metadata-layout").value = metadata.layout;
-      document.getElementById("input-metadata-title").value = metadata.title;
-      document.getElementById("input-metadata-date").value = metadata.date;
-      document.getElementById("input-metadata-category").value = metadata.category;
-      document.getElementById("input-metadata-tags").value = metadata.tags;
-      document.getElementById("input-metadata-description").value = metadata.description;
-
-      // Set custom key-values
-      var generalKeys = ["type", "id", "layout", "title", "date", "category", "tags", "description"];
-      for (var i = 1; i <= 3; i++) {
-        document.getElementById("input-metadata-reserved-key" + i).value = "";
-        document.getElementById("input-metadata-reserved-value" + i).value = "";
-      }
-      var cnt = 0;
-      for (var k in metadata) {
-        if (!generalKeys.includes(k) && cnt < 3) {
-          cnt += 1;
-          document.getElementById("input-metadata-reserved-key" + cnt).value = k;
-          document.getElementById("input-metadata-reserved-value" + cnt).value = metadata[k];
-        }
-      }
-    }
-  }
-})();
 
 let Tab = (function () {
   const MAXTABS = 10;
@@ -133,7 +22,7 @@ let Tab = (function () {
     if (selectedTab) {
       var i = selectedTab.index;
       _data[i].selected = false;
-      _data[i].metadata = Metadata.getMetadataFromPanel();
+      _data[i].metadata = Dialog.Metadata.getData();
       _data[i].texts = editor.getValue();
       _data[i].editor.scrollPos = editor.getScrollInfo();
       _data[i].editor.cursor = editor.getCursor();
@@ -167,11 +56,11 @@ let Tab = (function () {
       editor.setCursor(_data[i].editor.cursor.line, _data[i].editor.cursor.ch);
 
       // Set metadata to each panel elements
-      Metadata.setMetadataToPanel(_data[i].metadata);
+      Dialog.Metadata.setData(_data[i].metadata);
 
       // Manually trigger onchange events
-      document.getElementById("select-metadata-type").onchange();
-      document.getElementById("input-metadata-title").onchange();
+      document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+      document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
 
       // Activate tab-close button
       var divClose = document.createElement("div");
@@ -250,11 +139,7 @@ let Tab = (function () {
       _data[idx] = info;
 
       // Set metadata to each panel elements
-      Metadata.setMetadataToPanel(info.metadata);
-
-      // Manually trigger onchange events
-      document.getElementById("select-metadata-type").onchange();
-      document.getElementById("input-metadata-title").onchange();
+      Dialog.Metadata.setData(info.metadata);
     },
     count: function () {
       return _data.length;
@@ -278,7 +163,7 @@ let Tab = (function () {
         e.dataTransfer.effectAllowed = "move";
         _dragSrcTab = e.target;
 
-        // Prepare dragging image by element copy
+        // Prepare dragging image by element copycopy
         _dragImg = _dragSrcTab.cloneNode(true);
         _dragImg.style.display = "none";
         document.body.appendChild(_dragImg);
@@ -347,6 +232,10 @@ let Tab = (function () {
           newDocInfo.metadata.layout = "post";
           newDocInfo.metadata.date = Util.curtime();
           Tab.set(selectedTab.index, newDocInfo);
+
+          // Manually trigger onchange events
+          document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+          document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
         }
       }
     },

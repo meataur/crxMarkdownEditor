@@ -65,6 +65,10 @@ IO.Local = (function () {
             selectedTab.info.texts = editor.getValue();
             selectedTab.info.originalTexts = editor.getValue();
             Tab.set(selectedTab.index, selectedTab.info);
+
+            // Manually trigger onchange events
+            document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+            document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
           }
         };
         reader.readAsText(e.target.files[0]);

@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function () {
           dropdownItem.addEventListener("click", function (e) {
             collapseAllDropdowns();
             deselectAllTempPanelMenuItems();
-            closeAllDialogs();
+            Dialog.closeAll();
           });
         });
       }
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         collapseAllDropdowns();
-        closeAllDialogs();
+        Dialog.closeAll();
 
         if (this.classList.contains("selected")) {
           // Deselect all panel menu items
@@ -188,18 +188,18 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("editor-tools-save-local").onclick = IO.Local.save;
   document.getElementById("editor-tools-save-github").onclick = IO.Github.save;
   document.getElementById("editor-tools-save-gdrive").onclick = IO.GDrive.save;
-  document.getElementById("editor-tools-doc-metadata").onclick = Metadata.openPanel;
+  document.getElementById("editor-tools-doc-metadata").onclick = Dialog.Metadata.open;
   document.getElementById("editor-tools-makenew").onclick = Tab.makeNew;
   document.getElementById("editor-tools-attachment").onclick = attachments;
   document.getElementById("editor-tools-prettify").onclick = prettify;
-  document.getElementById("editor-tools-settings").onclick = Settings.openEditorSettingsPanel;
+  document.getElementById("editor-tools-settings").onclick = Dialog.Settings.Editor.open;
 
   document.getElementById("viewer-tools-export-html").onclick = IO.Local.saveAsHtml;
   document.getElementById("viewer-tools-export-pdf").onclick = IO.Local.saveAsPdf;
   document.getElementById("viewer-tools-print").onclick = IO.Local.print;
   document.getElementById("viewer-tools-mode").onclick = switchViewerMode;
   document.getElementById("viewer-tools-expand").onclick = expandViewer;
-  document.getElementById("viewer-tools-settings").onclick = Settings.openViewerSettingsPanel;
+  document.getElementById("viewer-tools-settings").onclick = Dialog.Settings.Viewer.open;
 
   document.getElementById("localhost-tools-jekyll-setup").onclick = setupJekyll;
   document.getElementById("localhost-tools-run-jekyll").onclick = runJekyll;
@@ -208,21 +208,36 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("help-tools-md-tutorial").onclick = openMdTutorial;
   document.getElementById("help-tools-about").onclick = openAboutPage;
 
-  // Prevent event propagation on dialogs
-  Array.from(document.getElementsByClassName("dlg")).forEach(function (dialog) {
-    dialog.addEventListener("mousedown", function (e) {
-      e.stopPropagation();
-    });
-  });
+  // Set panel's control event handler
+  document.getElementById("jekyll-settings-port").onkeypress = function (e) {
+    // Allow only number keys
+    var evt = e || window.event;
+    var key = evt.keyCode || evt.which;
+    key = String.fromCharCode(key);
+    var regex = /[0-9]|\./;
+    if (!regex.test(key)) {
+      evt.returnValue = false;
+      if (evt.preventDefault)
+        evt.preventDefault();
+    }
+  }
+  document.getElementById("btn-reset-settings").onclick = function () {
+    if (confirm("All open documents will be closed without saving, and all settings are initialized.\nAre you sure you want to continue?")) {
+      Tab.resetData();
+      Settings.reset();
+      Settings.autoSave = false;
+      chrome.runtime.reload();
+    }
+  }
 
   // Enable panel splitter dragging
   splitter.onmousedown = function (e) {
     isPanelResizing = true;
-  };
+  }
   splitter.ondblclick = function (e) {
     panelEditor.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
     panelWrapperHelper.style.width = "calc(50% - " + (splitter.clientWidth / 2) + "px)";
-  };
+  }
   document.onmousemove = function (e) {
     if (!isPanelResizing) return;
 
@@ -233,16 +248,16 @@ document.addEventListener("DOMContentLoaded", function () {
     var ratio = offset / wrapper.clientWidth * 100;
     panelEditor.style.width = "calc(" + ratio + "% - " + (splitter.clientWidth / 2) + "px)";
     panelWrapperHelper.style.width = "calc(" + (100 - ratio) + "% - " + (splitter.clientWidth / 2) + "px)";
-  };
+  }
   document.onmouseup = function (e) {
     // Escape from panel resizing mode
     isPanelResizing = false;
-  };
+  }
   document.onmousedown = function (e) {
     collapseAllDropdowns();
     deselectAllTempPanelMenuItems();
-    closeAllDialogs();
-  };
+    Dialog.closeAll();
+  }
 
   // Keyboard shortcut
   document.onkeydown = function (e) {
@@ -270,7 +285,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (toggle.hasAttribute("expanded"))
             toggle.click();
 
-          closeAllDialogs();
+          Dialog.closeAll();
           break;
       }
     }
@@ -302,7 +317,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Save the last state of workspace
   window.onbeforeunload = function (e) {
     var selectedTab = Tab.get();
-    selectedTab.info.metadata = Metadata.getMetadataFromPanel();
+    selectedTab.info.metadata = Dialog.Metadata.getData();
     selectedTab.info.texts = editor.getValue();
     selectedTab.info.editor.scrollPos = editor.getScrollInfo();
     selectedTab.info.editor.cursor = editor.getCursor();
@@ -328,12 +343,18 @@ function messageBox(texts, duration) {
   var outer = document.createElement("div");
   var msgbox = document.createElement("messagebox");
   msgbox.innerHTML = texts.replace(/\n/g, '<br />');
+  msgbox.onmouseover = function (e) { timer.pause(); }
+  msgbox.onmouseout = function (e) { timer.resume(); }
   outer.appendChild(msgbox);
   msgboxWrapper.appendChild(outer);
+
+  // Appeared
   setTimeout(function () {
     msgbox.style.opacity = 1;
   }, 100);
-  setTimeout(function () {
+  
+  // Disappeared
+  var timer = new PausableTimer(function() {
     msgbox.style.opacity = 0;
     setTimeout(function () {
       msgbox.parentNode.removeChild(msgbox);
@@ -453,12 +474,6 @@ function deselectAllTempPanelMenuItems() {
   });
 }
 
-function closeAllDialogs() {
-  Array.from(document.getElementsByClassName("dlg")).forEach(function (dialog) {
-    dialog.style.display = "none";
-  });
-}
-
 
 
 /**
@@ -528,6 +543,7 @@ function runJekyll() {
     messageBox("Invalid localhost port!");
     return;
   }
+  messageBox("Checking if Jekyll Launcher is installed...");
 
   var xhr = new XMLHttpRequest();
   xhr.onload = function () {
@@ -566,6 +582,7 @@ function visitJekyllSite() {
     messageBox("Invalid localhost port!");
     return;
   }
+  messageBox("Loading 'http://localhost:" + port + "/'...");
 
   var xhr = new XMLHttpRequest();
   xhr.onload = function () {

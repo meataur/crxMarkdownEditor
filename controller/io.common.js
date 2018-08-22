@@ -16,7 +16,7 @@ let IO = {
     }
 
     if (editor) {
-      data.metadata = Metadata.getMetadataFromPanel();
+      data.metadata = Dialog.Metadata.getData();
       data.texts += "---\n";
 
       // Sort keys

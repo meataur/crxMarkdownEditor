@@ -1,59 +1,3 @@
-document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("editor-settings-theme").onchange = function () {
-    if (editor) {
-      var selector = document.getElementById("editor-settings-theme");
-      var theme = selector.options[selector.selectedIndex].textContent;
-      editor.setOption("theme", theme);
-    }
-  }
-  document.getElementById("editor-settings-fontsize").onchange = function () {
-    if (editor) {
-      var selector = document.getElementById("editor-settings-fontsize");
-      var fontsize = selector.options[selector.selectedIndex].textContent;
-      var editorObj = document.getElementsByClassName('CodeMirror')[0];
-      editorObj.style["font-size"] = fontsize + "px";
-      editor.refresh();
-    }
-  }
-  document.getElementById("attachment-settings-types").onkeyup = function (e) {
-    try {
-      JSON.parse(this.value);
-      this.style["background"] = "#383838";
-    } catch (e) {
-      this.style["background"] = "rgb(238,97,80)";
-    }
-  }
-  document.getElementById("viewer-settings-codestyle").onchange = function () {
-    document.getElementById("viewer-style-codeblock").href = "lib/highlight-9.12.0/styles/" + this.value + ".css";
-    if (editor) {
-      var selectedTab = Tab.get();
-      if (selectedTab) {
-        preview(selectedTab.info.metadata.title, editor.getValue());
-      }
-    }
-  }
-  document.getElementById("jekyll-settings-port").onkeypress = function (e) {
-    // Allow only number keys
-    var evt = e || window.event;
-    var key = evt.keyCode || evt.which;
-    key = String.fromCharCode(key);
-    var regex = /[0-9]|\./;
-    if (!regex.test(key)) {
-      evt.returnValue = false;
-      if (evt.preventDefault)
-        evt.preventDefault();
-    }
-  }
-  document.getElementById("btn-reset-settings").onclick = function () {
-    if (confirm("All open documents will be closed without saving, and all settings are initialized.\nAre you sure you want to continue?")) {
-      Tab.resetData();
-      Settings.reset();
-      Settings.autoSave = false;
-      chrome.runtime.reload();
-    }
-  }
-});
-
 let Settings = (function () {
   let _get = function (key, callback, defaultVal) {
     chrome.storage.local.get(key, function (result) {
@@ -72,16 +16,6 @@ let Settings = (function () {
 
   return {
     autoSave: true,
-    openEditorSettingsPanel: function () {
-      var div = document.getElementById("editor-settings");
-      div.style.display = "block";
-      document.getElementById("editor-settings-theme").focus();
-    },
-    openViewerSettingsPanel: function () {
-      var div = document.getElementById("viewer-settings");
-      div.style.display = "block";
-      document.getElementById("viewer-settings-baseurl").focus();
-    },
     load: function (key) {
       if (key == "editor") {
         // Insert font-size options
@@ -190,9 +124,9 @@ let Settings = (function () {
         try {
           var parsed = JSON.parse(document.getElementById("attachment-settings-types").value);
           _set(key, {
-            location: document.getElementById("attachment-settings-location").value.replace(/\/+$/, ''),
+            location: document.getElementById("attachment-settings-location").value,
             types: parsed,
-            hashfunc: document.querySelector('input[name="hashing"]:checked').value
+            hashfunc: document.querySelector("input[name=\"hashfunc\"]:checked").value
           });
         } catch (e) {
           return false;
@@ -209,7 +143,7 @@ let Settings = (function () {
       } else if (key == "jekyll") {
         _set(key, {
           local: {
-            path: document.getElementById("jekyll-settings-localpath").value.replace(/\\+$/, ''),
+            path: document.getElementById("jekyll-settings-localpath").value.replace(/\\+$|\/+$/, ''),
             port: document.getElementById("jekyll-settings-port").value
           }
         });
