@@ -37,7 +37,6 @@ IO.Local = (function () {
 
     return ifrm;
   }
-
   return {
     open: function () {
       var input = document.createElement("input");
@@ -139,11 +138,96 @@ IO.Local = (function () {
         });
       }, 500);
     },
+    saveAsImage: function () {
+      messageBox("Generating screenshot image...\n(It may takes a few seconds.)");
+
+      var imgWidth = parseInt(viewer.scrollWidth);
+      var imgHeight = parseInt(viewer.scrollHeight);
+      var imgBackground = viewer.style.background ? viewer.style.background : "#fff";
+
+      var hidden = document.createElement("div");
+      hidden.id = "viewer";
+      hidden.style.width = parseInt(viewer.style.width) + "px";
+      hidden.style.height = parseInt(viewer.scrollHeight) + "px";
+      hidden.style.background = imgBackground;
+      hidden.innerHTML = viewer.innerHTML;
+      document.body.appendChild(hidden);
+
+      html2canvas(viewer, {
+        widht: imgWidth,
+        height: imgHeight,
+        background: imgBackground,
+        onrendered: function (canvas) {
+          hidden.parentNode.removeChild(hidden);
+
+          var imgData = canvas.toDataURL("image/png");
+
+          chrome.downloads.download({
+            url: imgData,
+            filename: IO.filename() + ".png",
+            conflictAction: "overwrite",
+            saveAs: true
+          }, function (downloadId) {
+            chrome.downloads.onChanged.addListener(function (e) {
+              if (e.id == downloadId && e.state) {
+                if (e.state.current === "complete") {
+                  messageBox("Download complete.");
+                  document.body.removeChild(ifrm);
+                } else if (e.state.current === "interrupted") {
+                  document.body.removeChild(ifrm);
+                }
+              }
+            });
+          });
+        }
+      });
+    },
     saveAsPdf: function () {
-      messageBox("Not support yet...");
-      // var doc = new jsPDF();
-      // doc.fromHTML(viewer);
-      // doc.save("document.pdf");
+      messageBox("Generating PDF document...\n(It may takes a few seconds.)");
+
+      var imgWidth = parseInt(viewer.scrollWidth);
+      var imgHeight = parseInt(viewer.scrollHeight);
+      var imgBackground = viewer.style.background ? viewer.style.background : "#fff";
+
+      var hidden = document.createElement("div");
+      hidden.id = "viewer";
+      hidden.style.width = imgWidth + "px";
+      hidden.style.height = imgHeight + "px";
+      hidden.style.background = imgBackground;
+      hidden.innerHTML = viewer.innerHTML;
+      document.body.appendChild(hidden);
+
+      html2canvas(viewer, {
+        widht: imgWidth,
+        height: imgHeight,
+        background: imgBackground,
+        onrendered: function (canvas) {
+          hidden.parentNode.removeChild(hidden);
+
+          var imgData = canvas.toDataURL("image/png");
+
+          var pdf = new jsPDF("p", "mm", [imgWidth * 0.26458333, imgHeight * 0.26458333]);
+          pdf.addImage(imgData, "PNG", 0, 0, imgWidth * 0.26458333, imgHeight * 0.26458333);
+
+          chrome.downloads.download({
+            url: pdf.output("datauristring"),
+            filename: IO.filename() + ".pdf",
+            conflictAction: "overwrite",
+            saveAs: true
+          }, function (downloadId) {
+            chrome.downloads.onChanged.addListener(function (e) {
+              if (e.id == downloadId && e.state) {
+                if (e.state.current === "complete") {
+                  messageBox("Download complete.");
+                  document.body.removeChild(ifrm);
+                } else if (e.state.current === "interrupted") {
+                  document.body.removeChild(ifrm);
+                }
+              }
+            });
+          });
+        }
+      });
     },
     print: function () {
       var selectedTab = Tab.get();

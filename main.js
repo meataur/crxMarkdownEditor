@@ -195,6 +195,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("editor-tools-settings").onclick = Dialog.Settings.Editor.open;
 
   document.getElementById("viewer-tools-export-html").onclick = IO.Local.saveAsHtml;
+  document.getElementById("viewer-tools-export-image").onclick = IO.Local.saveAsImage;
   document.getElementById("viewer-tools-export-pdf").onclick = IO.Local.saveAsPdf;
   document.getElementById("viewer-tools-print").onclick = IO.Local.print;
   document.getElementById("viewer-tools-mode").onclick = switchViewerMode;
@@ -491,6 +492,7 @@ function switchViewerMode() {
     viewer.removeAttribute("raw");
     viewer.className = "";
     viewer.style.background = "#fff";
+    viewer.style.overflowX = "hidden";
     nothingOnViewer.style.color = "#1e1e1e";
 
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-html\"></use>";
@@ -499,9 +501,10 @@ function switchViewerMode() {
     viewer.setAttribute("raw", "");
     viewer.classList.add("monotype");
     viewer.style.background = "#383838";
+    viewer.style.overflowX = "auto";
     nothingOnViewer.style.color = "#fff";
 
-    this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-see\"></use>";
+    this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-img\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "styled html";
   }
   var selectedTab = Tab.get();

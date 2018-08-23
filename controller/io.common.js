@@ -6,6 +6,12 @@ let IO = {
       return confirm("Changes you made may not be saved.\nAre you sure to open another document?");
     return true;
   },
+  filename: function () {
+    var metadata = Dialog.Metadata.getData();
+    var docTitle = metadata.title.length ? metadata.title : "Untitled Document";
+    var docDate = metadata.date.length ? metadata.date : Util.curtime();
+    return [docDate.split(" ")[0], docTitle.replaceAll(" ", "-").toLowerCase()].join("-");
+  },
   makeSaveData: function () {
     var data = {
       filename: "",
@@ -24,7 +30,7 @@ let IO = {
       keys.sort();
 
       // Make metadata string to append
-      var docDatetime = "";
+      var docDate = "";
       var docTitle = "";
       keys.forEach(function (k) {
         if (k == "type") {
@@ -34,9 +40,9 @@ let IO = {
           data.texts += k + ": " + docTitle + "\n";
           docTitle = docTitle.replaceAll(" ", "-").toLowerCase();
         } else if (k == "date") {
-          docDatetime = data.metadata[k].length ? data.metadata[k] : Util.curtime();
-          data.texts += k + ": " + docDatetime + "\n";
-          docDatetime = docDatetime.split(" ")[0];
+          docDate = data.metadata[k].length ? data.metadata[k] : Util.curtime();
+          data.texts += k + ": " + docDate + "\n";
+          docDate = docDate.split(" ")[0];
         } else {
           if (data.metadata[k].length)
             data.texts += k + ": " + data.metadata[k] + "\n";
@@ -44,7 +50,7 @@ let IO = {
       });
       data.texts += "---\n\n";
       data.texts += editor.getValue();
-      data.filename = [docDatetime, docTitle].join("-") + ".md";
+      data.filename = [docDate, docTitle].join("-") + ".md";
     }
     return data;
   }
