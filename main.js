@@ -780,7 +780,7 @@ function attachments() {
           var fext = fname.toLowerCase().split(".").pop();
           var storage = document.getElementById('attachment-settings-location').value.replace(/\/+$/, '');
           var type = document.getElementById('attachment-settings-types').value;
-          var hashing = document.querySelector('input[name="hashing"]:checked').value;
+          var hashfunc = document.querySelector('input[name="hashfunc"]:checked').value;
 
           // Set sub-directory path
           var jsonObj = JSON.parse(type);
@@ -793,21 +793,21 @@ function attachments() {
           }
 
           // Get file hashcode
-          if (hashing != "none") {
+          if (hashfunc != "none") {
             var ui8a = new Uint8Array(evt.target.result);
             var tmp = [];
             for (var i = 0; i < ui8a.length; i += 4)
               tmp.push(ui8a[i] << 24 | ui8a[i + 1] << 16 | ui8a[i + 2] << 8 | ui8a[i + 3]);
             var wordArray = CryptoJS.lib.WordArray.create(tmp, ui8a.length);
-            if (hashing == "md5")
+            if (hashfunc == "md5")
               fname = CryptoJS.MD5(wordArray) + "." + fext;
-            else if (hashing == "sha1")
+            else if (hashfunc == "sha1")
               fname = CryptoJS.SHA1(wordArray) + "." + fext;
-            else if (hashing == "sha224")
+            else if (hashfunc == "sha224")
               fname = CryptoJS.SHA224(wordArray) + "." + fext;
-            else if (hashing == "sha256")
+            else if (hashfunc == "sha256")
               fname = CryptoJS.SHA256(wordArray) + "." + fext;
-            else if (hashing == "sha512")
+            else if (hashfunc == "sha512")
               fname = CryptoJS.SHA512(wordArray) + "." + fext;
           }
 
