@@ -29,17 +29,18 @@ svg { display: inline-flex; align-self: center; fill: currentColor; stroke: curr
 }
 
 #viewer h1, h2, h3, h4, h5, h6, strong { font-weight: 500; }
-#viewer h1 { margin-top: 0; }
-#viewer h1 + div { margin-top: 1em; }
+#viewer h1 { margin-top: 0; margin-bottom: 30px; }
+#viewer h1 + p { margin-top: 1em; }
 #viewer h2 { margin-top: 1.6em; }
-#viewer h2 + h3, h2 + div { margin-top: 1em; }
+#viewer h2 + h3, h2 + p { margin-top: 1em; }
 #viewer h3 { margin-top: 1.4em; }
-#viewer h3 + h4, h3 + div { margin-top: 1em; }
+#viewer h3 + h4, h3 + p { margin-top: 1em; }
 #viewer h4 { margin-top: 1.2em; }
-#viewer h4 + h5, h4 + div { margin-top: 1em; }
+#viewer h4 + h5, h4 + p { margin-top: 1em; }
 #viewer > *:first-child { margin-top: 0; }
 
 #viewer div { margin: 1em 0; }
+#viewer p { margin: .6em 0; }
 
 #viewer img { display: block; max-width: 100%; margin: 1.6em auto; }
 #viewer figure { margin: 1.6em 0; }

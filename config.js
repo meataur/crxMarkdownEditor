@@ -1,5 +1,5 @@
 // Develop environment settings
 let Developer = {
-  debug: false,
+  debug: true,
   workathome: true
 }

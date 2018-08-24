@@ -191,7 +191,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("editor-tools-doc-metadata").onclick = Dialog.Metadata.open;
   document.getElementById("editor-tools-makenew").onclick = Tab.makeNew;
   document.getElementById("editor-tools-attachment").onclick = attachments;
-  document.getElementById("editor-tools-prettify").onclick = prettify;
+  document.getElementById("editor-tools-tidyup").onclick = Parser.tidyup;
   document.getElementById("editor-tools-settings").onclick = Dialog.Settings.Editor.open;
 
   document.getElementById("viewer-tools-export-html").onclick = IO.Local.saveAsHtml;
@@ -831,10 +831,6 @@ function attachments() {
   });
 
   input.click();
-}
-
-function prettify () {
-  messageBox("Not support yet...");
 }
 
 var preview = Util.debounce(function (docTitle, content) {

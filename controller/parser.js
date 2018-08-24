@@ -64,8 +64,13 @@ let Parser = (function () {
 
       return parsed;
     },
-    prettify: function () {
+    tidyup: function () {
+      var tidycode = Parser.parse(editor.getValue()).body.texts;
 
+      // Remove succeeding multi-newlines
+      tidycode = tidycode.replace(/\n{3,}/gi, "\n\n");
+
+      editor.setValue(tidycode);
     }
   }
 })();

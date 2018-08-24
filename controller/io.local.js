@@ -172,9 +172,8 @@ IO.Local = (function () {
               if (e.id == downloadId && e.state) {
                 if (e.state.current === "complete") {
                   messageBox("Download complete.");
-                  document.body.removeChild(ifrm);
                 } else if (e.state.current === "interrupted") {
-                  document.body.removeChild(ifrm);
+                  // Do nothing
                 }
               }
             });
@@ -219,9 +218,8 @@ IO.Local = (function () {
               if (e.id == downloadId && e.state) {
                 if (e.state.current === "complete") {
                   messageBox("Download complete.");
-                  document.body.removeChild(ifrm);
                 } else if (e.state.current === "interrupted") {
-                  document.body.removeChild(ifrm);
+                  // Do nothing
                 }
               }
             });
