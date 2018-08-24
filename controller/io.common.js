@@ -19,39 +19,38 @@ let IO = {
       texts: ""
     }
 
-    if (editor) {
-      data.metadata = Dialog.Metadata.getData();
-      data.texts += "---\n";
+    data.metadata = Dialog.Metadata.getData();
+    data.texts += "---\n";
 
-      // Sort keys
-      var keys = [];
-      for (var k in data.metadata)
-        keys[keys.length] = k;
-      keys.sort();
+    // Sort keys
+    var keys = [];
+    for (var k in data.metadata)
+      keys[keys.length] = k;
+    keys.sort();
 
-      // Make metadata string to append
-      var docDate = "";
-      var docTitle = "";
-      keys.forEach(function (k) {
-        if (k == "type") {
-          // Do nothing
-        } else if (k == "title") {
-          docTitle = data.metadata[k].length ? data.metadata[k] : "Untitled Document";
-          data.texts += k + ": " + docTitle + "\n";
-          docTitle = docTitle.replaceAll(" ", "-").toLowerCase();
-        } else if (k == "date") {
-          docDate = data.metadata[k].length ? data.metadata[k] : Util.curtime();
-          data.texts += k + ": " + docDate + "\n";
-          docDate = docDate.split(" ")[0];
-        } else {
-          if (data.metadata[k].length)
-            data.texts += k + ": " + data.metadata[k] + "\n";
-        }
-      });
-      data.texts += "---\n\n";
-      data.texts += editor.getValue();
-      data.filename = [docDate, docTitle].join("-") + ".md";
-    }
+    // Make metadata string to append
+    var docDate = "";
+    var docTitle = "";
+    keys.forEach(function (k) {
+      if (k == "type") {
+        // Do nothing
+      } else if (k == "title") {
+        docTitle = data.metadata[k].length ? data.metadata[k] : "Untitled Document";
+        data.texts += k + ": " + docTitle + "\n";
+        docTitle = docTitle.replaceAll(" ", "-").toLowerCase();
+      } else if (k == "date") {
+        docDate = data.metadata[k].length ? data.metadata[k] : Util.curtime();
+        data.texts += k + ": " + docDate + "\n";
+        docDate = docDate.split(" ")[0];
+      } else {
+        if (data.metadata[k].length)
+          data.texts += k + ": " + data.metadata[k] + "\n";
+      }
+    });
+    data.texts += "---\n\n";
+    data.texts += editor.getValue();
+    data.filename = [docDate, docTitle].join("-") + ".md";
+
     return data;
   }
 }

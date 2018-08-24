@@ -21,15 +21,14 @@ let Tab = (function () {
     var selectedTab = Tab.get();
     if (selectedTab) {
       var i = selectedTab.index;
+
+      // Update current document information
       _data[i].selected = false;
       _data[i].metadata = Dialog.Metadata.getData();
       _data[i].texts = editor.getValue();
       _data[i].editor.scrollPos = editor.getScrollInfo();
       _data[i].editor.cursor = editor.getCursor();
-      
-      // Save current viewer's scroll position
-      viewer.scrollPos = viewer.scrollTop;
-      _data[i].viewer.scrollPos = viewer.scrollPos;
+      _data[i].viewer.scrollPos = viewer.scrollTop;
 
       // Mark currently selected tab as previous one
       _prevSelectedIdx = i;
@@ -134,12 +133,11 @@ let Tab = (function () {
         }
       }
     },
-    set: function (idx, info) {
-      // Save document information
-      _data[idx] = info;
-
-      // Set metadata to each panel elements
-      Dialog.Metadata.setData(info.metadata);
+    saveData: function () {
+      // Save documents data to local storage
+      chrome.storage.local.set({
+        documents: _data
+      });
     },
     count: function () {
       return _data.length;
@@ -224,22 +222,22 @@ let Tab = (function () {
       _isNewTabAdded = true;
     },
     makeNew: function () {
-      if (editor) {
-        editor.setValue("");
-        editor.focus();
-        editor.setCursor(editor.lineCount(), 0);
+      editor.setValue("");
+      editor.focus();
+      editor.setCursor(editor.lineCount(), 0);
 
-        var selectedTab = Tab.get();
-        if (selectedTab) {
-          var newDocInfo = Tab.getInitData();
-          newDocInfo.metadata.layout = "post";
-          newDocInfo.metadata.date = Util.curtime();
-          Tab.set(selectedTab.index, newDocInfo);
+      var selectedTab = Tab.get();
+      if (selectedTab) {
+        var newDocInfo = Tab.getInitData();
+        newDocInfo.metadata.layout = "post";
+        newDocInfo.metadata.date = Util.curtime();
 
-          // Manually trigger onchange events
-          document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
-          document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
-        }
+        // Set metadata to each panel elements
+        Dialog.Metadata.setData(newDocInfo.metadata);
+
+        // Manually trigger onchange events
+        document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+        document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
       }
     },
     close: function () {
@@ -287,11 +285,6 @@ let Tab = (function () {
           _data.splice(selectedTab.index, 1);
         }, 300);
       }
-    },
-    save: function () {
-      chrome.storage.local.set({
-        documents: _data
-      });
     },
     resize: function () {
       var bodyWidth = parseInt(window.getComputedStyle(document.body).width);

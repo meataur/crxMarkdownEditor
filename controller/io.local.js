@@ -63,7 +63,9 @@ IO.Local = (function () {
               selectedTab.info.metadata[key] = parsed.header[key];
             selectedTab.info.texts = editor.getValue();
             selectedTab.info.originalTexts = editor.getValue();
-            Tab.set(selectedTab.index, selectedTab.info);
+
+            // Set metadata to each panel elements
+            Dialog.Metadata.setData(selectedTab.info.metadata);
 
             // Manually trigger onchange events
             document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
@@ -78,40 +80,43 @@ IO.Local = (function () {
       IO.Local.saveAsMarkdown();
     },
     saveAsMarkdown: function () {
-      if (editor) {
-        var saveData = IO.makeSaveData();
-        chrome.downloads.download({
-          url: URL.createObjectURL(new Blob([saveData.texts], {
-            type: "text/x-markdown"
-          })),
-          filename: saveData.filename,
-          conflictAction: "overwrite",
-          saveAs: true
-        }, function (downloadId) {
-          chrome.downloads.onChanged.addListener(function (e) {
-            if (e.id == downloadId && e.state && e.state.current === "complete") {
-              chrome.downloads.search({
-                id: downloadId
-              }, function (result) {
-                messageBox("Download Complete.");
+      var saveData = IO.makeSaveData();
+      chrome.downloads.download({
+        url: URL.createObjectURL(new Blob([saveData.texts], {
+          type: "text/x-markdown"
+        })),
+        filename: saveData.filename,
+        conflictAction: "overwrite",
+        saveAs: true
+      }, function (downloadId) {
+        chrome.downloads.onChanged.addListener(function (e) {
+          if (e.id == downloadId && e.state && e.state.current === "complete") {
+            chrome.downloads.search({
+              id: downloadId
+            }, function (result) {
+              messageBox("Download Complete.");
 
-                var selectedTab = Tab.get();
-                for (var key in saveData.metadata) {
-                  selectedTab.info.metadata[key] = saveData.metadata[key];
-                }
-                // selectedTab.info.metadata.description = result[0].filename;
-                selectedTab.info.metadata.type = "local";
-                selectedTab.info.texts = editor.getValue();
-                selectedTab.info.originalTexts = editor.getValue();
-                selectedTab.info.editor.scrollPos = editor.getScrollInfo();
-                selectedTab.info.editor.cursor = editor.getCursor();
-                selectedTab.info.viewer.scrollPos = viewer.scrollTop;
-                Tab.set(selectedTab.index, selectedTab.info);
-              });
-            }
-          });
+              var selectedTab = Tab.get();
+              for (var key in saveData.metadata) {
+                selectedTab.info.metadata[key] = saveData.metadata[key];
+              }
+              // selectedTab.info.metadata.description = result[0].filename;
+              selectedTab.info.metadata.type = "local";
+              selectedTab.info.texts = editor.getValue();
+              selectedTab.info.originalTexts = editor.getValue();
+              selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+              selectedTab.info.editor.cursor = editor.getCursor();
+              selectedTab.info.viewer.scrollPos = viewer.scrollTop;
+
+              // Set metadata to each panel elements
+              Dialog.Metadata.setData(selectedTab.info.metadata);
+
+              // Manually trigger onchange events
+              document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+            });
+          }
         });
-      }
+      });
     },
     saveAsHtml: function () {
       var selectedTab = Tab.get();

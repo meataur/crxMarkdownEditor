@@ -17,37 +17,41 @@ document.addEventListener("DOMContentLoaded", function () {
       github: "github",
       google: "gdrive"
     }
-    var iconId = "icon-file";
+    var iconId = "file";
     for (var k in keywords) {
       if (this.value.toLowerCase().contains(k)) {
-        iconId = "icon-" + keywords[k];
+        iconId = keywords[k];
         break;
       }
     }
+
     var selectedTab = Tab.get();
-    selectedTab.tab.getElementsByClassName("doc-type")[0].innerHTML = "<svg><use xlink:href=\"icons.svg#" + iconId + "\"></use></svg>";
+    selectedTab.info.type = (iconId == "file") ? "" : iconId;
+    selectedTab.tab.getElementsByClassName("doc-type")[0].innerHTML = "<svg><use xlink:href=\"icons.svg#icon-" + iconId + "\"></use></svg>";
   }
   document.getElementById("input-metadata-title").onchange = function (e) {
     if (!this.value.length)
       this.value = "Untitled Document";
 
-    // Save document information
     var selectedTab = Tab.get();
-    selectedTab.info.metadata.title = this.value;
-    Tab.set(selectedTab.index, selectedTab.info);
-
-    // Modify texts of tab element
     selectedTab.tab.getElementsByClassName("doc-title")[0].innerHTML = this.value;
-    selectedTab.tab.title = this.value;
-
-    // Modify browser title
+    selectedTab.tab.title = "[" + selectedTab.info.date + "] " + this.value;
+    selectedTab.info.title = this.value;
     document.title = manifestData.name + " - " + this.value;
 
-    if (editor)
-      preview(this.value, editor.getValue());
+    preview(this.value, editor.getValue());
+  }
+  document.getElementById("input-metadata-date").onchange = function (e) {
+    var selectedTab = Tab.get();
+    selectedTab.tab.title = "[" + this.value + "] " + selectedTab.info.title;
+    selectedTab.info.date = this.value;
   }
   document.getElementById("refresh-datetime").onclick = function () {
-    document.getElementById("input-metadata-date").value = Util.curtime();
+    var curtime = Util.curtime();
+    document.getElementById("input-metadata-date").value = curtime;
+
+    var selectedTab = Tab.get();
+    selectedTab.info.date = curtime;
   }
 
 
@@ -56,22 +60,18 @@ document.addEventListener("DOMContentLoaded", function () {
    * Dialog.Settings.Editor controls
    */
   document.getElementById("editor-settings-theme").onchange = function () {
-    if (editor) {
-      var selector = document.getElementById("editor-settings-theme");
-      var theme = selector.options[selector.selectedIndex].textContent;
-      editor.setOption("theme", theme);
-      Settings.save("editor");
-    }
+    var selector = document.getElementById("editor-settings-theme");
+    var theme = selector.options[selector.selectedIndex].textContent;
+    editor.setOption("theme", theme);
+    Settings.save("editor");
   }
   document.getElementById("editor-settings-fontsize").onchange = function () {
-    if (editor) {
-      var selector = document.getElementById("editor-settings-fontsize");
-      var fontsize = selector.options[selector.selectedIndex].textContent;
-      var editorObj = document.getElementsByClassName('CodeMirror')[0];
-      editorObj.style["font-size"] = fontsize + "px";
-      editor.refresh();
-      Settings.save("editor");
-    }
+    var selector = document.getElementById("editor-settings-fontsize");
+    var fontsize = selector.options[selector.selectedIndex].textContent;
+    var editorObj = document.getElementsByClassName('CodeMirror')[0];
+    editorObj.style["font-size"] = fontsize + "px";
+    editor.refresh();
+    Settings.save("editor");
   }
   document.getElementById("editor-settings-scrollsync").onclick = function () {
     Settings.save("editor");
@@ -114,13 +114,12 @@ document.addEventListener("DOMContentLoaded", function () {
    */
   document.getElementById("viewer-settings-codestyle").onchange = function () {
     document.getElementById("viewer-style-codeblock").href = "lib/highlight-9.12.0/styles/" + this.value + ".css";
-    if (editor) {
-      var selectedTab = Tab.get();
-      if (selectedTab) {
-        preview(selectedTab.info.metadata.title, editor.getValue());
-      }
-      Settings.save("viewer");
+
+    var selectedTab = Tab.get();
+    if (selectedTab) {
+      preview(selectedTab.info.metadata.title, editor.getValue());
     }
+    Settings.save("viewer");
   }
   document.getElementById("viewer-settings-baseurl").onchange = function () {
     this.value = this.value.replace(/\\+$|\/+$/, '');

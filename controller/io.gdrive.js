@@ -169,8 +169,10 @@ IO.GDrive = (function () {
         selectedTab.info.metadata[key] = parsed.header[key];
       selectedTab.info.texts = editor.getValue();
       selectedTab.info.originalTexts = editor.getValue();
-      Tab.set(selectedTab.index, selectedTab.info);
 
+      // Set metadata to each panel elements
+      Dialog.Metadata.setData(selectedTab.info.metadata);
+  
       // Manually trigger onchange events
       document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
       document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
@@ -309,7 +311,12 @@ IO.GDrive = (function () {
               selectedTab.info.editor.scrollPos = editor.getScrollInfo();
               selectedTab.info.editor.cursor = editor.getCursor();
               selectedTab.info.viewer.scrollPos = viewer.scrollTop;
-              Tab.set(selectedTab.index, selectedTab.info);
+
+              // Set metadata to each panel elements
+              Dialog.Metadata.setData(selectedTab.info.metadata);
+
+              // Manually trigger onchange events
+              document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
 
               Dialog.closeAll();
             } else {

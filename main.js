@@ -327,11 +327,10 @@ document.addEventListener("DOMContentLoaded", function () {
     selectedTab.info.editor.scrollPos = editor.getScrollInfo();
     selectedTab.info.editor.cursor = editor.getCursor();
     selectedTab.info.viewer.scrollPos = viewer.scrollTop;
-    Tab.set(selectedTab.index, selectedTab.info);
     
     if (Settings.autoSave) {
       Settings.saveAll();
-      Tab.save();
+      Tab.saveData();
     }
   }
 });
@@ -834,87 +833,85 @@ function attachments() {
 }
 
 var preview = Util.debounce(function (docTitle, content) {
-  if (editor) {
-    var nothingOnViewer = document.getElementById("nothing-on-viewer");
+  var nothingOnViewer = document.getElementById("nothing-on-viewer");
 
-    if (viewer.scrollPos < 0)
-      viewer.scrollPos = viewer.scrollTop;
+  if (viewer.scrollPos < 0)
+    viewer.scrollPos = viewer.scrollTop;
 
-    if (content.length) {
-      // Remove no-content helper message
-      nothingOnViewer.style.display = "none";
+  if (content.length) {
+    // Remove no-content helper message
+    nothingOnViewer.style.display = "none";
 
-      // Set site's base url to localhost
-      var baseurl = document.getElementById("viewer-settings-baseurl").value;
-      content = content.replace(/{{ site.baseurl }}/gi, baseurl);
+    // Set site's base url to localhost
+    var baseurl = document.getElementById("viewer-settings-baseurl").value;
+    content = content.replace(/{{ site.baseurl }}/gi, baseurl);
 
-      // Convert markdown into html
-      var html = converter.makeHtml("# " + docTitle + "\n\n" + content);
+    // Convert markdown into html
+    var html = converter.makeHtml("# " + docTitle + "\n\n" + content);
 
-      if (viewer.hasAttribute("raw")) {   // HTML code viewer
-        html = html_beautify(html, {
-          "indent_size": "2",
-          "indent_char": " ",
-          "max_preserve_newlines": "5",
-          "preserve_newlines": true,
-          "keep_array_indentation": false,
-          "break_chained_methods": false,
-          "indent_scripts": "normal",
-          "brace_style": "collapse",
-          "space_before_conditional": true,
-          "unescape_strings": false,
-          "jslint_happy": false,
-          "end_with_newline": false,
-          "wrap_line_length": "0",
-          "indent_inner_html": false,
-          "comma_first": false,
-          "e4x": false
-        });
+    if (viewer.hasAttribute("raw")) {   // HTML code viewer
+      html = html_beautify(html, {
+        "indent_size": "2",
+        "indent_char": " ",
+        "max_preserve_newlines": "5",
+        "preserve_newlines": true,
+        "keep_array_indentation": false,
+        "break_chained_methods": false,
+        "indent_scripts": "normal",
+        "brace_style": "collapse",
+        "space_before_conditional": true,
+        "unescape_strings": false,
+        "jslint_happy": false,
+        "end_with_newline": false,
+        "wrap_line_length": "0",
+        "indent_inner_html": false,
+        "comma_first": false,
+        "e4x": false
+      });
 
-        html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
-          return '&#'+i.charCodeAt(0)+';';
-        }).replace(/ /g, "&nbsp;").replace(/\t/g, "  ");
+      html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+        return '&#'+i.charCodeAt(0)+';';
+      }).replace(/ /g, "&nbsp;").replace(/\t/g, "  ");
 
-        // Set content
-        viewer.innerHTML = html;
+      // Set content
+      viewer.innerHTML = html;
 
-        // Syntax highlighting
-        hljs.configure({ languages: ["html"] });
-        hljs.highlightBlock(viewer);
+      // Syntax highlighting
+      hljs.configure({ languages: ["html"] });
+      hljs.highlightBlock(viewer);
 
-        // Set content again
-        var codelines = "";
-        viewer.innerHTML.match(/[^\r\n]+/g).forEach(function (line) {
-          codelines += line + "<br />";
-        });
-        viewer.innerHTML = codelines;
-      } else {    // Styled HTML viewer
-        // Set content
-        viewer.innerHTML = html;
+      // Set content again
+      var codelines = "";
+      viewer.innerHTML.match(/[^\r\n]+/g).forEach(function (line) {
+        codelines += line + "<br />";
+      });
+      viewer.innerHTML = codelines;
+    } else {    // Styled HTML viewer
+      // Set content
+      viewer.innerHTML = html;
 
-        // Set scroll position
-        viewer.scrollTop = viewer.scrollPos;
+      // Set scroll position
+      viewer.scrollTop = viewer.scrollPos;
 
-        // Syntax highlighting
-        viewer.querySelectorAll("pre code").forEach(highlighter);
+      // Syntax highlighting
+      viewer.querySelectorAll("pre code").forEach(highlighter);
 
-        // Render math equations
-        renderMathInElement(viewer, {
-          delimiters: [
-            {left: "$$", right: "$$", display: true},
-            {left: "\\[", right: "\\]", display: true},
-            {left: "$", right: "$", display: false},
-            {left: "\\(", right: "\\)", display: false}
-          ]
-        });
+      // Render math equations
+      renderMathInElement(viewer, {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "\\[", right: "\\]", display: true},
+          {left: "$", right: "$", display: false},
+          {left: "\\(", right: "\\)", display: false}
+        ]
+      });
 
-        // Set previous scrollbar postion
-        Scroll.onViewerContentsLoaded();
-      }
-    } else {
-      viewer.removeAllChildren();
-      nothingOnViewer.style.display = "block";
+      // Set previous scrollbar postion
+      Scroll.onViewerContentsLoaded();
     }
+  } else {
+    viewer.removeAllChildren();
+    nothingOnViewer.style.display = "block";
   }
 }, 300);
 
