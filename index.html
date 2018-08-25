@@ -69,7 +69,7 @@
 
 	<!-- html2canvas -->
 	<script src="lib/html2canvas-1.0.0-alpha.12/html2canvas.min.js"></script>
-
+	
 	<!-- jsPDF -->
 	<script src="lib/jspdf-1.4.1/jspdf.min.js"></script>
 
@@ -344,7 +344,7 @@
 				</toolbox>
 			</div>
 			<div class="panel-body">
-				<div id="viewer"></div>
+				<div id="viewer" class="preview"></div>
 				<div id="nothing-on-viewer">There is nothing displayed on viewer.</div>
 
 				<div id="viewer-settings" class="dlg">
@@ -387,7 +387,7 @@
 				</toolbox>
 			</div>
 			<div class="panel-body">
-				<div id="hpage-jekyll-setup" class="hpage">
+				<div id="hpage-jekyll-setup" class="preview hpage">
 					<h1>Setup Jekyll on Localhost</h1>
 					<h2>One-Time Installation Steps</h2>
 					<h3>Step 1. Install Jekyll</h3>
@@ -398,7 +398,7 @@
 					<ul>
 						<li><strong>Local Working Directory: </strong><br />
 						<input type="text" class="expand" id="jekyll-settings-localpath" spellcheck="false"></li>
-						<li><strong>Port: </strong><input type="text" id="jekyll-settings-port" spellcheck="false" maxlength="5" size="5"> (This value must be specified if you want to run Jekyll.)</li>
+						<li><strong>Port: </strong><input type="text" id="jekyll-settings-port" spellcheck="false" maxlength="5" size="5"><br />(This value must be specified if you want to run Jekyll.)</li>
 					</ul>
 					<h3>Step 3. Install Jekyll Launcher</h3>
 					<p>Download and execute the Jekyll Launcher installer:</p>
@@ -419,8 +419,8 @@
 				</toolbox>
 			</div>
 			<div class="panel-body">
-				<div id="hpage-md-tutorial" class="hpage"></div>
-				<div id="hpage-about" class="hpage">
+				<div id="hpage-md-tutorial" class="preview hpage"></div>
+				<div id="hpage-about" class="preview hpage">
 					<h1><span class="appname"></span> <span class="appvers"></span></h1>
 					<h2>Author</h2>
 					<p>ChangUk, Park (<a href="https://changuk.github.io">changuk.github.io</a>)</p>

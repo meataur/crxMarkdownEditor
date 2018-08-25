@@ -23,12 +23,12 @@ IO.Local = (function () {
         _get("lib/highlight-9.12.0/styles/" + document.getElementById("viewer-settings-codestyle").value + ".css", function () {
           ifrm.contentWindow.document.write("<style>" + this.responseText + "</style>\n");
           ifrm.contentWindow.document.write("</head>\n");
-          ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + viewer.innerHTML + "</body>\n");
+          ifrm.contentWindow.document.write("<body class=\"preview\">\n" + viewer.innerHTML + "</body>\n");
           ifrm.contentWindow.document.write("</html>");
           ifrm.contentWindow.document.close();
         }, function () {
           ifrm.contentWindow.document.write("</head>\n");
-          ifrm.contentWindow.document.write("<body id=\"viewer\">\n" + viewer.innerHTML + "</body>\n");
+          ifrm.contentWindow.document.write("<body class=\"preview\">\n" + viewer.innerHTML + "</body>\n");
           ifrm.contentWindow.document.write("</html>");
           ifrm.contentWindow.document.close();
         });
@@ -37,6 +37,41 @@ IO.Local = (function () {
 
     return ifrm;
   }
+  let _html2canvas = function (id, scale, callback) {
+    var el = document.getElementById(id);
+
+    // Adjust layer's width and height to A4 paper size
+    var imgWidth = Math.floor(210 / 0.26); // 0.26458333
+    el.style.width = imgWidth + "px";
+    var imgHeight = parseInt(el.scrollHeight);
+    el.removeAttribute("style");
+    var imgBackground = el.style.background ? el.style.background : "#fff";
+
+    // Make entire page
+    var entirePage = document.createElement("div");
+    entirePage.className = "preview";
+    entirePage.style.width = imgWidth + "px";
+    entirePage.style.height = imgHeight + "px";
+    if (scale > 1) {
+      entirePage.style.transform = "scale(" + scale + ")";
+      entirePage.style.transformOrigin = "0 0";
+    }
+    entirePage.style.background = imgBackground;
+    entirePage.innerHTML = el.innerHTML;
+    document.body.appendChild(entirePage);
+
+    html2canvas(entirePage, {
+      width: imgWidth * scale,
+      height: imgHeight * scale,
+      background: imgBackground,
+      allowTaint: true,
+      onrendered: function (canvas) {
+        entirePage.parentNode.removeChild(entirePage);
+        callback(canvas);
+      }
+    });
+  }
+
   return {
     open: function () {
       var input = document.createElement("input");
@@ -146,90 +181,84 @@ IO.Local = (function () {
     saveAsImage: function () {
       messageBox("Generating screenshot image...\n(It may takes a few seconds.)");
 
-      var imgWidth = parseInt(viewer.scrollWidth);
-      var imgHeight = parseInt(viewer.scrollHeight);
-      var imgBackground = viewer.style.background ? viewer.style.background : "#fff";
+      _html2canvas("viewer", 2, function (canvas) {
+        var imgData = canvas.toDataURL("image/png");
 
-      var hidden = document.createElement("div");
-      hidden.id = "viewer";
-      hidden.style.width = parseInt(viewer.style.width) + "px";
-      hidden.style.height = parseInt(viewer.scrollHeight) + "px";
-      hidden.style.background = imgBackground;
-      hidden.innerHTML = viewer.innerHTML;
-      document.body.appendChild(hidden);
-
-      html2canvas(viewer, {
-        widht: imgWidth,
-        height: imgHeight,
-        background: imgBackground,
-        onrendered: function (canvas) {
-          hidden.parentNode.removeChild(hidden);
-
-          var imgData = canvas.toDataURL("image/png");
-
-          chrome.downloads.download({
-            url: imgData,
-            filename: IO.filename() + ".png",
-            conflictAction: "overwrite",
-            saveAs: true
-          }, function (downloadId) {
-            chrome.downloads.onChanged.addListener(function (e) {
-              if (e.id == downloadId && e.state) {
-                if (e.state.current === "complete") {
-                  messageBox("Download complete.");
-                } else if (e.state.current === "interrupted") {
-                  // Do nothing
-                }
+        chrome.downloads.download({
+          url: imgData,
+          filename: IO.filename() + ".png",
+          conflictAction: "overwrite",
+          saveAs: true
+        }, function (downloadId) {
+          chrome.downloads.onChanged.addListener(function (e) {
+            if (e.id == downloadId && e.state) {
+              if (e.state.current === "complete") {
+                messageBox("Download complete.");
+              } else if (e.state.current === "interrupted") {
+                // Do nothing
               }
-            });
+            }
           });
-        }
+        });
       });
     },
     saveAsPdf: function () {
       messageBox("Generating PDF document...\n(It may takes a few seconds.)");
+      
+      _html2canvas("viewer", 2, function (canvas) {
+        var pdf = new jsPDF("p", "mm", "a4");
+        var pageRatio = pdf.internal.pageSize.getHeight() / pdf.internal.pageSize.getWidth();
+        var pageWidth = canvas.width;
+        var pageHeight = Math.floor(canvas.width * pageRatio);
+        var pageWidthInMm = pdf.internal.pageSize.getWidth();    // (pageWidth / scale) * 0.26458333;
+        var pageHeightInMm = pdf.internal.pageSize.getHeight();  // (pageHeight / scale) * 0.26458333;
 
-      var imgWidth = parseInt(viewer.scrollWidth);
-      var imgHeight = parseInt(viewer.scrollHeight);
-      var imgBackground = viewer.style.background ? viewer.style.background : "#fff";
-
-      var hidden = document.createElement("div");
-      hidden.id = "viewer";
-      hidden.style.width = imgWidth + "px";
-      hidden.style.height = imgHeight + "px";
-      hidden.style.background = imgBackground;
-      hidden.innerHTML = viewer.innerHTML;
-      document.body.appendChild(hidden);
-
-      html2canvas(viewer, {
-        widht: imgWidth,
-        height: imgHeight,
-        background: imgBackground,
-        onrendered: function (canvas) {
-          hidden.parentNode.removeChild(hidden);
-
-          var imgData = canvas.toDataURL("image/png");
-
-          var pdf = new jsPDF("p", "mm", [imgWidth * 0.26458333, imgHeight * 0.26458333]);
-          pdf.addImage(imgData, "PNG", 0, 0, imgWidth * 0.26458333, imgHeight * 0.26458333);
-
-          chrome.downloads.download({
-            url: pdf.output("datauristring"),
-            filename: IO.filename() + ".pdf",
-            conflictAction: "overwrite",
-            saveAs: true
-          }, function (downloadId) {
-            chrome.downloads.onChanged.addListener(function (e) {
-              if (e.id == downloadId && e.state) {
-                if (e.state.current === "complete") {
-                  messageBox("Download complete.");
-                } else if (e.state.current === "interrupted") {
-                  // Do nothing
-                }
-              }
-            });
-          });
+        // Calculate PDF document pages
+        var pages = 0;
+        var remnant = canvas.height;
+        while (remnant > 0) {
+          remnant -= pages ? Math.floor(pageHeight * 0.99) : pageHeight;
+          pages += 1;
         }
+
+        for (var page = 0; page < pages; page++) {
+          var pageCanvas = document.createElement("canvas");
+          pageCanvas.setAttribute("width", pageWidth);
+          pageCanvas.setAttribute("height", pageHeight);
+          
+          var context = pageCanvas.getContext("2d");
+          context.drawImage(canvas, 0, Math.floor(pageHeight * 0.99) * page, pageWidth, pageHeight, 0, 0, pageWidth, pageHeight);
+
+          if (page) pdf.addPage();
+          pdf.setPage(page + 1);
+
+          var pageCanvasDataURL = pageCanvas.toDataURL("image/png", 1.0);
+          pdf.addImage(pageCanvasDataURL, "PNG", 11, 11, pageWidthInMm - 22, pageHeightInMm - 22);
+
+          var pageNo = (page + 1) + "/" + pages;
+          var offsetX = pageWidthInMm - 11;
+          var offsetY = pageHeightInMm - 6;
+          pdf.setFontSize(8);
+          pdf.text(pageNo, offsetX, offsetY, null, null, "right");
+        }
+
+        var pdfBlob = pdf.output("blob");
+        chrome.downloads.download({
+          url: URL.createObjectURL(pdfBlob),
+          filename: IO.filename() + ".pdf",
+          conflictAction: "overwrite",
+          saveAs: true
+        }, function (downloadId) {
+          chrome.downloads.onChanged.addListener(function (e) {
+            if (e.id == downloadId && e.state) {
+              if (e.state.current === "complete") {
+                messageBox("Download complete.");
+              } else if (e.state.current === "interrupted") {
+                // Do nothing
+              }
+            }
+          });
+        });
       });
     },
     print: function () {
