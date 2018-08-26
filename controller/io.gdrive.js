@@ -89,7 +89,7 @@ IO.GDrive = (function () {
 
         parent.appendChild(ul);
       } else {
-        messageBox("Unable to load files of Google Drive: Error code(" + this.status + ")");
+        new MessageBox("Unable to load files of Google Drive: Error code(" + this.status + ")").show();
       }
     });
   }
@@ -147,7 +147,7 @@ IO.GDrive = (function () {
 
         parent.appendChild(ul);
       } else {
-        messageBox("Unable to load files of Google Drive: Error code(" + this.status + ")");
+        new MessageBox("Unable to load files of Google Drive: Error code(" + this.status + ")").show();
       }
     });
   }
@@ -179,12 +179,12 @@ IO.GDrive = (function () {
 
       Dialog.closeAll();
     } else {
-      messageBox("Unable to import google document: Error code(" + this.status + ")");
+      new MessageBox("Unable to import google document: Error code(" + this.status + ")").show();
     }
   }
   let _openCallback = function (access_token) {
     if (chrome.runtime.lastError) {
-      messageBox(chrome.runtime.lastError.message); 
+      new MessageBox(chrome.runtime.lastError.message).show(); 
       return;
     }
     
@@ -229,7 +229,7 @@ IO.GDrive = (function () {
   }
   let _saveCallback = function (access_token) {
     if (chrome.runtime.lastError) {
-      messageBox(chrome.runtime.lastError.message); 
+      new MessageBox(chrome.runtime.lastError.message).show(); 
       return;
     }
     
@@ -299,7 +299,7 @@ IO.GDrive = (function () {
             IO.Spinner.hide("spinner-gdrive-export");
 
             if (this.status == 200) {
-              messageBox("Successfully saved.");
+              new MessageBox("Successfully saved.").show();
 
               var selectedTab = Tab.get();
               for (var key in saveData.metadata) {
@@ -320,7 +320,7 @@ IO.GDrive = (function () {
 
               Dialog.closeAll();
             } else {
-              messageBox("Unable to save google document: Error code(" + this.status + ")");
+              new MessageBox("Unable to save google document: Error code(" + this.status + ")").show();
             }
           }
           xhr.send(data);
@@ -336,10 +336,10 @@ IO.GDrive = (function () {
           interactive: true,
           callback: _openCallback
         }
-        messageBox("Connecting to Google Drive...");
+        new MessageBox("Connecting to Google Drive...").show();
         _getAuthToken(options);
       } else {
-        messageBox("There is no Internet connection.");
+        new MessageBox("There is no Internet connection.").show();
       }
     },
     save: function () {
@@ -348,10 +348,10 @@ IO.GDrive = (function () {
           interactive: true,
           callback: _saveCallback
         }
-        messageBox("Connecting to Google Drive...");
+        new MessageBox("Connecting to Google Drive...").show();
         _getAuthToken(options);
       } else {
-        messageBox("There is no Internet connection.");
+        new MessageBox("There is no Internet connection.").show();
       }
     }
   }

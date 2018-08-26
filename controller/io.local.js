@@ -129,7 +129,7 @@ IO.Local = (function () {
             chrome.downloads.search({
               id: downloadId
             }, function (result) {
-              messageBox("Download Complete.");
+              new MessageBox("Download Complete.").show();
 
               var selectedTab = Tab.get();
               for (var key in saveData.metadata) {
@@ -168,7 +168,7 @@ IO.Local = (function () {
           chrome.downloads.onChanged.addListener(function (e) {
             if (e.id == downloadId && e.state) {
               if (e.state.current === "complete") {
-                messageBox("Download complete.");
+                new MessageBox("Download complete.").show();
                 document.body.removeChild(ifrm);
               } else if (e.state.current === "interrupted") {
                 document.body.removeChild(ifrm);
@@ -179,10 +179,12 @@ IO.Local = (function () {
       }, 500);
     },
     saveAsImage: function () {
-      messageBox("Generating screenshot image...\n(It may takes a few seconds.)");
+      var msgbox = new MessageBox("Generating screenshot image...\n(It may takes a few seconds.)", false);
+      msgbox.show();
 
       _html2canvas("viewer", 2, function (canvas) {
         var imgData = canvas.toDataURL("image/png");
+        msgbox.config("Screenshot image is ready.", true);
 
         chrome.downloads.download({
           url: imgData,
@@ -193,7 +195,7 @@ IO.Local = (function () {
           chrome.downloads.onChanged.addListener(function (e) {
             if (e.id == downloadId && e.state) {
               if (e.state.current === "complete") {
-                messageBox("Download complete.");
+                new MessageBox("Download complete.").show();
               } else if (e.state.current === "interrupted") {
                 // Do nothing
               }
@@ -203,8 +205,9 @@ IO.Local = (function () {
       });
     },
     saveAsPdf: function () {
-      messageBox("Generating PDF document...\n(It may takes a few seconds.)");
-      
+      var msgbox = new MessageBox("Generating PDF document...\n(It may takes a few seconds.)", false);
+      msgbox.show();
+
       _html2canvas("viewer", 2, function (canvas) {
         var pdf = new jsPDF("p", "mm", "a4");
         var pageRatio = pdf.internal.pageSize.getHeight() / pdf.internal.pageSize.getWidth();
@@ -243,6 +246,8 @@ IO.Local = (function () {
         }
 
         var pdfBlob = pdf.output("blob");
+        msgbox.config("PDF generation is complete.", true);
+
         chrome.downloads.download({
           url: URL.createObjectURL(pdfBlob),
           filename: IO.filename() + ".pdf",
@@ -252,7 +257,7 @@ IO.Local = (function () {
           chrome.downloads.onChanged.addListener(function (e) {
             if (e.id == downloadId && e.state) {
               if (e.state.current === "complete") {
-                messageBox("Download complete.");
+                new MessageBox("Download complete.").show();
               } else if (e.state.current === "interrupted") {
                 // Do nothing
               }

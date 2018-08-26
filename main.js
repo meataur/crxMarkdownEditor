@@ -18,7 +18,7 @@ var splitter = null;
 var isPanelResizing = false;
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Set tab title
+  // Set browser tab title
   document.title = manifestData.name;
 
   // Fill extension title into the app title division
@@ -274,7 +274,12 @@ document.addEventListener("DOMContentLoaded", function () {
           break;
         case 81:  // Ctrl + Q (for testing)
           e.preventDefault();
-          messageBox("testing...");
+
+          var msgbox = new MessageBox("testing...", false);
+          msgbox.show();
+          setTimeout(function () {
+            msgbox.config("testing... done!", true);
+          }, 2000);
           break;
         case 83:  // Ctrl + S
           e.preventDefault();
@@ -334,37 +339,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 });
-
-function messageBox(texts, duration) {
-  if (typeof (duration) === "undefined")
-    duration = texts.length * 90;
-  if (duration > 3000)
-    duration = 3000;
-  if (duration < 1500)
-    duration = 1500;
-
-  var msgboxWrapper = document.getElementById("messagebox-wrapper");
-  var outer = document.createElement("div");
-  var msgbox = document.createElement("messagebox");
-  msgbox.innerHTML = texts.replace(/\n/g, '<br />');
-  msgbox.onmouseover = function (e) { timer.pause(); }
-  msgbox.onmouseout = function (e) { timer.resume(); }
-  outer.appendChild(msgbox);
-  msgboxWrapper.appendChild(outer);
-
-  // Appeared
-  setTimeout(function () {
-    msgbox.style.opacity = 1;
-  }, 100);
-  
-  // Disappeared
-  var timer = new PausableTimer(function() {
-    msgbox.style.opacity = 0;
-    setTimeout(function () {
-      msgbox.parentNode.removeChild(msgbox);
-    }, 300);
-  }, duration);
-}
 
 
 
@@ -546,14 +520,14 @@ function setupJekyll() {
 function runJekyll() {
   var port = document.getElementById("jekyll-settings-port").value;
   if (!port) {
-    messageBox("Invalid localhost port!");
+    new MessageBox("Invalid localhost port!").show();
     return;
   }
-  messageBox("Checking if Jekyll Launcher is installed...");
+  new MessageBox("Checking if Jekyll Launcher is installed...").show();
 
   var xhr = new XMLHttpRequest();
   xhr.onload = function () {
-    messageBox("Jekyll is now running on port " + port + ".");
+    new MessageBox("Jekyll is now running on port " + port + ".").show();
   }
   xhr.onerror = function () {
     chrome.runtime.sendNativeMessage("jekyllserve" + port, {
@@ -564,15 +538,15 @@ function runJekyll() {
         if (lastError) {
           if (lastError.message == "Access to the specified native messaging host is forbidden.") {
             // Do nothing
-            messageBox("Invalid \"allowed_origins\" value in manifest JSON file!\nRe-install Jekyll Launcher.");
+            new MessageBox("Invalid \"allowed_origins\" value in manifest JSON file!\nRe-install Jekyll Launcher.").show();
           } else if (lastError.message == "Specified native messaging host not found.") {
             // Not found host application
-            messageBox("Not found host application!\nInstall Jekyll Launcher to be running on port " + port + ".");
+            new MessageBox("Not found host application!\nInstall Jekyll Launcher to be running on port " + port + ".").show();
           } else if (lastError.message == "Error when communicating with the native messaging host.") {
             // Jekyll is shut down.
           } else {
             // Do nothing
-            messageBox("Unknown error occurred!");
+            new MessageBox("Unknown error occurred!").show();
           }
         }
       }
@@ -585,17 +559,17 @@ function runJekyll() {
 function visitJekyllSite() {
   var port = document.getElementById("jekyll-settings-port").value;
   if (!port) {
-    messageBox("Invalid localhost port!");
+    new MessageBox("Invalid localhost port!").show();
     return;
   }
-  messageBox("Loading 'http://localhost:" + port + "/'...");
+  new MessageBox("Loading 'http://localhost:" + port + "/'...").show();
 
   var xhr = new XMLHttpRequest();
   xhr.onload = function () {
     window.open("http://localhost:" + port);
   }
   xhr.onerror = function () {
-    messageBox("The Jekyll site is not responding.\nCheck if Jekyll is running properly.");
+    new MessageBox("The Jekyll site is not responding.\nCheck if Jekyll is running properly.").show();
   }
   xhr.open("GET", "http://localhost:" + port + "/", true);
   xhr.send();
@@ -657,13 +631,13 @@ function getJekyllStandalone() {
 function getJekyllLauncher() {
   var workingDirectory = document.getElementById("jekyll-settings-localpath").value;
   if (!workingDirectory) {
-    messageBox("Invalid working directory path!");
+    new MessageBox("Invalid working directory path!").show();
     return;
   }
 
   var localhostPort = document.getElementById("jekyll-settings-port").value;
   if (!localhostPort) {
-    messageBox("Invalid localhost port!");
+    new MessageBox("Invalid localhost port!").show();
     return;
   }
 

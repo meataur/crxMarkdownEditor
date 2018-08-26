@@ -15,7 +15,7 @@ IO.Github = (function () {
   let _getAuthToken = function (options, callback) {
     chrome.identity.launchWebAuthFlow(options, function (redirectUri) {
       if (chrome.runtime.lastError) {
-        messageBox(chrome.runtime.lastError.message); 
+        new MessageBox(chrome.runtime.lastError.message).show(); 
         return;
       }
 
@@ -205,7 +205,7 @@ IO.Github = (function () {
         });
         parent.appendChild(ul);
       } else {
-        messageBox("Unable to load Github file list: Error code(" + this.status + ")");
+        new MessageBox("Unable to load Github file list: Error code(" + this.status + ")").show();
       }
     });
   }
@@ -245,7 +245,7 @@ IO.Github = (function () {
 
       Dialog.closeAll();
     } else {
-      messageBox("Unable to import from Github: Error code(" + this.status + ")");
+      new MessageBox("Unable to import from Github: Error code(" + this.status + ")").show();
     }
   }
   let _openCallback = function (access_token) {
@@ -310,7 +310,7 @@ IO.Github = (function () {
               });
               root.appendChild(reposList);
             } else {
-              messageBox("Unable to load Github repositories: Error code(" + this.status + ")");
+              new MessageBox("Unable to load Github repositories: Error code(" + this.status + ")").show();
             }
           });
 
@@ -326,11 +326,11 @@ IO.Github = (function () {
             }
           }
         } else {
-          messageBox("Unable to get user information: Error code(" + this.status + ")");
+          new MessageBox("Unable to get user information: Error code(" + this.status + ")").show();
         }
       });
     } else {
-      messageBox("Unexpected error occured: Empty token.");
+      new MessageBox("Unexpected error occured: Empty token.").show();
     }
   }
   let _saveCallback = function (access_token) {
@@ -410,7 +410,7 @@ IO.Github = (function () {
               });
               root.appendChild(reposList);
             } else {
-              messageBox("Unable to load Github repositories: Error code(" + this.status + ")");
+              new MessageBox("Unable to load Github repositories: Error code(" + this.status + ")").show();
             }
           });
 
@@ -442,7 +442,7 @@ IO.Github = (function () {
                       IO.Spinner.hide("spinner-github-export");
 
                       if (this.status == 200) {
-                        messageBox("Successfully updated.");
+                        new MessageBox("Successfully updated.").show();
 
                         var selectedTab = Tab.get();
                         for (var key in saveData.metadata) {
@@ -464,7 +464,7 @@ IO.Github = (function () {
 
                         Dialog.closeAll();
                       } else {
-                        messageBox("Failed to update file. Error code(" + this.status + ")");
+                        new MessageBox("Failed to update file. Error code(" + this.status + ")").show();
                       }
                     }, JSON.stringify(data));
                   }
@@ -473,7 +473,7 @@ IO.Github = (function () {
                     IO.Spinner.hide("spinner-github-export");
 
                     if (this.status == 201) {
-                      messageBox("Successfully saved.");
+                      new MessageBox("Successfully saved.").show();
 
                       var selectedTab = Tab.get();
                       for (var key in saveData.metadata) {
@@ -495,22 +495,22 @@ IO.Github = (function () {
 
                       Dialog.closeAll();
                     } else {
-                      messageBox("Failed to save file. Error code(" + this.status + ")");
+                      new MessageBox("Failed to save file. Error code(" + this.status + ")").show();
                     }
                   }, JSON.stringify(data));
                 } else {
                   IO.Spinner.hide("spinner-github-export");
-                  messageBox("Unexpected error occured: Error code(" + this.status + ")");
+                  new MessageBox("Unexpected error occured: Error code(" + this.status + ")").show();
                 }
               });
             }
           }
         } else {
-          messageBox("Unable to get user information: Error code(" + this.status + ")");
+          new MessageBox("Unable to get user information: Error code(" + this.status + ")").show();
         }
       });
     } else {
-      messageBox("Unexpected error occured: Empty token.");
+      new MessageBox("Unexpected error occured: Empty token.").show();
     }
   }
 
@@ -522,10 +522,10 @@ IO.Github = (function () {
           url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
             '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
         }
-        messageBox("Connecting to Github...");
+        new MessageBox("Connecting to Github...").show();
         _getAuthToken(options, _openCallback);
       } else {
-        messageBox("There is no Internet connection.");
+        new MessageBox("There is no Internet connection.").show();
       }
     },
     save: function () {
@@ -535,10 +535,10 @@ IO.Github = (function () {
           url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
             '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
         }
-        messageBox("Connecting to Github...");
+        new MessageBox("Connecting to Github...").show();
         _getAuthToken(options, _saveCallback);
       } else {
-        messageBox("There is no Internet connection.");
+        new MessageBox("There is no Internet connection.").show();
       }
     }
   }

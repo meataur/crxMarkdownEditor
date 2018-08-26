@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     var selectedTab = Tab.get();
-    selectedTab.info.type = (iconId == "file") ? "" : iconId;
+    selectedTab.info.metadata.type = (iconId == "file") ? "" : iconId;
     selectedTab.tab.getElementsByClassName("doc-type")[0].innerHTML = "<svg><use xlink:href=\"icons.svg#icon-" + iconId + "\"></use></svg>";
   }
   document.getElementById("input-metadata-title").onchange = function (e) {
@@ -35,23 +35,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var selectedTab = Tab.get();
     selectedTab.tab.getElementsByClassName("doc-title")[0].innerHTML = this.value;
-    selectedTab.tab.title = "[" + selectedTab.info.date + "] " + this.value;
-    selectedTab.info.title = this.value;
+    selectedTab.tab.title = "[" + selectedTab.info.metadata.date + "] " + this.value;
+    selectedTab.info.metadata.title = this.value;
     document.title = manifestData.name + " - " + this.value;
 
     preview(this.value, editor.getValue());
   }
   document.getElementById("input-metadata-date").onchange = function (e) {
     var selectedTab = Tab.get();
-    selectedTab.tab.title = "[" + this.value + "] " + selectedTab.info.title;
-    selectedTab.info.date = this.value;
+    selectedTab.tab.title = "[" + this.value + "] " + selectedTab.info.metadata.title;
+    selectedTab.info.metadata.date = this.value;
   }
   document.getElementById("refresh-datetime").onclick = function () {
     var curtime = Util.curtime();
     document.getElementById("input-metadata-date").value = curtime;
 
     var selectedTab = Tab.get();
-    selectedTab.info.date = curtime;
+    selectedTab.info.metadata.date = curtime;
   }
 
 
