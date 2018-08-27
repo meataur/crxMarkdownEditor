@@ -461,9 +461,10 @@ function deselectAllTempPanelMenuItems() {
 function switchViewerMode() {
   var nothingOnViewer = document.getElementById("nothing-on-viewer");
 
-  if (viewer.hasAttribute("raw")) {
-    viewer.removeAttribute("raw");
-    viewer.className = "";
+  if (viewer.hasAttribute("htmlcode")) {
+    viewer.removeAttribute("htmlcode");
+    viewer.removeAllChildren();
+    viewer.className = "preview";
     viewer.style.background = "#fff";
     viewer.style.overflowX = "hidden";
     nothingOnViewer.style.color = "#1e1e1e";
@@ -471,7 +472,8 @@ function switchViewerMode() {
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-html\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "html code";
   } else {
-    viewer.setAttribute("raw", "");
+    viewer.setAttribute("htmlcode", "");
+    viewer.removeAllChildren();
     viewer.classList.add("monotype");
     viewer.style.background = "#383838";
     viewer.style.overflowX = "auto";
@@ -823,7 +825,7 @@ var preview = Util.debounce(function (docTitle, content) {
     // Convert markdown into html
     var html = converter.makeHtml("# " + docTitle + "\n\n" + content);
 
-    if (viewer.hasAttribute("raw")) {   // HTML code viewer
+    if (viewer.hasAttribute("htmlcode")) {   // HTML code viewer
       html = html_beautify(html, {
         "indent_size": "2",
         "indent_char": " ",
