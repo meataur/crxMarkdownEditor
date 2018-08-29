@@ -1,21 +1,21 @@
 // Load manifest data
-var manifestData = chrome.runtime.getManifest();
+let manifestData = chrome.runtime.getManifest();
 
 // CodeMirror editor variable
-var editor = null;
-var converter = null;
+let editor = null;
+let converter = null;
 
 // Viewer
-var viewer = null;
+let viewer = null;
 
 // Vertical panels
-var panelEditor = null;
-var panelWrapperHelper = null;
-var panelViewer = null;
-var panelLocalhost = null;
-var panelHelp = null;
-var splitter = null;
-var isPanelResizing = false;
+let panelEditor = null;
+let panelWrapperHelper = null;
+let panelViewer = null;
+let panelLocalhost = null;
+let panelHelp = null;
+let splitter = null;
+let isPanelResizing = false;
 
 document.addEventListener("DOMContentLoaded", function () {
   // Set browser tab title
@@ -458,20 +458,18 @@ function switchViewerMode() {
 
   if (viewer.hasAttribute("htmlcode")) {
     viewer.removeAttribute("htmlcode");
+    viewer.removeAttribute("style");
     viewer.removeAllChildren();
     viewer.className = "preview";
-    viewer.style.background = "#fff";
-    viewer.style.overflowX = "hidden";
     nothingOnViewer.style.color = "#1e1e1e";
 
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-html\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "html code";
   } else {
     viewer.setAttribute("htmlcode", "");
+    viewer.removeAttribute("style");
     viewer.removeAllChildren();
     viewer.classList.add("monotype");
-    viewer.style.background = "#383838";
-    viewer.style.overflowX = "auto";
     nothingOnViewer.style.color = "#fff";
 
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-img\"></use>";
@@ -850,7 +848,7 @@ var preview = Util.debounce(function (docTitle, content) {
       html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
         return '&#'+i.charCodeAt(0)+';';
       }).replace(/ /g, "&nbsp;").replace(/\t/g, "  ");
-      
+
       viewer.innerHTML = html;
 
       // Syntax highlighting

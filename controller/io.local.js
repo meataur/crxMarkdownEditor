@@ -18,6 +18,10 @@ IO.Local = (function () {
       ifrm.contentWindow.document.write("<style>" + this.responseText + "</style>\n");
 
       _get("preview.css", function () {
+        ifrm.contentWindow.document.write("<style>\n");
+        ifrm.contentWindow.document.write("*, *:before, *:after { margin: 0; padding: 0; box-sizing: border-box; }\n");
+        ifrm.contentWindow.document.write("*:focus { outline: none; }\n");
+        ifrm.contentWindow.document.write("</style>\n");
         ifrm.contentWindow.document.write("<style>" + this.responseText + "</style>\n");
 
         _get("lib/highlight-9.12.0/styles/" + document.getElementById("viewer-settings-codestyle").value + ".css", function () {
@@ -155,7 +159,7 @@ IO.Local = (function () {
       setTimeout(function () {
         chrome.downloads.download({
           url: "data:text/html;charset=utf-8," + encodeURIComponent(ifrm.contentWindow.document.documentElement.outerHTML),
-          filename: selectedTab.info.metadata.title + ".html",
+          filename: IO.filename() + ".html",
           conflictAction: "overwrite",
           saveAs: true
         }, function (downloadId) {

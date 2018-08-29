@@ -1,7 +1,7 @@
 let Scroll = (function () {
   var _scrollMap = null;
-  var _syncWithEditor = false;
-  var _syncWithViewer = false;
+  var _isEditorScrolling = false;
+  var _isViewerScrolling = false;
 
   let _watcher = 0;
   let _numAttachmentFiles = 0;
@@ -14,30 +14,30 @@ let Scroll = (function () {
   }
   return {
     onEditorScroll: function () {
-      if (!_syncWithViewer && document.getElementById("editor-settings-scrollsync").checked) {
-        _syncWithEditor = true;
+      if (!_isViewerScrolling && document.getElementById("editor-settings-scrollsync").checked) {
+        _isEditorScrolling = true;
 
-        var editor = document.getElementsByClassName("CodeMirror-scroll")[0];
-        var posRatio = editor.scrollTop / (editor.scrollHeight - editor.clientHeight);
+        var editorScroll = document.getElementsByClassName("CodeMirror-scroll")[0];
+        var posRatio = editorScroll.scrollTop / (editorScroll.scrollHeight - editorScroll.clientHeight);
         viewer.scrollTop = (viewer.scrollHeight - viewer.clientHeight) * posRatio;
 
         // Get line number of current code line
         var lineHeight = parseInt(window.getComputedStyle(document.getElementsByClassName("CodeMirror-line")[0]).height);
-        var lineNo = Math.floor(editor.scrollTop / lineHeight);
+        var lineNo = Math.floor(editorScroll.scrollTop / lineHeight);
 
         // TODO: work with line number
       }
-      _syncWithViewer = false;
+      _isViewerScrolling = false;
     },
     onViewerScroll: function () {
-      if (!_syncWithEditor && document.getElementById("viewer-settings-scrollsync").checked) {
-        _syncWithViewer = true;
+      if (!_isEditorScrolling && document.getElementById("viewer-settings-scrollsync").checked) {
+        _isViewerScrolling = true;
 
-        var editor = document.getElementsByClassName("CodeMirror-scroll")[0];
+        var editorScroll = document.getElementsByClassName("CodeMirror-scroll")[0];
         var posRatio = viewer.scrollTop / (viewer.scrollHeight - viewer.clientHeight);
-        editor.scrollTop = (editor.scrollHeight - editor.clientHeight) * posRatio;
+        editorScroll.scrollTop = (editorScroll.scrollHeight - editorScroll.clientHeight) * posRatio;
       }
-      _syncWithEditor = false;
+      _isEditorScrolling = false;
     },
     onViewerContentsLoaded: function () {
       _watcher = 0;

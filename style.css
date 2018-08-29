@@ -136,7 +136,7 @@ toolbox ul.dropdown > li > svg { position: absolute; top: 50%; margin: 0 .7em 0 
 
 /* Panel body */
 
-.panel-body { position: relative; height: calc(100vh - 90px); overflow-x: hidden; overflow-y: auto; }
+.panel-body { position: relative; height: calc(100vh - 90px); overflow: hidden; }
 
 editor { position: relative; float: left; width: calc(50% - 4px); user-select: none; }
 editor textarea { display: block; width: 100%; border: none; resize: vertical; font-family: 'consolas'; }
@@ -147,10 +147,14 @@ splitter:hover:after { background: #ffffff4d}
 splitter:active:after { background: #ffffff80; }
 
 helper { position: relative; width: calc(50% - 4px); height: 100%; float: left; }
+
 viewer, localhost, help { display: none; }
+viewer .panel-body { background: #fff; }
+localhost .panel-body { background: #f7f7f7; }
+help .panel-body { background: #f7f7f7; }
 
 div#viewer[htmlcode] { overflow-x: auto; overflow-y: scroll; white-space: nowrap; }
-div#viewer:not[htmlcode] { overflow-x: hidden; overflow-y: scroll; }
+div#viewer:not([htmlcode]) { overflow-x: hidden; overflow-y: scroll; }
 div#nothing-on-viewer {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   font-size: .92rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none;
@@ -247,7 +251,7 @@ div#nothing-on-viewer {
 
 /* Helper page style */
 
-.hpage { background: #f7f7f7; }
+.hpage { overflow-x: hidden; overflow-y: scroll; }
 .hpage input[type="text"].expand { width: 100%; overflow: hidden; }
 
 
