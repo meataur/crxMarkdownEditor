@@ -454,15 +454,11 @@ function deselectAllTempPanelMenuItems() {
  */
 
 function switchViewerMode() {
-  var nothingOnViewer = document.getElementById("nothing-on-viewer");
-
   if (viewer.hasAttribute("htmlcode")) {
     viewer.removeAttribute("htmlcode");
     viewer.removeAttribute("style");
     viewer.removeAllChildren();
     viewer.className = "preview";
-    nothingOnViewer.style.color = "#1e1e1e";
-
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-html\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "html code";
   } else {
@@ -470,8 +466,6 @@ function switchViewerMode() {
     viewer.removeAttribute("style");
     viewer.removeAllChildren();
     viewer.classList.add("monotype");
-    nothingOnViewer.style.color = "#fff";
-
     this.getElementsByTagName("svg")[0].innerHTML = "<use xlink:href=\"icons.svg#icon-img\"></use>";
     this.getElementsByTagName("span")[0].innerHTML = "styled html";
   }
@@ -802,91 +796,81 @@ function attachments() {
 }
 
 var preview = Util.debounce(function (docTitle, content) {
-  var nothingOnViewer = document.getElementById("nothing-on-viewer");
-
   if (viewer.scrollPos < 0)
     viewer.scrollPos = viewer.scrollTop;
 
-  if (content.length) {
-    // Remove no-content helper message
-    nothingOnViewer.style.display = "none";
+  // Set site's base url to localhost
+  var baseurl = document.getElementById("viewer-settings-baseurl").value;
+  content = content.replace(/{{ site.baseurl }}/gi, baseurl);
 
-    // Set site's base url to localhost
-    var baseurl = document.getElementById("viewer-settings-baseurl").value;
-    content = content.replace(/{{ site.baseurl }}/gi, baseurl);
+  // Convert markdown into html
+  var html = converter.makeHtml("# " + docTitle + "\n\n" + content);
 
-    // Convert markdown into html
-    var html = converter.makeHtml("# " + docTitle + "\n\n" + content);
+  if (viewer.hasAttribute("htmlcode")) {
+    // Add temporary tag in front of list items for better looking of nested lists
+    html = html.replace(/<ul/gi, "<forbetterlooking></forbetterlooking><ul").replace(/<ol/gi, "<forbetterlooking></forbetterlooking><ol");
 
-    if (viewer.hasAttribute("htmlcode")) {
-      // Add temporary tag in front of list items for better looking of nested lists
-      html = html.replace(/<ul/gi, "<forbetterlooking></forbetterlooking><ul").replace(/<ol/gi, "<forbetterlooking></forbetterlooking><ol");
+    // Beautify HTML code
+    html = html_beautify(html, {
+      "indent_size": "2",
+      "indent_char": " ",
+      "max_preserve_newlines": "5",
+      "preserve_newlines": true,
+      "keep_array_indentation": false,
+      "break_chained_methods": false,
+      "indent_scripts": "normal",
+      "brace_style": "collapse",
+      "space_before_conditional": true,
+      "unescape_strings": false,
+      "jslint_happy": false,
+      "end_with_newline": false,
+      "wrap_line_length": "0",
+      "indent_inner_html": false,
+      "comma_first": false,
+      "e4x": false
+    });
 
-      // Beautify HTML code
-      html = html_beautify(html, {
-        "indent_size": "2",
-        "indent_char": " ",
-        "max_preserve_newlines": "5",
-        "preserve_newlines": true,
-        "keep_array_indentation": false,
-        "break_chained_methods": false,
-        "indent_scripts": "normal",
-        "brace_style": "collapse",
-        "space_before_conditional": true,
-        "unescape_strings": false,
-        "jslint_happy": false,
-        "end_with_newline": false,
-        "wrap_line_length": "0",
-        "indent_inner_html": false,
-        "comma_first": false,
-        "e4x": false
-      });
+    // Remove temporarily-inserted tags
+    html = html.replace(/\s*<forbetterlooking><\/forbetterlooking>\n/gi, "\n");
 
-      // Remove temporarily-inserted tags
-      html = html.replace(/\s*<forbetterlooking><\/forbetterlooking>\n/gi, "\n");
-      
-      html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
-        return '&#'+i.charCodeAt(0)+';';
-      }).replace(/ /g, "&nbsp;").replace(/\t/g, "  ");
+    html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+      return '&#'+i.charCodeAt(0)+';';
+    }).replace(/ /g, "&nbsp;").replace(/\t/g, "  ");
 
-      viewer.innerHTML = html;
+    viewer.innerHTML = html;
 
-      // Syntax highlighting
-      hljs.configure({ languages: ["html"] });
-      hljs.highlightBlock(viewer);
+    // Syntax highlighting
+    hljs.configure({ languages: ["html"] });
+    hljs.highlightBlock(viewer);
 
-      // Set content again
-      var codelines = "";
-      viewer.innerHTML.match(/[^\r\n]+/g).forEach(function (line) {
-        codelines += line + "<br />";
-      });
-      viewer.innerHTML = codelines;
-    } else {    // Styled HTML viewer
-      // Set content
-      viewer.innerHTML = html;
+    // Set content again
+    var codelines = "";
+    viewer.innerHTML.match(/[^\r\n]+/g).forEach(function (line) {
+      codelines += line + "<br />";
+    });
+    viewer.innerHTML = codelines;
+  } else {    // Styled HTML viewer
+    // Set content
+    viewer.innerHTML = html;
 
-      // Set scroll position
-      viewer.scrollTop = viewer.scrollPos;
+    // Set scroll position
+    viewer.scrollTop = viewer.scrollPos;
 
-      // Syntax highlighting
-      viewer.querySelectorAll("pre code").forEach(highlighter);
+    // Syntax highlighting
+    viewer.querySelectorAll("pre code").forEach(highlighter);
 
-      // Render math equations
-      renderMathInElement(viewer, {
-        delimiters: [
-          {left: "$$", right: "$$", display: true},
-          {left: "\\[", right: "\\]", display: true},
-          {left: "$", right: "$", display: false},
-          {left: "\\(", right: "\\)", display: false}
-        ]
-      });
+    // Render math equations
+    renderMathInElement(viewer, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "\\[", right: "\\]", display: true},
+        {left: "$", right: "$", display: false},
+        {left: "\\(", right: "\\)", display: false}
+      ]
+    });
 
-      // Set previous scrollbar postion
-      Scroll.onViewerContentsLoaded();
-    }
-  } else {
-    viewer.removeAllChildren();
-    nothingOnViewer.style.display = "block";
+    // Set previous scrollbar postion
+    Scroll.onViewerContentsLoaded();
   }
 }, 300);
 

@@ -33,16 +33,16 @@ Element.prototype.removeAllChildren = function () {
  */
 
 String.prototype.replaceAll = function (src, dst) {
-  return this.replace(new RegExp(src, 'g'), dst);
+  return this.replace(new RegExp(src, "gi"), dst);
 }
 
 String.prototype.trimLeft = function (str) {
   if (str === "undefined") str = "\\s";
-  return this.replace(new RegExp("^" + str + "+"), "");
+  return this.replace(new RegExp("^" + str + "+", "i"), "");
 }
 String.prototype.trimRight = function (str) {
   if (str === "undefined") str = "\\s";
-  return this.replace(new RegExp(str + "+$"), "");
+  return this.replace(new RegExp(str + "+$", "i"), "");
 }
 
 String.prototype.contains = function (substr) {

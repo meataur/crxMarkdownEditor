@@ -6,6 +6,7 @@ IO.Local = (function () {
     xhr.onerror = onerror;
     xhr.send();
   }
+
   let _createIframe = function (docTitle) {
     var ifrm = document.createElement("iframe");
     ifrm.style.position = "absolute";
@@ -41,26 +42,41 @@ IO.Local = (function () {
 
     return ifrm;
   }
-  let _html2canvas = function (el, scale, callback) {
-    // Adjust layer's width and height to A4 paper size
-    var imgWidth = Math.floor(210 / 0.26); // 0.26458333
-    el.style.width = imgWidth + "px";
-    var imgHeight = parseInt(el.scrollHeight);
+
+  let _getallstyle = function (el) {
+    var data = {}
+    var computed = getComputedStyle(el);
+    for (var i = 0; i < computed.length; i++) {
+      data[computed[i]] = computed.getPropertyValue(computed[i]);
+    }
+    return data;
+  }
+
+  let _html2canvas = function (el, scale, styleOptions, callback) {
+    // Adjust layer's width to A4 paper size
+    styleOptions["width"] = Math.floor(210 / 0.26) + "px"; // 0.26458333
+    Object.keys(styleOptions).forEach(function (key) {
+      el.style[key] = styleOptions[key];
+    });
+
+    // Re-calculate page's height
+    styleOptions["height"] = el.scrollHeight + "px";
+    styleOptions["overflow-x"] = "hidden";
+    styleOptions["overflow-y"] = "hidden";
+
+    // Reset element's style
     el.removeAttribute("style");
-    var imgBackground = el.style.background ? el.style.background : "#fff";
 
     // Make entire page
     var entirePage = document.createElement("div");
-    entirePage.className = "preview";
-    entirePage.style.width = imgWidth + "px";
-    entirePage.style.height = imgHeight + "px";
-    entirePage.style.background = imgBackground;
-    entirePage.style.overflow = "hidden";
+    entirePage.className = el.className;
+    Object.keys(styleOptions).forEach(function (key) {
+      entirePage.style[key] = styleOptions[key];
+    });
     entirePage.innerHTML = el.innerHTML;
     document.body.appendChild(entirePage);
 
     html2canvas(entirePage, {
-      background: imgBackground,
       allowTaint: true,
       scale: scale,
       logging: Developer.debug
@@ -180,7 +196,13 @@ IO.Local = (function () {
       var msgbox = new MessageBox("Generating screenshot image...\n(It may takes a few seconds.)", false);
       msgbox.show();
 
-      _html2canvas(viewer, 2, function (canvas) {
+      var styleOptions = {}
+      if (viewer.hasAttribute("htmlcode")) {
+        styleOptions["white-space"] = "normal";
+        styleOptions["word-break"] = "break-all";
+      }
+
+      _html2canvas(viewer, 2, styleOptions, function (canvas) {
         var imgData = canvas.toDataURL("image/png");
         msgbox.config("Screenshot image is ready.", true);
 
@@ -214,7 +236,13 @@ IO.Local = (function () {
       var msgbox = new MessageBox("Generating PDF document...\n(It may takes a few seconds.)", false);
       msgbox.show();
 
-      _html2canvas(viewer, 2, function (canvas) {
+      var styleOptions = {}
+      if (viewer.hasAttribute("htmlcode")) {
+        styleOptions["white-space"] = "normal";
+        styleOptions["word-break"] = "break-all";
+      }
+
+      _html2canvas(viewer, 2, styleOptions, function (canvas) {
         var pdf = new jsPDF("p", "mm", "a4");
         var pageRatio = pdf.internal.pageSize.getHeight() / pdf.internal.pageSize.getWidth();
         var pageWidth = canvas.width;
