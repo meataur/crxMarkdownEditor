@@ -72,9 +72,9 @@ let Util = {
   },
   debounce: function (func, wait, immediate) {
     var timeout;
-    return function() {
+    return function () {
       var context = this, args = arguments;
-      var later = function() {
+      var later = function () {
         timeout = null;
         if (!immediate) func.apply(context, args);
       }
@@ -82,6 +82,18 @@ let Util = {
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
       if (callNow) func.apply(context, args);
+    }
+  },
+  Converter: {
+    dataUriToBlob: function (dataURI) {
+      var byteString = atob(dataURI.split(",")[1]);
+      var mime = dataURI.split(",")[0].match(/data:(.+\/.+);base64/)[1];
+      var buffer = new ArrayBuffer(byteString.length);
+      var ui8a = new Uint8Array(buffer);
+      for (var i = 0; i < byteString.length; i++) {
+        ui8a[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([buffer], { type: mime });
     }
   }
 }

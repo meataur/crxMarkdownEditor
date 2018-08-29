@@ -37,9 +37,7 @@ IO.Local = (function () {
 
     return ifrm;
   }
-  let _html2canvas = function (id, scale, callback) {
-    var el = document.getElementById(id);
-
+  let _html2canvas = function (el, scale, callback) {
     // Adjust layer's width and height to A4 paper size
     var imgWidth = Math.floor(210 / 0.26); // 0.26458333
     el.style.width = imgWidth + "px";
@@ -52,23 +50,19 @@ IO.Local = (function () {
     entirePage.className = "preview";
     entirePage.style.width = imgWidth + "px";
     entirePage.style.height = imgHeight + "px";
-    if (scale > 1) {
-      entirePage.style.transform = "scale(" + scale + ")";
-      entirePage.style.transformOrigin = "0 0";
-    }
     entirePage.style.background = imgBackground;
+    entirePage.style.overflow = "hidden";
     entirePage.innerHTML = el.innerHTML;
     document.body.appendChild(entirePage);
 
     html2canvas(entirePage, {
-      width: imgWidth * scale,
-      height: imgHeight * scale,
       background: imgBackground,
       allowTaint: true,
-      onrendered: function (canvas) {
-        entirePage.parentNode.removeChild(entirePage);
-        callback(canvas);
-      }
+      scale: scale,
+      logging: Developer.debug
+    }).then(function (canvas) {
+      entirePage.parentNode.removeChild(entirePage);
+      callback(canvas);
     });
   }
 
@@ -182,24 +176,32 @@ IO.Local = (function () {
       var msgbox = new MessageBox("Generating screenshot image...\n(It may takes a few seconds.)", false);
       msgbox.show();
 
-      _html2canvas("viewer", 2, function (canvas) {
+      _html2canvas(viewer, 2, function (canvas) {
         var imgData = canvas.toDataURL("image/png");
         msgbox.config("Screenshot image is ready.", true);
 
-        chrome.downloads.download({
-          url: imgData,
-          filename: IO.filename() + ".png",
-          conflictAction: "overwrite",
-          saveAs: true
-        }, function (downloadId) {
-          chrome.downloads.onChanged.addListener(function (e) {
-            if (e.id == downloadId && e.state) {
-              if (e.state.current === "complete") {
-                new MessageBox("Download complete.").show();
-              } else if (e.state.current === "interrupted") {
-                // Do nothing
+        // Convert data URI to blob object
+        var imgBlob = Util.Converter.dataUriToBlob(imgData);
+
+        // Open blob object to new tab
+        chrome.tabs.create({
+          url: URL.createObjectURL(imgBlob)
+        }, function (tab) {
+          chrome.downloads.download({
+            url: imgData,
+            filename: IO.filename() + ".png",
+            conflictAction: "overwrite",
+            saveAs: true
+          }, function (downloadId) {
+            chrome.downloads.onChanged.addListener(function (e) {
+              if (e.id == downloadId && e.state) {
+                if (e.state.current === "complete") {
+                  new MessageBox("Download complete.").show();
+                } else if (e.state.current === "interrupted") {
+                  // Do nothing
+                }
               }
-            }
+            });
           });
         });
       });
@@ -208,7 +210,7 @@ IO.Local = (function () {
       var msgbox = new MessageBox("Generating PDF document...\n(It may takes a few seconds.)", false);
       msgbox.show();
 
-      _html2canvas("viewer", 2, function (canvas) {
+      _html2canvas(viewer, 2, function (canvas) {
         var pdf = new jsPDF("p", "mm", "a4");
         var pageRatio = pdf.internal.pageSize.getHeight() / pdf.internal.pageSize.getWidth();
         var pageWidth = canvas.width;
@@ -248,20 +250,25 @@ IO.Local = (function () {
         var pdfBlob = pdf.output("blob");
         msgbox.config("PDF generation is complete.", true);
 
-        chrome.downloads.download({
-          url: URL.createObjectURL(pdfBlob),
-          filename: IO.filename() + ".pdf",
-          conflictAction: "overwrite",
-          saveAs: true
-        }, function (downloadId) {
-          chrome.downloads.onChanged.addListener(function (e) {
-            if (e.id == downloadId && e.state) {
-              if (e.state.current === "complete") {
-                new MessageBox("Download complete.").show();
-              } else if (e.state.current === "interrupted") {
-                // Do nothing
+        // Open blob object to new tab
+        chrome.tabs.create({
+          url: URL.createObjectURL(pdfBlob)
+        }, function (tab) {
+          chrome.downloads.download({
+            url: URL.createObjectURL(pdfBlob),
+            filename: IO.filename() + ".pdf",
+            conflictAction: "overwrite",
+            saveAs: true
+          }, function (downloadId) {
+            chrome.downloads.onChanged.addListener(function (e) {
+              if (e.id == downloadId && e.state) {
+                if (e.state.current === "complete") {
+                  new MessageBox("Download complete.").show();
+                } else if (e.state.current === "interrupted") {
+                  // Do nothing
+                }
               }
-            }
+            });
           });
         });
       });

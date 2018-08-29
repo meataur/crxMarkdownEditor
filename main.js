@@ -274,12 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
           break;
         case 81:  // Ctrl + Q (for testing)
           e.preventDefault();
-
-          var msgbox = new MessageBox("testing...", false);
-          msgbox.show();
-          setTimeout(function () {
-            msgbox.config("testing... done!", true);
-          }, 2000);
+          
           break;
         case 83:  // Ctrl + S
           e.preventDefault();
@@ -825,7 +820,11 @@ var preview = Util.debounce(function (docTitle, content) {
     // Convert markdown into html
     var html = converter.makeHtml("# " + docTitle + "\n\n" + content);
 
-    if (viewer.hasAttribute("htmlcode")) {   // HTML code viewer
+    if (viewer.hasAttribute("htmlcode")) {
+      // Add temporary tag in front of list items for better looking of nested lists
+      html = html.replace(/<ul/gi, "<forbetterlooking></forbetterlooking><ul").replace(/<ol/gi, "<forbetterlooking></forbetterlooking><ol");
+
+      // Beautify HTML code
       html = html_beautify(html, {
         "indent_size": "2",
         "indent_char": " ",
@@ -845,11 +844,13 @@ var preview = Util.debounce(function (docTitle, content) {
         "e4x": false
       });
 
+      // Remove temporarily-inserted tags
+      html = html.replace(/\s*<forbetterlooking><\/forbetterlooking>\n/gi, "\n");
+      
       html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
         return '&#'+i.charCodeAt(0)+';';
       }).replace(/ /g, "&nbsp;").replace(/\t/g, "  ");
-
-      // Set content
+      
       viewer.innerHTML = html;
 
       // Syntax highlighting

@@ -149,7 +149,9 @@ splitter:active:after { background: #ffffff80; }
 helper { position: relative; width: calc(50% - 4px); height: 100%; float: left; }
 viewer, localhost, help { display: none; }
 
-#nothing-on-viewer {
+div#viewer[htmlcode] { overflow-x: auto; overflow-y: scroll; white-space: nowrap; }
+div#viewer:not[htmlcode] { overflow-x: hidden; overflow-y: scroll; }
+div#nothing-on-viewer {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
   font-size: .92rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none;
 }
