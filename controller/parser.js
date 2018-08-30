@@ -57,7 +57,7 @@ let Parser = (function () {
           if (!curLine.length && !prevLine.length)
             continue;
 
-          parsed.body["texts"] += curLine + "\n";
+          parsed.body.texts += curLine + "\n";
           prevLine = curLine;
         }
       }

@@ -1,6 +1,19 @@
 // Load manifest data
 let manifestData = chrome.runtime.getManifest();
 
+// Settings data version check
+chrome.storage.local.get("_version", function (result) {
+  if (!result || !result._version || result._version < Config.dataversion) {
+    if (confirm("The current version of settings stored in sandboxed local storage is out of date.\n"
+              + "It is strongly recommended that you reset all the settings.\n"
+              + "Are you sure you want to continue?")) {
+      Tab.resetData();
+      Settings.reset();
+      chrome.storage.local.set({ "_version": Config.dataversion });
+    }
+  }
+});
+
 // CodeMirror editor variable
 let editor = null;
 let converter = null;
@@ -261,7 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Disable right mouse click
-  if (!Developer.debug)
+  if (!Config.debug)
     document.addEventListener("contextmenu", event => event.preventDefault());
 
   // Keyboard shortcut
@@ -274,7 +287,7 @@ document.addEventListener("DOMContentLoaded", function () {
           break;
         case 81:  // Ctrl + Q (for testing)
           e.preventDefault();
-          
+          document.getElementById("btn-reset-settings").click();
           break;
         case 83:  // Ctrl + S
           e.preventDefault();
@@ -803,8 +816,11 @@ var preview = Util.debounce(function (docTitle, content) {
   var baseurl = document.getElementById("viewer-settings-baseurl").value;
   content = content.replace(/{{ site.baseurl }}/gi, baseurl);
 
+  if (docTitle.length)
+    content = "# " + docTitle + "\n\n" + content;
+
   // Convert markdown into html
-  var html = converter.makeHtml("# " + docTitle + "\n\n" + content);
+  var html = converter.makeHtml(content);
 
   if (viewer.hasAttribute("htmlcode")) {
     // Add temporary tag in front of list items for better looking of nested lists

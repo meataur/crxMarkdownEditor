@@ -58,8 +58,9 @@ let Tab = (function () {
       Dialog.Metadata.setData(_data[i].metadata);
 
       // Manually trigger onchange events
-      document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+      document.getElementById("input-metadata-title").setAttribute("placeholder", _data[i].filename);
       document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
+      document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
 
       // Activate tab-close button
       var divClose = document.createElement("div");
@@ -84,18 +85,19 @@ let Tab = (function () {
     getInitData: function () {
       return {
         selected: true,
+        filename: "Untitled Document",
         metadata: {
           type: "",
           id: "",
           layout: "",
-          title: "Untitled Document",
+          title: "",
           date: "",
           category: "",
           tags: "",
           description: ""
         },
         texts: "",
-        originalTexts: "",
+        hash: "",
         editor: {
           width: -1,
           scrollPos: {
@@ -132,6 +134,9 @@ let Tab = (function () {
           tab: tabs[i]
         }
       }
+    },
+    set: function (idx, info) {
+      _data[idx] = info;
     },
     saveData: function () {
       // Save documents data to local storage
@@ -216,6 +221,9 @@ let Tab = (function () {
       var newDocInfo = Tab.getInitData();
       newDocInfo.metadata.layout = "post";
       newDocInfo.metadata.date = Util.curtime();
+      newDocInfo.metadata.id = IO.filehash(newDocInfo.metadata, newDocInfo.texts);
+      newDocInfo.hash = newDocInfo.metadata.id;
+
       var newtab = Tab.create(newDocInfo);
       Tab.add(newtab, newDocInfo);
 
@@ -231,13 +239,19 @@ let Tab = (function () {
         var newDocInfo = Tab.getInitData();
         newDocInfo.metadata.layout = "post";
         newDocInfo.metadata.date = Util.curtime();
+        newDocInfo.metadata.id = IO.filehash(newDocInfo.metadata, "");
+        newDocInfo.hash = newDocInfo.metadata.id;
+
+        // Update tab info
+        Tab.set(selectedTab.index, newDocInfo);
 
         // Set metadata to each panel elements
         Dialog.Metadata.setData(newDocInfo.metadata);
 
         // Manually trigger onchange events
-        document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+        document.getElementById("input-metadata-title").setAttribute("placeholder", newDocInfo.filename);
         document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
+        document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
       }
     },
     close: function () {

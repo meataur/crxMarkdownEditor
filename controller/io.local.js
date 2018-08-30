@@ -79,7 +79,7 @@ IO.Local = (function () {
     html2canvas(entirePage, {
       allowTaint: true,
       scale: scale,
-      logging: Developer.debug
+      logging: Config.debug
     }).then(function (canvas) {
       entirePage.parentNode.removeChild(entirePage);
       callback(canvas);
@@ -96,7 +96,13 @@ IO.Local = (function () {
         if (!IO.checkBeforeLeave()) return;
 
         var reader = new FileReader();
-        reader.onload = function (evt) {
+        reader.fname = e.target.files[0].name;
+        reader.onloadend = function (evt) {
+          if (Config.debug) {
+            console.log(evt.target.readyState);
+            console.log(evt.target.result);
+          }
+
           if (evt.target.readyState == FileReader.DONE) {
             var parsed = Parser.parse(evt.target.result);
 
@@ -107,18 +113,26 @@ IO.Local = (function () {
 
             var selectedTab = Tab.get();
             selectedTab.info = Tab.getInitData();
+            selectedTab.info.filename = evt.target.fname;
+            if (parsed) {
+              for (var key in parsed.header)
+                selectedTab.info.metadata[key] = parsed.header[key];
+            }
             selectedTab.info.metadata.type = "local";
-            for (var key in parsed.header)
-              selectedTab.info.metadata[key] = parsed.header[key];
+            selectedTab.info.metadata.id = IO.filehash(selectedTab.info.metadata, editor.getValue());
+            selectedTab.info.hash = selectedTab.info.metadata.id;
             selectedTab.info.texts = editor.getValue();
-            selectedTab.info.originalTexts = editor.getValue();
+
+            // Update tab info
+            Tab.set(selectedTab.index, selectedTab.info);
 
             // Set metadata to each panel elements
             Dialog.Metadata.setData(selectedTab.info.metadata);
 
             // Manually trigger onchange events
-            document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+            document.getElementById("input-metadata-title").setAttribute("placeholder", selectedTab.info.filename);
             document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
+            document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
           }
         };
         reader.readAsText(e.target.files[0]);
@@ -131,7 +145,7 @@ IO.Local = (function () {
     saveAsMarkdown: function () {
       var saveData = IO.makeSaveData();
       chrome.downloads.download({
-        url: URL.createObjectURL(new Blob([saveData.texts], {
+        url: URL.createObjectURL(new Blob([saveData.texts], { 
           type: "text/x-markdown"
         })),
         filename: saveData.filename,
@@ -139,6 +153,11 @@ IO.Local = (function () {
         saveAs: true
       }, function (downloadId) {
         chrome.downloads.onChanged.addListener(function (e) {
+          if (Config.debug) {
+            console.log(e.state);
+            console.log(editor.getValue());
+          }
+
           if (e.id == downloadId && e.state && e.state.current === "complete") {
             chrome.downloads.search({
               id: downloadId
@@ -146,21 +165,27 @@ IO.Local = (function () {
               new MessageBox("Download Complete.").show();
 
               var selectedTab = Tab.get();
+              selectedTab.info.filename = Util.Extractor.filename(result[0].filename);
               for (var key in saveData.metadata) {
                 selectedTab.info.metadata[key] = saveData.metadata[key];
               }
-              // selectedTab.info.metadata.description = result[0].filename;
               selectedTab.info.metadata.type = "local";
+              selectedTab.info.metadata.id = IO.filehash(selectedTab.info.metadata, editor.getValue());
+              selectedTab.info.hash = selectedTab.info.metadata.id;
               selectedTab.info.texts = editor.getValue();
-              selectedTab.info.originalTexts = editor.getValue();
               selectedTab.info.editor.scrollPos = editor.getScrollInfo();
               selectedTab.info.editor.cursor = editor.getCursor();
               selectedTab.info.viewer.scrollPos = viewer.scrollTop;
+
+              // Update tab info
+              Tab.set(selectedTab.index, selectedTab.info);
 
               // Set metadata to each panel elements
               Dialog.Metadata.setData(selectedTab.info.metadata);
 
               // Manually trigger onchange events
+              document.getElementById("input-metadata-title").setAttribute("placeholder", selectedTab.info.filename);
+              document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
               document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
             });
           }

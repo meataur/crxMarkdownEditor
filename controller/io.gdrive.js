@@ -153,6 +153,10 @@ IO.GDrive = (function () {
   }
   let _cbReadFile = function () {
     IO.Spinner.hide("spinner-gdrive-import");
+    if (Config.debug) {
+      console.log(this.status);
+      console.log(this.response);
+    }
 
     if (this.status == 200) {
       var parsed = Parser.parse(this.response);
@@ -162,20 +166,38 @@ IO.GDrive = (function () {
       editor.focus();
       editor.setCursor(0, 0);
 
+      var importList = document.getElementById("importlist-gdrive");
+      var filelist = importList.getElementsByTagName("li");
+      var savename = "unknown"
+      for (var i = 0; i < filelist.length; i++) {
+        if (filelist[i].hasAttribute("selected")) {
+          savename = filelist[i].innerText;
+          break;
+        }
+      }
+
       var selectedTab = Tab.get();
       selectedTab.info = Tab.getInitData();
+      selectedTab.info.filename = savename;
+      if (parsed) {
+        for (var key in parsed.header)
+          selectedTab.info.metadata[key] = parsed.header[key];
+      }
       selectedTab.info.metadata.type = "gdrive";
-      for (var key in parsed.header)
-        selectedTab.info.metadata[key] = parsed.header[key];
+      selectedTab.info.metadata.id = document.getElementById("btn-import-from-gdrive").getAttribute("data");
+      selectedTab.info.hash = IO.filehash(selectedTab.info.metadata, editor.getValue());
       selectedTab.info.texts = editor.getValue();
-      selectedTab.info.originalTexts = editor.getValue();
+
+      // Update tab info
+      Tab.set(selectedTab.index, selectedTab.info);
 
       // Set metadata to each panel elements
       Dialog.Metadata.setData(selectedTab.info.metadata);
-  
+
       // Manually trigger onchange events
-      document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+      document.getElementById("input-metadata-title").setAttribute("placeholder", selectedTab.info.filename);
       document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
+      document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
 
       Dialog.closeAll();
     } else {
@@ -184,10 +206,10 @@ IO.GDrive = (function () {
   }
   let _openCallback = function (access_token) {
     if (chrome.runtime.lastError) {
-      new MessageBox(chrome.runtime.lastError.message).show(); 
+      new MessageBox(chrome.runtime.lastError.message).show();
       return;
     }
-    
+
     if (access_token) {
       var dialog = document.getElementById("editor-import-gdrive");
       dialog.style.display = "block";
@@ -229,10 +251,10 @@ IO.GDrive = (function () {
   }
   let _saveCallback = function (access_token) {
     if (chrome.runtime.lastError) {
-      new MessageBox(chrome.runtime.lastError.message).show(); 
+      new MessageBox(chrome.runtime.lastError.message).show();
       return;
     }
-    
+
     if (access_token) {
       var dialog = document.getElementById("editor-export-gdrive");
       dialog.style.display = "block";
@@ -276,7 +298,7 @@ IO.GDrive = (function () {
       // Filename
       var saveData = IO.makeSaveData();
       var inputFilename = document.getElementById("input-export-gdrive-filename");
-      inputFilename.value = saveData.filename;
+      inputFilename.setAttribute("placeholder", saveData.filename);
       inputFilename.focus();
 
       // Set save button event handler
@@ -285,45 +307,135 @@ IO.GDrive = (function () {
         if (this.hasAttribute("activated")) {
           IO.Spinner.show(exportList, "spinner-gdrive-export");
 
-          // Sending data
-          var data = "--mdeditor_create_file\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n";
-          data += "{ \"name\": \"" + inputFilename.value + "\", \"mimeType\": \"application/vnd.google-apps.document\", \"parents\": [\"" + this.getAttribute("data") + "\"] }\r\n\r\n";
-          data += "--mdeditor_create_file\r\nContent-Type: text/plain\r\n\r\n";
-          data += saveData.texts + "\r\n--mdeditor_create_file\r\n";
+          // Save name
+          var savename = inputFilename.value;
+          if (!savename.length)
+            savename = inputFilename.getAttribute("placeholder");
 
-          var xhr = new XMLHttpRequest();
-          xhr.open("POST", "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart");
-          xhr.setRequestHeader("Authorization", "Bearer " + access_token);
-          xhr.setRequestHeader("Content-Type", "multipart/related; boundary=mdeditor_create_file");
-          xhr.onload = function () {
-            IO.Spinner.hide("spinner-gdrive-export");
+          // Directory path to save file
+          var parentId = this.getAttribute("data");
+
+          // Check if the file exists
+          _xhrWithToken("GET", "https://www.googleapis.com/drive/v3/files/" + saveData.metadata.id + "?fields=*", access_token, function () {
+            if (Config.debug) {
+              console.log(this.status);
+              console.log(this.response);
+            }
 
             if (this.status == 200) {
-              new MessageBox("Successfully saved.").show();
+              if (confirm("The file already exists.\nDo you want to change it?")) {
+                // The existing file information
+                var fileinfo = JSON.parse(this.response);
 
-              var selectedTab = Tab.get();
-              for (var key in saveData.metadata) {
-                selectedTab.info.metadata[key] = saveData.metadata[key];
+                var dataToSend = "--mdeditor_upload_file\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n";
+                dataToSend += JSON.stringify({
+                  name: savename,
+                  mimeType: "application/vnd.google-apps.document"
+                }) + "\r\n\r\n";
+                dataToSend += "--mdeditor_upload_file\r\nContent-Type: text/plain\r\n\r\n";
+                dataToSend += saveData.texts + "\r\n--mdeditor_upload_file\r\n";
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("PATCH", "https://www.googleapis.com/upload/drive/v3/files/" + fileinfo.id + "?uploadType=multipart&addParents=" + parentId + "&removeParents=" + fileinfo.parents[0]);
+                xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+                xhr.setRequestHeader("Content-Type", "multipart/related; boundary=mdeditor_upload_file");
+                xhr.onload = function () {
+                  IO.Spinner.hide("spinner-gdrive-export");
+                  if (Config.debug) {
+                    console.log(this.status);
+                    console.log(this.response);
+                  }
+
+                  if (this.status == 200) {
+                    new MessageBox("Successfully updated.").show();
+
+                    var selectedTab = Tab.get();
+                    selectedTab.info.filename = JSON.parse(this.response).name;
+                    for (var key in saveData.metadata) {
+                      selectedTab.info.metadata[key] = saveData.metadata[key];
+                    }
+                    selectedTab.info.metadata.type = "gdrive";
+                    selectedTab.info.metadata.id = JSON.parse(this.response).id;
+                    selectedTab.info.hash = IO.filehash(selectedTab.info.metadata, editor.getValue());
+                    selectedTab.info.texts = editor.getValue();
+                    selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+                    selectedTab.info.editor.cursor = editor.getCursor();
+                    selectedTab.info.viewer.scrollPos = viewer.scrollTop;
+
+                    // Update tab info
+                    Tab.set(selectedTab.index, selectedTab.info);
+
+                    // Set metadata to each panel elements
+                    Dialog.Metadata.setData(selectedTab.info.metadata);
+
+                    // Manually trigger onchange events
+                    document.getElementById("input-metadata-title").setAttribute("placeholder", selectedTab.info.filename);
+                    document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
+                    document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+
+                    Dialog.closeAll();
+                  } else {
+                    new MessageBox("Unable to update the existing google document: Error code(" + this.status + ")").show();
+                  }
+                }
+                xhr.send(dataToSend);
               }
-              selectedTab.info.metadata.type = "gdrive";
-              selectedTab.info.texts = editor.getValue();
-              selectedTab.info.originalTexts = editor.getValue();
-              selectedTab.info.editor.scrollPos = editor.getScrollInfo();
-              selectedTab.info.editor.cursor = editor.getCursor();
-              selectedTab.info.viewer.scrollPos = viewer.scrollTop;
+            } else if (this.status == 404) {
+              var dataToSend = "--mdeditor_upload_file\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n";
+              dataToSend += JSON.stringify({
+                name: savename,
+                mimeType: "application/vnd.google-apps.document",
+                parents: [parentId.toString()]
+              }) + "\r\n\r\n";
+              dataToSend += "--mdeditor_upload_file\r\nContent-Type: text/plain\r\n\r\n";
+              dataToSend += saveData.texts + "\r\n--mdeditor_upload_file\r\n";
 
-              // Set metadata to each panel elements
-              Dialog.Metadata.setData(selectedTab.info.metadata);
+              var xhr = new XMLHttpRequest();
+              xhr.open("POST", "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart");
+              xhr.setRequestHeader("Authorization", "Bearer " + access_token);
+              xhr.setRequestHeader("Content-Type", "multipart/related; boundary=mdeditor_upload_file");
+              xhr.onload = function () {
+                IO.Spinner.hide("spinner-gdrive-export");
+                if (Config.debug) {
+                  console.log(this.status);
+                  console.log(this.response);
+                }
 
-              // Manually trigger onchange events
-              document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+                if (this.status == 200) {
+                  new MessageBox("Successfully saved.").show();
 
-              Dialog.closeAll();
-            } else {
-              new MessageBox("Unable to save google document: Error code(" + this.status + ")").show();
+                  var selectedTab = Tab.get();
+                  selectedTab.info.filename = JSON.parse(this.response).name;
+                  for (var key in saveData.metadata) {
+                    selectedTab.info.metadata[key] = saveData.metadata[key];
+                  }
+                  selectedTab.info.metadata.type = "gdrive";
+                  selectedTab.info.metadata.id = JSON.parse(this.response).id;
+                  selectedTab.info.hash = IO.filehash(selectedTab.info.metadata, editor.getValue());
+                  selectedTab.info.texts = editor.getValue();
+                  selectedTab.info.editor.scrollPos = editor.getScrollInfo();
+                  selectedTab.info.editor.cursor = editor.getCursor();
+                  selectedTab.info.viewer.scrollPos = viewer.scrollTop;
+
+                  // Update tab info
+                  Tab.set(selectedTab.index, selectedTab.info);
+
+                  // Set metadata to each panel elements
+                  Dialog.Metadata.setData(selectedTab.info.metadata);
+
+                  // Manually trigger onchange events
+                  document.getElementById("input-metadata-title").setAttribute("placeholder", selectedTab.info.filename);
+                  document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
+                  document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+
+                  Dialog.closeAll();
+                } else {
+                  new MessageBox("Unable to save google document: Error code(" + this.status + ")").show();
+                }
+              }
+              xhr.send(dataToSend);
             }
-          }
-          xhr.send(data);
+          });
         }
       }
     }

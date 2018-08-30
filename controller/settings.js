@@ -52,7 +52,7 @@ let Settings = (function () {
         }
         xhr.send();
       } else if (key == "attachment") {
-        _get("attachment", function (value) {
+        _get(key, function (value) {
           document.getElementById("attachment-settings-location").value = value.location;
           document.getElementById("attachment-settings-types").value = JSON.stringify(value.types, function (k, v) {
             if (v instanceof Array)
@@ -106,13 +106,12 @@ let Settings = (function () {
             port: 4000
           }
         });
-      } else {
-        return false;
       }
-      return true;
     },
     save: function (key) {
-      if (key == "editor") {
+      if (key == "_version") {
+        _set(key, Config.dataversion);
+      } else if (key == "editor") {
         var editorTheme = document.getElementById("editor-settings-theme");
         var editorFontsize = document.getElementById("editor-settings-fontsize");
         _set(key, {

@@ -28,23 +28,41 @@ document.addEventListener("DOMContentLoaded", function () {
     var selectedTab = Tab.get();
     selectedTab.info.metadata.type = (iconId == "file") ? "" : iconId;
     selectedTab.tab.getElementsByClassName("doc-type")[0].innerHTML = "<svg><use xlink:href=\"icons.svg#icon-" + iconId + "\"></use></svg>";
+
+    // Update tab info
+    Tab.set(selectedTab.index, selectedTab.info);
   }
   document.getElementById("input-metadata-title").onchange = function (e) {
-    if (!this.value.length)
-      this.value = "Untitled Document";
+    this.value = this.value.trim();
 
     var selectedTab = Tab.get();
-    selectedTab.tab.getElementsByClassName("doc-title")[0].innerHTML = this.value;
-    selectedTab.tab.title = "[" + selectedTab.info.metadata.date + "] " + this.value;
-    selectedTab.info.metadata.title = this.value;
-    document.title = manifestData.name + " - " + this.value;
+    if (this.value.length) {
+      selectedTab.tab.getElementsByClassName("doc-title")[0].innerHTML = this.value;
+      selectedTab.tab.title = this.value;
+      document.title = manifestData.name + " - " + this.value;
 
+      // Update tab info
+      selectedTab.info.metadata.title = this.value;
+      Tab.set(selectedTab.index, selectedTab.info);
+    } else {
+      var filename = this.getAttribute("placeholder");
+      selectedTab.tab.getElementsByClassName("doc-title")[0].innerHTML = filename;
+      selectedTab.tab.title = filename;
+      document.title = manifestData.name + " - " + filename;
+    }
+
+    // Update viewer
     preview(this.value, editor.getValue());
   }
   document.getElementById("input-metadata-date").onchange = function (e) {
+    this.value = this.value.trim();
+
     var selectedTab = Tab.get();
-    selectedTab.tab.title = "[" + this.value + "] " + selectedTab.info.metadata.title;
-    selectedTab.info.metadata.date = this.value;
+    if (this.value.length) {
+      // Update tab info
+      selectedTab.info.metadata.date = this.value;
+      Tab.set(selectedTab.index, selectedTab.info);
+    }
   }
   document.getElementById("refresh-datetime").onclick = function () {
     var curtime = Util.curtime();
@@ -52,6 +70,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     var selectedTab = Tab.get();
     selectedTab.info.metadata.date = curtime;
+    selectedTab.info.metadata.id = IO.filehash(selectedTab.info.metadata, editor.getValue());
+    document.getElementById("input-metadata-id").value = selectedTab.info.metadata.id;
+
+    // Update tab info
+    Tab.set(selectedTab.index, selectedTab.info);
   }
 
 
@@ -127,6 +150,18 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   document.getElementById("viewer-settings-scrollsync").onclick = function () {
     Settings.save("viewer");
+  }
+
+
+
+  /**
+   * Dialog.SaveTo controls
+   */
+  document.getElementById("input-export-github-filename").onchange = function () {
+    this.value = this.value.trim();
+  }
+  document.getElementById("input-export-gdrive-filename").onchange = function () {
+    this.value = this.value.trim();
   }
 });
 

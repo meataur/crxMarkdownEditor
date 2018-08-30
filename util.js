@@ -94,6 +94,26 @@ let Util = {
         ui8a[i] = byteString.charCodeAt(i);
       }
       return new Blob([buffer], { type: mime });
+    },
+    stringToHash: function (texts, hashfunc) {
+      if (hashfunc == null)
+        return CryptoJS.SHA256(texts).toString();
+      else if (hashfunc == "md5")
+        return CryptoJS.MD5(texts).toString(); 
+      else if (hashfunc == "sha1")
+        return CryptoJS.SHA1(texts).toString();
+      else if (hashfunc == "sha224")
+        return CryptoJS.SHA224(texts).toString();
+      else if (hashfunc == "sha256")
+        return CryptoJS.SHA256(texts).toString();
+      else if (hashfunc == "sha512")
+        return CryptoJS.SHA512(texts).toString();
+      return "";
+    }
+  },
+  Extractor: {
+    filename: function (fullpath) {
+      return fullpath.replace(/^.*[\\\/]/, '');
     }
   }
 }

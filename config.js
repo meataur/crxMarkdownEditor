@@ -1,5 +1,5 @@
-// Develop environment settings
-let Developer = {
+let Config = {
   debug: false,
-  workathome: true
+  workathome: true,
+  dataversion: 1
 }

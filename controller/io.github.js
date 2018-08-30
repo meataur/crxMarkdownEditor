@@ -1,8 +1,8 @@
 IO.Github = (function () {
   let _clientId = "ac52e15a05c1f05e2a14";
   let _clientSecret = "612056756863407c1241706306ec711c76bb8814";
-  if (Developer.debug) {
-    if (Developer.workathome) {
+  if (Config.debug) {
+    if (Config.workathome) {
       _clientId = "fffdcf84e36ddeb9bce4";
       _clientSecret = "609f288a1df9763979ac258a5db17d19ee8ee49e";
     } else {
@@ -211,15 +211,19 @@ IO.Github = (function () {
   }
   let _cbReadFile = function () {
     IO.Spinner.hide("spinner-github-import");
+    if (Config.debug) {
+      console.log(this.status);
+      console.log(this.response);
+    }
 
     if (this.status == 200) {
-      var data = JSON.parse(this.response);
-      if (data.encoding === "base64") {
+      var parsed = null;
+      if (JSON.parse(this.response).encoding === "base64") {
         viewer.scrollTop = 0;
-        var textData = decodeURIComponent(Array.prototype.map.call(atob(data.content), function (c) {
+        var textData = decodeURIComponent(Array.prototype.map.call(atob(JSON.parse(this.response).content), function (c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
         }).join(''));
-        var parsed = Parser.parse(textData);
+        parsed = Parser.parse(textData);
         editor.setValue(parsed.body.texts);
       } else {
         editor.setValue("");
@@ -229,19 +233,26 @@ IO.Github = (function () {
 
       var selectedTab = Tab.get();
       selectedTab.info = Tab.getInitData();
+      selectedTab.info.filename = JSON.parse(this.response).name;
+      if (parsed) {
+        for (var key in parsed.header)
+          selectedTab.info.metadata[key] = parsed.header[key];
+      }
       selectedTab.info.metadata.type = "github";
-      selectedTab.info.metadata.id = data.sha;
-      for (var key in parsed.header)
-        selectedTab.info.metadata[key] = parsed.header[key];
+      selectedTab.info.metadata.id = JSON.parse(this.response).sha;    // Github data has itw own hash value.
+      selectedTab.info.hash = IO.filehash(selectedTab.info.metadata, editor.getValue());
       selectedTab.info.texts = editor.getValue();
-      selectedTab.info.originalTexts = editor.getValue();
+
+      // Update tab info
+      Tab.set(selectedTab.index, selectedTab.info);
 
       // Set metadata to each panel elements
       Dialog.Metadata.setData(selectedTab.info.metadata);
 
       // Manually trigger onchange events
-      document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
+      document.getElementById("input-metadata-title").setAttribute("placeholder", selectedTab.info.filename);
       document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
+      document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
 
       Dialog.closeAll();
     } else {
@@ -251,6 +262,11 @@ IO.Github = (function () {
   let _openCallback = function (access_token) {
     if (access_token) {
       _getUserInfo(access_token, function () {
+        if (Config.debug) {
+          console.log(this.status);
+          console.log(this.response);
+        }
+
         if (this.status == 200) {
           var user = JSON.parse(this.response);
 
@@ -336,6 +352,11 @@ IO.Github = (function () {
   let _saveCallback = function (access_token) {
     if (access_token) {
       _getUserInfo(access_token, function () {
+        if (Config.debug) {
+          console.log(this.status);
+          console.log(this.response);
+        }
+
         if (this.status == 200) {
           var user = JSON.parse(this.response);
 
@@ -417,7 +438,7 @@ IO.Github = (function () {
           // Filename
           var saveData = IO.makeSaveData();
           var inputFilename = document.getElementById("input-export-github-filename");
-          inputFilename.value = saveData.filename;
+          inputFilename.setAttribute("placeholder", saveData.filename);
           inputFilename.focus();
 
           // Set save button event handler
@@ -426,78 +447,110 @@ IO.Github = (function () {
             if (this.hasAttribute("activated")) {
               IO.Spinner.show(exportList, "spinner-github-export");
 
-              var data = {
-                message: "commit from MDEditor",
-                content: btoa(unescape(encodeURIComponent(saveData.texts)))
-              }
+              var savename = inputFilename.value;
+              if (!savename.length)
+                savename = inputFilename.getAttribute("placeholder");
 
               // Try to create new file
               var url = new URL(this.getAttribute("data"));
-              var requestUrl = url.origin + url.pathname.trimRight("/") + "/" + inputFilename.value;
+              var requestUrl = url.origin + url.pathname.trimRight("/") + "/" + savename;
               _xhrWithToken("GET", requestUrl, access_token, function () {
+                if (Config.debug) {
+                  console.log(this.status);
+                  console.log(this.response);
+                }
+
                 if (this.status == 200) {
                   if (confirm("The file already exists.\nDo you want to overwrite it?")) {
-                    data.sha = JSON.parse(this.response).sha;
+                    var dataToSend = {
+                      message: "commit from MDEditor",
+                      content: btoa(unescape(encodeURIComponent(saveData.texts))),
+                      sha: JSON.parse(this.response).sha
+                    }
                     _xhrWithToken("PUT", requestUrl, access_token, function () {
                       IO.Spinner.hide("spinner-github-export");
+                      if (Config.debug) {
+                        console.log(this.status);
+                        console.log(this.response);
+                      }
 
                       if (this.status == 200) {
                         new MessageBox("Successfully updated.").show();
 
                         var selectedTab = Tab.get();
+                        selectedTab.info.filename = JSON.parse(this.response).content.name;
                         for (var key in saveData.metadata) {
                           selectedTab.info.metadata[key] = saveData.metadata[key];
                         }
                         selectedTab.info.metadata.type = "github";
-                        selectedTab.info.metadata.id = JSON.parse(this.response).data;
+                        selectedTab.info.metadata.id = JSON.parse(this.response).content.sha;
+                        selectedTab.info.hash = IO.filehash(selectedTab.info.metadata, editor.getValue());
                         selectedTab.info.texts = editor.getValue();
-                        selectedTab.info.originalTexts = editor.getValue();
                         selectedTab.info.editor.scrollPos = editor.getScrollInfo();
                         selectedTab.info.editor.cursor = editor.getCursor();
                         selectedTab.info.viewer.scrollPos = viewer.scrollTop;
 
+                        // Update tab info
+                        Tab.set(selectedTab.index, selectedTab.info);
+
                         // Set metadata to each panel elements
                         Dialog.Metadata.setData(selectedTab.info.metadata);
-        
+
                         // Manually trigger onchange events
+                        document.getElementById("input-metadata-title").setAttribute("placeholder", selectedTab.info.filename);
+                        document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
                         document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
 
                         Dialog.closeAll();
                       } else {
                         new MessageBox("Failed to update file. Error code(" + this.status + ")").show();
                       }
-                    }, JSON.stringify(data));
+                    }, JSON.stringify(dataToSend));
                   }
                 } else if (this.status == 404) {
+                  var dataToSend = {
+                    message: "commit from MDEditor",
+                    content: btoa(unescape(encodeURIComponent(saveData.texts)))
+                  }
                   _xhrWithToken("PUT", requestUrl, access_token, function () {
                     IO.Spinner.hide("spinner-github-export");
+                    if (Config.debug) {
+                      console.log(this.status);
+                      console.log(this.response);
+                    }
 
                     if (this.status == 201) {
                       new MessageBox("Successfully saved.").show();
 
                       var selectedTab = Tab.get();
+                      selectedTab.info.filename = JSON.parse(this.response).content.name;
                       for (var key in saveData.metadata) {
                         selectedTab.info.metadata[key] = saveData.metadata[key];
                       }
                       selectedTab.info.metadata.type = "github";
                       selectedTab.info.metadata.id = JSON.parse(this.response).content.sha;
+                      selectedTab.info.hash = IO.filehash(selectedTab.info.metadata, editor.getValue());
                       selectedTab.info.texts = editor.getValue();
-                      selectedTab.info.originalTexts = editor.getValue();
                       selectedTab.info.editor.scrollPos = editor.getScrollInfo();
                       selectedTab.info.editor.cursor = editor.getCursor();
                       selectedTab.info.viewer.scrollPos = viewer.scrollTop;
+
+                      // Update tab info
+                      Tab.set(selectedTab.index, selectedTab.info);
 
                       // Set metadata to each panel elements
                       Dialog.Metadata.setData(selectedTab.info.metadata);
       
                       // Manually trigger onchange events
+                      document.getElementById("input-metadata-title").setAttribute("placeholder", selectedTab.info.filename);
+                      document.getElementById("input-metadata-title").dispatchEvent(new Event("change"));
                       document.getElementById("select-metadata-type").dispatchEvent(new Event("change"));
 
                       Dialog.closeAll();
                     } else {
                       new MessageBox("Failed to save file. Error code(" + this.status + ")").show();
                     }
-                  }, JSON.stringify(data));
+                  }, JSON.stringify(dataToSend));
                 } else {
                   IO.Spinner.hide("spinner-github-export");
                   new MessageBox("Unexpected error occured: Error code(" + this.status + ")").show();
