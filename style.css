@@ -16,6 +16,9 @@ svg { display: inline-flex; align-self: center; fill: currentColor; stroke: curr
 .svg-btn { display: inline-block; width: 1.1em; height: 1.1em; }
 
 .flex-container { display: flex; }
+.flex-justify { justify-content: space-between; }
+.flex-1 { flex: 1; }
+
 .left { float: left; }
 .right { float: right; }
 
@@ -42,7 +45,7 @@ svg { display: inline-flex; align-self: center; fill: currentColor; stroke: curr
 }
 
 body {
-  min-width: 800px; min-height: 500px; overflow: hidden;
+  min-width: 800px; min-height: 600px; overflow: hidden;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400;
 }
 
@@ -165,14 +168,26 @@ div#viewer:not([htmlcode]) { overflow-x: hidden; overflow-y: scroll; }
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 400;
   border-color: #1e1e1e; border-style: solid; border-width: 24px 12px; background: #1e1e1e; user-select: none; z-index: 99;
 }
+.dlg#editor-cloudstorages { width: calc(400px - 48px); }
+
 .dlg section { display: block; }
 .dlg section:not(:last-child) { margin-bottom: 1.6em; }
 .dlg section .section-title { display: block; margin-bottom: .3em; line-height: 100%; font-size: 1.4rem; font-weight: 300; color: #a8afbd; }
-.dlg section > item { display: block; margin-top: 1em; }
-.dlg section > item.inline { display: inline-block; }
-.dlg section > item > div { display: block; padding: 0; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important; }
-.dlg section > item ctrl { display: block; margin: .5em 0; color: #a8afbd; }
-.dlg section > item ctrl:last-child { margin-bottom: 0; }
+
+.dlg item { display: block; margin-top: 1em; }
+.dlg item.inline { display: inline-block; }
+.dlg item > div { display: block; padding: 0; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; color: #a8afbd !important; }
+.dlg item ctrl { display: block; margin: .5em 0; color: #a8afbd; transition-duration: .3s; }
+.dlg item ctrl:last-child { margin-bottom: 0; }
+
+.dlg .btn-wrapper { padding: 1em; background: #383838; border-radius: 2px; }
+.dlg .btn-item { margin-bottom: 1em; }
+.dlg .btn-item:last-child { margin-bottom: 0; }
+.dlg .btn-item * { line-height: 1; }
+.dlg .btn-item-label:hover { color: #fff; }
+.dlg .btn-item svg { width: 15px; height: 15px; vertical-align: middle; }
+.dlg .btn-item span { margin-left: .5em; height: 15px; vertical-align: middle; text-transform: uppercase; }
+
 .dlg .option-radio { display: inline-block; margin-right: .5em; }
 .dlg .option-radio label { padding: 0 3px; color: #a8afbd; vertical-align: middle; }
 .dlg .option-checkbox label { vertical-align: middle; }
@@ -191,9 +206,10 @@ div#viewer:not([htmlcode]) { overflow-x: hidden; overflow-y: scroll; }
 .dlg input.table-value { flex: 1; }
 
 #refresh-datetime { display: inline-flex; margin-left: .5em; padding: 4px 0; color: #383838; }
-#refresh-datetime > svg { width: 14px; height: 14px; }
+#refresh-datetime > svg { width: 14px; height: 14px; vertical-align: top; }
 #refresh-datetime:hover { color: #a8afbd; }
 #refresh-datetime:active { color: #fff; }
+
 
 
 /* File dialog */

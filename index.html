@@ -146,10 +146,11 @@
 					<li>
 						<span>editor</span>
 						<ul class="dropdown">
-							<li id="editor-tools-doc-metadata"><svg><use xlink:href="icons.svg#icon-tag"></use></svg><div><span>metadata</span></div></li>
 							<li id="editor-tools-makenew"><svg><use xlink:href="icons.svg#icon-file"></use></svg><div><span>make new</span></div></li>
 							<li id="editor-tools-attachment"><svg><use xlink:href="icons.svg#icon-attachment"></use></svg><div><span>attachment</span></div></li>
-							<li id="editor-tools-tidyup"><svg><use xlink:href="icons.svg#icon-formatting"></use></svg><div><span>tidy up</span></div></li>
+							<li id="editor-tools-tidyup"><svg><use xlink:href="icons.svg#icon-tidyup"></use></svg><div><span>tidy up</span></div></li>
+							<li id="editor-tools-doc-metadata"><svg><use xlink:href="icons.svg#icon-tag"></use></svg><div><span>metadata</span></div></li>
+							<li id="editor-tools-cloudstorages"><svg><use xlink:href="icons.svg#icon-cloud"></use></svg><div><span>cloud storages</span></div></li>
 							<li id="editor-tools-settings"><svg><use xlink:href="icons.svg#icon-settings"></use></svg><div><span>settings</span></div></li>
 						</ul>
 					</li>
@@ -262,6 +263,27 @@
 							<div class="flex-container">
 								<input type="text" id="input-metadata-reserved-key3" class="table-key" placeholder="custom key #3" spellcheck="false">
 								<input type="text" class="table-value" id="input-metadata-reserved-value3" spellcheck="false">
+							</div>
+						</ctrl>
+					</item>
+				</section>
+			</div>
+
+			<div id="editor-cloudstorages" class="dlg">
+				<section>
+					<div class="section-title">cloud storage manager</div>
+					<item>
+						<div>link with:</div>
+						<ctrl>
+							<div class="btn-wrapper">
+								<div class="flex-container btn-item">
+									<div id="btn-linkwith-github" class="btn-item-label flex-1"><svg><use xlink:href="icons.svg#icon-github"></use></svg><span>github</span></div>
+									<div id="link-status-github"><svg><use xlink:href="icons.svg#icon-link"></use></svg></div>
+								</div>
+								<div class="flex-container btn-item">
+									<div id="btn-linkwith-gdrive" class="btn-item-label flex-1"><svg><use xlink:href="icons.svg#icon-gdrive"></use></svg><span>google drive</span></div>
+									<div id="link-status-gdrive"><svg><use xlink:href="icons.svg#icon-link"></use></svg></div>
+								</div>
 							</div>
 						</ctrl>
 					</item>

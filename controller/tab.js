@@ -153,7 +153,11 @@ let Tab = (function () {
       divType.innerHTML = "<svg><use xlink:href=\"icons.svg#" + _getDocTypeIconId(info.metadata.type) + "\"></use></svg>";
       var divTitle = document.createElement("div");
       divTitle.className = "doc-title";
-      divTitle.innerHTML = info.metadata.title.length ? info.metadata.title : "Untitled Document";
+      if (info.metadata.title) {
+        divTitle.innerHTML = info.metadata.title;
+      } else {
+        divTitle.innerHTML = info.filename ? info.filename : "Untitled Document";
+      }
       divTitle.ondblclick = function (e) {
         Dialog.Metadata.open();
       }

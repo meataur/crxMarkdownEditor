@@ -133,6 +133,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
   /**
+   * Dialog.CloudStorages controls
+   */
+  document.getElementById("btn-linkwith-github").onclick = IO.Github.auth;
+  document.getElementById("btn-linkwith-gdrive").onclick = IO.GDrive.auth;
+
+
+
+  /**
    * Dialog.Settings.Viewer controls
    */
   document.getElementById("viewer-settings-codestyle").onchange = function () {
@@ -250,6 +258,21 @@ let Dialog = {
             document.getElementById("input-metadata-reserved-value" + cnt).value = metadata[k];
           }
         }
+      }
+    }
+  })(),
+  CloudStorages: (function () {
+    return {
+      open: function () {
+        var div = document.getElementById("editor-cloudstorages");
+        div.style.display = "block";
+
+        IO.Github.authchk(function () {
+          document.getElementById("link-status-github").style.color = "#fff";
+        });
+        IO.GDrive.authchk(function () {
+          document.getElementById("link-status-gdrive").style.color = "#fff";
+        });
       }
     }
   })(),

@@ -4,12 +4,14 @@ let manifestData = chrome.runtime.getManifest();
 // Settings data version check
 chrome.storage.local.get("_version", function (result) {
   if (!result || !result._version || result._version < Config.dataversion) {
-    if (confirm("The current version of settings stored in sandboxed local storage is out of date.\n"
-              + "It is strongly recommended that you reset all the settings.\n"
-              + "Are you sure you want to continue?")) {
+    if (confirm("The current version of settings stored in sandboxed local storage is out of date.\n" +
+        "It is strongly recommended that you reset all the settings.\n" +
+        "Are you sure you want to continue?")) {
       Tab.resetData();
       Settings.reset();
-      chrome.storage.local.set({ "_version": Config.dataversion });
+      chrome.storage.local.set({
+        "_version": Config.dataversion
+      });
     }
   }
 });
@@ -205,6 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("editor-tools-makenew").onclick = Tab.makeNew;
   document.getElementById("editor-tools-attachment").onclick = attachments;
   document.getElementById("editor-tools-tidyup").onclick = Parser.tidyup;
+  document.getElementById("editor-tools-cloudstorages").onclick = Dialog.CloudStorages.open;
   document.getElementById("editor-tools-settings").onclick = Dialog.Settings.Editor.open;
 
   document.getElementById("viewer-tools-export-html").onclick = IO.Local.saveAsHtml;
@@ -281,15 +284,15 @@ document.addEventListener("DOMContentLoaded", function () {
   document.onkeydown = function (e) {
     if (e.ctrlKey) {
       switch (e.which) {
-        case 79:  // Ctrl + O
+        case 79: // Ctrl + O
           e.preventDefault();
           IO.Local.open();
           break;
-        case 81:  // Ctrl + Q (for testing)
+        case 81: // Ctrl + Q (for testing)
           e.preventDefault();
           document.getElementById("btn-reset-settings").click();
           break;
-        case 83:  // Ctrl + S
+        case 83: // Ctrl + S
           e.preventDefault();
           IO.Local.save();
           break;
@@ -315,6 +318,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // The 'window.onresize' callback function is called after printing.
   window.onresize = function (e) {
+    chrome.windows.getCurrent(function (win) {
+      if (win.width < 800 || win.height < 600) {
+        chrome.windows.update(win.id, {
+          focused: false
+        });
+      }
+    });
+
     if (panelEditor.style.display == "none" || splitter.style.display == "none" || panelWrapperHelper.style.display == "none")
       return;
 
@@ -340,7 +351,7 @@ document.addEventListener("DOMContentLoaded", function () {
     selectedTab.info.editor.scrollPos = editor.getScrollInfo();
     selectedTab.info.editor.cursor = editor.getCursor();
     selectedTab.info.viewer.scrollPos = viewer.scrollTop;
-    
+
     if (Settings.autoSave) {
       Settings.saveAll();
       Tab.saveData();
@@ -588,11 +599,26 @@ function openMdTutorial() {
     document.getElementById("hpage-md-tutorial").innerHTML = data;
     document.getElementById("hpage-md-tutorial").querySelectorAll("pre code").forEach(highlighter);
     renderMathInElement(document.getElementById("hpage-md-tutorial"), {
-      delimiters: [
-        {left: "$$", right: "$$", display: true},
-        {left: "\\[", right: "\\]", display: true},
-        {left: "$", right: "$", display: false},
-        {left: "\\(", right: "\\)", display: false}
+      delimiters: [{
+          left: "$$",
+          right: "$$",
+          display: true
+        },
+        {
+          left: "\\[",
+          right: "\\]",
+          display: true
+        },
+        {
+          left: "$",
+          right: "$",
+          display: false
+        },
+        {
+          left: "\\(",
+          right: "\\)",
+          display: false
+        }
       ]
     });
   }
@@ -849,14 +875,16 @@ var preview = Util.debounce(function (docTitle, content) {
     // Remove temporarily-inserted tags
     html = html.replace(/\s*<forbetterlooking><\/forbetterlooking>\n/gi, "\n");
 
-    html = html.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
-      return '&#'+i.charCodeAt(0)+';';
+    html = html.replace(/[\u00A0-\u9999<>\&]/gim, function (i) {
+      return '&#' + i.charCodeAt(0) + ';';
     }).replace(/ /g, "&nbsp;").replace(/\t/g, "  ");
 
     viewer.innerHTML = html;
 
     // Syntax highlighting
-    hljs.configure({ languages: ["html"] });
+    hljs.configure({
+      languages: ["html"]
+    });
     hljs.highlightBlock(viewer);
 
     // Set content again
@@ -865,7 +893,7 @@ var preview = Util.debounce(function (docTitle, content) {
       codelines += line + "<br />";
     });
     viewer.innerHTML = codelines;
-  } else {    // Styled HTML viewer
+  } else { // Styled HTML viewer
     // Set content
     viewer.innerHTML = html;
 
@@ -877,11 +905,26 @@ var preview = Util.debounce(function (docTitle, content) {
 
     // Render math equations
     renderMathInElement(viewer, {
-      delimiters: [
-        {left: "$$", right: "$$", display: true},
-        {left: "\\[", right: "\\]", display: true},
-        {left: "$", right: "$", display: false},
-        {left: "\\(", right: "\\)", display: false}
+      delimiters: [{
+          left: "$$",
+          right: "$$",
+          display: true
+        },
+        {
+          left: "\\[",
+          right: "\\]",
+          display: true
+        },
+        {
+          left: "$",
+          right: "$",
+          display: false
+        },
+        {
+          left: "\\(",
+          right: "\\)",
+          display: false
+        }
       ]
     });
 
@@ -890,10 +933,10 @@ var preview = Util.debounce(function (docTitle, content) {
   }
 }, 300);
 
-function highlighter (code) {
+function highlighter(code) {
   if (code.classList.length) {
     var worker = new Worker("lib/highlight-9.12.0/worker.js");
-    worker.onmessage = function(event) {
+    worker.onmessage = function (event) {
       code.innerHTML = event.data;
 
       this.terminate();

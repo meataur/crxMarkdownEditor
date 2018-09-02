@@ -568,6 +568,30 @@ IO.Github = (function () {
   }
 
   return {
+    authchk: function (callback) {
+      if (navigator.onLine) {
+        var options = {
+          interactive: true,
+          url: ""
+        }
+        _getAuthToken(options, callback);
+      }
+    },
+    auth: function () {
+      if (navigator.onLine) {
+        var options = {
+          interactive: true,
+          url: 'https://github.com/login/oauth/authorize?client_id=' + _clientId +
+            '&reponse_type=token&scope=user,repo&access_type=online&redirect_uri=' + encodeURIComponent(_redirectUri)
+        }
+        new MessageBox("Connecting to Github...").show();
+        _getAuthToken(options, function () {
+          // TODO: 
+        });
+      } else {
+        new MessageBox("There is no Internet connection.").show();
+      }
+    },
     open: function () {
       if (navigator.onLine) {
         var options = {

@@ -442,6 +442,29 @@ IO.GDrive = (function () {
   }
 
   return {
+    authchk: function (callback) {
+      if (navigator.onLine) {
+        var options = {
+          interactive: true,
+          callback: callback
+        }
+        _getAuthToken(options);
+      }
+    },
+    auth: function () {
+      if (navigator.onLine) {
+        var options = {
+          interactive: true,
+          callback: function () {
+            // TODO: 
+          }
+        }
+        new MessageBox("Connecting to Google Drive...").show();
+        _getAuthToken(options);
+      } else {
+        new MessageBox("There is no Internet connection.").show();
+      }
+    },
     open: function () {
       if (navigator.onLine) {
         var options = {
